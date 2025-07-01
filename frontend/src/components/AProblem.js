@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './navbar';
- const AProblems = () => {
+
+const AProblems = () => {
   const { user } = useAuth();
   const [problems, setProblems] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -14,9 +15,7 @@ import Navbar from './navbar';
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return;
-if (user.role !== 'admin') return;
-
+    if (!user || user.role !== 'admin') return;
     const fetchProblems = async () => {
       try {
         const res = await axios.get('http://localhost:5000/problems');
@@ -28,29 +27,23 @@ if (user.role !== 'admin') return;
         setError('Error loading problems');
       }
     };
-
     fetchProblems();
   }, [user]);
 
   const handleFilterChange = (e) => {
     const value = e.target.value;
     setFilterTag(value);
-
     const filteredList = problems.filter(q =>
       (q.tag || '').toLowerCase().includes(value.toLowerCase())
     );
-
     setFiltered(filteredList);
   };
 
-  const handleViewClick = (qid) => {
-    navigate(`/adminproblem/${qid}`);
-  };
+  const handleViewClick = (qid) => navigate(`/adminproblem/${qid}`);
 
   const handleDelete = async (qid) => {
-    const confirm = window.confirm(`Are you sure you want to delete QID: ${qid}?`);
-    if (!confirm) return;
-
+    const confirmDelete = window.confirm(`Are you sure you want to delete QID: ${qid}?`);
+    if (!confirmDelete) return;
     try {
       await axios.delete(`http://localhost:5000/problem/${qid}`);
       const updated = problems.filter(p => p.QID !== qid);
@@ -64,81 +57,77 @@ if (user.role !== 'admin') return;
 
   const getDifficultyBadge = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
-      case 'easy':
-        return 'badge bg-success-subtle border border-success text-success px-3 py-2 rounded-pill';
-      case 'medium':
-        return 'badge bg-warning-subtle border border-warning text-warning px-3 py-2 rounded-pill';
-      case 'hard':
-        return 'badge bg-danger-subtle border border-danger text-danger px-3 py-2 rounded-pill';
-      case 'basic':
-        return 'badge bg-secondary-subtle border border-secondary text-secondary px-3 py-2 rounded-pill';
-      default:
-        return 'badge bg-light';
+      case 'easy': return 'badge bg-success-subtle border border-success text-success px-3 py-2 rounded-pill';
+      case 'medium': return 'badge bg-warning-subtle border border-warning text-warning px-3 py-2 rounded-pill';
+      case 'hard': return 'badge bg-danger-subtle border border-danger text-danger px-3 py-2 rounded-pill';
+      case 'basic': return 'badge bg-secondary-subtle border border-secondary text-secondary px-3 py-2 rounded-pill';
+      default: return 'badge bg-light';
     }
   };
 
-  const getTagBadge = (tag) => {
-    return 'badge bg-warning text-dark px-2 py-1 rounded-pill';
-  };
+  const getTagBadge = () => 'badge bg-success text-dark px-2 py-1 rounded-pill';
 
   if (!user) return <div className="alert alert-danger text-center mt-5">Unauthorized</div>;
-  if (user.role !== 'admin') return ( <div className="container mt-5">
+  if (user.role !== 'admin') return (
+    <div className="container mt-5">
       <div className="alert alert-danger text-center">You are not logged in.</div>
-    </div>);
+    </div>
+  );
 
   return (
-    <><Navbar/>
-    <div className="container my-5">
-      <h3 className="mb-4 fw-bold"> Problems </h3>
+    <>
+      <Navbar />
+      <div className="container my-5">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h3 className="fw-bold">📚 Manage Problems</h3>
+        </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+        {error && <div className="alert alert-danger">{error}</div>}
 
-      {/* Tag Filter */}
-      <div className="mb-4">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Filter by Tags (e.g., array, dp, hash)"
-          value={filterTag}
-          onChange={handleFilterChange}
-        />
-      </div>
+        {/* Tag Filter */}
+        <div className="input-group mb-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="🔍 Filter by tag (e.g., array, dp, hash)"
+            value={filterTag}
+            onChange={handleFilterChange}
+          />
+          <span className="input-group-text"><i className="bi bi-filter"></i></span>
+        </div>
 
-      {/* Filtered List */}
-      <div className="list-group">
-        {filtered.map((q, index) => (
-          <div
-            key={index}
-            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center border rounded mb-3"
-          >
-            <div className="d-flex flex-column">
-              <strong className="text-secondary small">QID: {q.QID}</strong>
-              <strong className="fs-5">{q.name}</strong>
-              <span className="mt-1">{q.tag && <span className={getTagBadge(q.tag)}>{q.tag}</span>}</span>
+        {/* Problem List */}
+        <div className="row">
+          {filtered.length === 0 && (
+            <div className="col-12">
+              <div className="alert alert-warning text-center">No problems match the filter.</div>
             </div>
+          )}
 
-            <div className="d-flex align-items-center gap-2">
-              <span className={getDifficultyBadge(q.difficulty)}>{q.difficulty?.toUpperCase()}</span>
-
-              <button
-                onClick={() => handleViewClick(q.QID)}
-                className="btn btn-outline-primary btn-sm"
-              >
-                View Question
-              </button>
-
-              <button
-                onClick={() => handleDelete(q.QID)}
-                className="btn btn-outline-danger btn-sm"
-              >
-                Remove
-              </button>
+          {filtered.map((q, index) => (
+            <div key={index} className="col-md-12 mb-3">
+              <div className="card shadow-sm border-0">
+                <div className="card-body d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 className="mb-1">{q.name}</h5>
+                    <div className="d-flex gap-2 align-items-center flex-wrap">
+                      <span className="text-muted small">QID: {q.QID}</span>
+                      {q.tag && <span className={getTagBadge(q.tag)}>{q.tag}</span>}
+                      <span className={getDifficultyBadge(q.difficulty)}>{q.difficulty?.toUpperCase()}</span>
+                    </div>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-outline-primary btn-sm" onClick={() => handleViewClick(q.QID)}>👁 View</button>
+                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(q.QID)}>🗑 Delete</button>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  </>);
+    </>
+  );
 };
 
 export default AProblems;

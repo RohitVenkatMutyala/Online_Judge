@@ -17,7 +17,8 @@ function Navbar() {
   const isAdmin = user?.role === 'admin' || user?.isAdmin;
 
   return (
-    <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#20232a' }}>
+  <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: '#20232a' }}>
+
       <div className="container-fluid px-4">
         <Link className="navbar-brand d-flex align-items-center text-white fw-bold" to="/">
           <i className="bi bi-lightbulb-fill text-warning me-2"></i> AlgoArena
