@@ -18,7 +18,7 @@ int main() {
 }`);
   const [language, setLanguage] = useState('cpp');
   const [output, setOutput] = useState('');
-  const[verdict,SetVerdict]= useState('');
+  
   const [activeTab, setActiveTab] = useState('input');
 
   // Load code, language, input from localStorage
@@ -87,25 +87,7 @@ int main() {
       setActiveTab('output');
     }
   };
-{/*const handlesubmit = async () => {
-    try {
-      const res = await axios.post('http://localhost:8000/submit', {
-        language,
-        code,
-        QID,
-      });
-      SetVerdict(res.data.verdict|| 'No verdict received');
-      setActiveTab('verdict');
-    } catch (error) {
-      console.error("Compilation/Execution error:", error);
-      if (error.response && error.response.data) {
-        setOutput(error.response.data.error);
-      } else {
-        setOutput('Something went wrong!');
-      }
-      setActiveTab('verdict');
-    }
-  };*/}
+
   if (!problem) {
     return (
       <div className="container mt-5">

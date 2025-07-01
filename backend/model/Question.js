@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const ProbSchema = new mongoose.Schema({
     QID:{
-        type : String,
+        type : Number,
         required :[true],
         
     },
