@@ -1,7 +1,7 @@
 const Question = require("../model/Question");
 const problems= async(req,res)=>{
     try {
-        const {QID,name,tag,description,difficulty}=req.body;
+        const {QID,name,tag,description,difficulty ,status ="Not ATTEMPTED"}=req.body;
         if(!(QID && name && tag && description && difficulty)){
             return res.status(400).json({
                success: false,

@@ -52,6 +52,11 @@ function Navbar() {
                         <i className="bi bi-pencil-square me-1"></i> Post Problem
                       </Link>
                     </li>
+                     <li className="nav-item">
+                      <Link className="nav-link text-white" to="/test">
+                        <i className="bi bi-beaker"></i> U_TC
+                      </Link>
+                    </li>
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/adminproblems">
                         <i className="bi bi-list-task me-1"></i> View Problems

@@ -12,6 +12,7 @@ import PostProblems from './components/postporblems';
 import Solve from './components/solve';
 import AProblems from './components/AProblem';
 import Adminview from './components/adminview';
+import UploadTestCase from './components/testcase';
 
 function App() {
   return (
@@ -29,7 +30,7 @@ function App() {
           <Route path="/adminproblems" element={< AProblems/>} />
            <Route path="/postproblem" element={< PostProblems/>} />
             <Route path="/adminproblem/:QID" element={<Adminview />} />
-          
+              <Route path="/test" element={<UploadTestCase />} />
           < Route path="/contribute" element={<Contribute/>} />
         </Routes>
       </Router>

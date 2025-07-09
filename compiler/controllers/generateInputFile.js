@@ -11,7 +11,8 @@ const generateInputFile=(input)=>{
         const jobId = uuid();
         const fileName = `${jobId}.txt`;
         const InputfilePath = path.join(dirInput,fileName);
-        fs.writeFileSync( InputfilePath,input);
+        if(input!=" "){
+        fs.writeFileSync( InputfilePath,input);}
         return  InputfilePath;
  
         

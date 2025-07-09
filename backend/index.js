@@ -8,19 +8,18 @@ const {login} = require("./controllers/login.js");
 const {register} = require("./controllers/register.js");
 const {logout} = require("./controllers/logout.js");
 const {profile} = require("./controllers/profile.js");
-//const {problems} = require("./controllers/problems.js");
 const{problems}= require("./controllers/problems.js");
 const {getAllProblems}= require("./controllers/getAllProblems.js");
 const{getProblemByID}= require("./controllers/getProblemByID.js");
 const { DBConnection } = require("./database/db.js");
-
+ 
 const User = require("./model/User.js");
 const Question = require("./model/Question.js");
-
-//const Problem = require("./model/Problem.js");
 const {deleteProblem} =require("./controllers/deleteProblem.js");
-
-
+const{deleteTest}=require("./controllers/deleteProblem.js");
+const { Test } = require("./controllers/test.js");
+const {gtest} = require("./controllers/gettest.js");
+const {Stats} = require("./controllers/stats.js");
 dotenv.config();
 
 const app = express();
@@ -36,14 +35,16 @@ app.use(cookieParser());
 
 DBConnection();
 app.post("/logout",logout );
+app.post("/test",Test)
 
 app.post("/problems",problems);
 app.get("/problems", getAllProblems); // GET /api/problems
 app.get("/problem/:QID", getProblemByID); // GET /api/problem/1
 app.delete('/problem/:QID',deleteProblem);
-
+app.delete("/test/:QID",deleteTest);
+app.get("/test/:QID",gtest);
 app.get("/profile", profile);
-
+app.post("/rd",Stats);
 app.get("/", (req, res) => {
     res.status(200).json({ 
         message: "AlgoU Auth Server is running!",
