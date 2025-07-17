@@ -1,11 +1,12 @@
 const Question = require("../model/Question");
+const User = require("../model/User");
+const UserQuestionStatus = require("../model/UserQuestionStatus");
 
 const Stats = async (req, res) => {
   try {
-    const QID = req.body.QID; // ✅ Correct: from POST body
+    const { QID, id, status } = req.body;
 
     const question = await Question.findOne({ QID });
-
     if (!question) {
       return res.status(404).json({
         success: false,
@@ -13,13 +14,28 @@ const Stats = async (req, res) => {
       });
     }
 
-    question.status = "Solved";
-    await question.save();
+    const foundUser = await User.findById(id);
+    if (!foundUser) {
+      return res.status(404).json({
+        success: false,
+        message: `User not found`,
+      });
+    }
+
+    const userStatus = status || "UnSolved";
+
+    const statusEntry = await UserQuestionStatus.findOneAndUpdate(
+      { user: foundUser._id, question: question._id },
+      { status: userStatus },
+      { new: true, upsert: true }
+    );
 
     res.status(200).json({
       success: true,
-      message: `Problem ${QID} marked as Solved.`,
+      message: `Problem ${QID} marked as '${userStatus}' for user ${foundUser.firstname}.`,
+      data: statusEntry,
     });
+    
 
   } catch (error) {
     console.error(error);

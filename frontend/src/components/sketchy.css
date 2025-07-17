@@ -1,0 +1,117 @@
+/* ================================
+   🧾 Book Container (Outer Shell)
+   ================================ */
+.book {
+  background-color: var(--sketch-bg);
+  border-radius: 12px;
+  padding: 40px 30px;
+  max-width: 650px;
+  width: 100%;
+  min-height: 600px;
+  border: 2px dashed var(--sketch-border);
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2);
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* ================================
+   📖 Inner Page Animation
+   ================================ */
+.book-inner {
+  animation: flipIn 0.6s ease-in-out;
+}
+
+/* ================================
+   📄 Page Styles
+   ================================ */
+.book-page {
+  background-color: var(--sketch-bg);
+  color: var(--sketch-text);
+  border: 2px dashed var(--sketch-border);
+  border-radius: 10px;
+  padding: 30px;
+  font-family: 'Georgia', serif;
+  min-height: 520px;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s ease;
+}
+
+/* ================================
+   🔄 Flip Animation
+   ================================ */
+@keyframes flipIn {
+  from {
+    transform: rotateY(-90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+/* ================================
+   🔘 Prev / Next Buttons
+   ================================ */
+.book-controls button {
+  min-width: 100px;
+  font-weight: 500;
+}
+
+/* ================================
+   🟣 Custom Badges
+   ================================ */
+.bg-purple {
+  background-color: #b084f7 !important;
+  color: white !important;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+  border-radius: 6px;
+}
+
+/* ================================
+   🧾 Sketch Box
+   ================================ */
+.sketch-box {
+  border: 1.5px dashed var(--sketch-border);
+  border-radius: 10px;
+  padding: 20px;
+  background-color: var(--sketch-bg);
+  color: var(--sketch-text);
+}
+
+/* ================================
+   🎨 Sketchy Button Style
+   ================================ */
+.sketchy-btn {
+  border-width: 2px;
+  font-family: 'Courier New', monospace;
+  transition: transform 0.2s;
+}
+
+.sketchy-btn:hover {
+  transform: scale(1.03);
+}
+
+/* ================================
+   🌞 Light Theme Variables
+   ================================ */
+:root,
+[data-bs-theme="light"] {
+  --sketch-bg: #fefaf3;
+  --sketch-border: #ccc;
+  --sketch-text: #222;
+}
+
+/* ================================
+   🌙 Dark Theme Variables
+   ================================ */
+[data-bs-theme="dark"] {
+  --sketch-bg: #2b2b2b;
+  --sketch-border: #444;
+  --sketch-text: #eee;
+}

@@ -13,7 +13,9 @@ const profile = async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.id).select("-password");
+    console.log({user});
     res.json({ user });
+
   } catch (err) {
     res.status(401).json({ message: "Invalid token" });
   }

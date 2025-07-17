@@ -13,9 +13,14 @@ import Solve from './components/solve';
 import AProblems from './components/AProblem';
 import Adminview from './components/adminview';
 import UploadTestCase from './components/testcase';
+import { ThemeProvider } from './context/ThemeContext'; // you'll create this file
+
+
+
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <Router>
         <Routes>
@@ -35,6 +40,7 @@ function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

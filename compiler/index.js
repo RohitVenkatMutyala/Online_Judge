@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.get("/",async(req,res)=>{
     
-    res.send("Hello World");
+    res.send("Hello 😊 World");
    
 })
 app.post("/run", run);

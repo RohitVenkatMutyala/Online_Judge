@@ -81,12 +81,9 @@ const Adminview = () => {
             </div>
 
             <hr />
-            <div
-              className="mt-3"
-              style={{ whiteSpace: 'pre-wrap', color: '#333', fontSize: '1rem' }}
-            >
-              {problem.description}
-            </div>
+                 <div className="fs-6 text-body" style={{ whiteSpace: 'pre-wrap' }}>
+                  {problem.description}
+                </div>
           </div>
         </div>
       </div>

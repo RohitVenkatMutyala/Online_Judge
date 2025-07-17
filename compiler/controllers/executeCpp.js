@@ -18,7 +18,7 @@ const executeCpp = async (filePath,InputfilePath) => {
     return new Promise((resolve, reject) => {
         const command = `g++ "${filePath}" -o "${outPath}" && "${outPath}" < "${InputfilePath}"`;
 
-        exec(command, (error, stdout, stderr) => {
+        exec(command, {timeout:2000},(error, stdout, stderr) => {
             if (error) {
                 return reject({ message: "Compilation or execution error", error, stderr });
             }

@@ -19,10 +19,13 @@ const Problems = () => {
 
     const fetchProblems = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/problems');
+        const res = await axios.get(`http://localhost:5000/problems/user/${user._id}`);
+
         if (res.data.success) {
+         
           setProblems(res.data.problems);
           setFiltered(res.data.problems);
+           
         }
       } catch (err) {
         setError('Error loading problems');

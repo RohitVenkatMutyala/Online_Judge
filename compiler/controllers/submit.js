@@ -46,6 +46,7 @@ const submit = async (req, res) => {
             total: result.total,
             passed: result.passed,
             failed: result.failed,
+            totalTimeMs: result.totalTimeMs,
         });
 
     } catch (error) {

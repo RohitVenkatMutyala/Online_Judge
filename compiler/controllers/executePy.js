@@ -7,7 +7,7 @@ const executePy = async (filePath,InputfilePath) => {
     return new Promise((resolve, reject) => {
         const command = `python "${filePath}" < "${InputfilePath}"`; 
 
-        exec(command, (error, stdout, stderr) => {
+        exec(command,{timeout:2000}, (error, stdout, stderr) => {
             if (error) {
                 return reject({ message: "Execution error", error, stderr });
             }

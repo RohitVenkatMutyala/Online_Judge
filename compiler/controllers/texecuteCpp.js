@@ -9,6 +9,7 @@ if (!fs.existsSync(outputPath)) {
 }
 
 const TexecuteCpp = async (filePath, inputFilePath, outputFilePath) => {
+   const startTime = Date.now(); // Start time
   const jobId = path.basename(filePath).split(".")[0];
   const outPath = path.join(outputPath, `${jobId}.out`);
 
@@ -16,9 +17,9 @@ const TexecuteCpp = async (filePath, inputFilePath, outputFilePath) => {
   const compileCommand = `g++ "${filePath}" -o "${outPath}"`;
 
   await new Promise((resolve, reject) => {
-    exec(compileCommand, (error, stdout, stderr) => {
+    exec(compileCommand, { timeout: 3000 }, (error, stdout, stderr) => {
       if (error || stderr) {
-        return reject({ message: "Compilation failed", stderr });
+        return reject({ message: "Compilation failed", stderr: stderr || error.message });
       }
       resolve();
     });
@@ -27,12 +28,12 @@ const TexecuteCpp = async (filePath, inputFilePath, outputFilePath) => {
   // Step 2: Read test cases
   const inputContent = fs.readFileSync(inputFilePath, "utf-8");
   const expectedContent = fs.readFileSync(outputFilePath, "utf-8");
-  
-  const inputTests = inputContent.split("------").map(x => x.trim()).filter(Boolean);
 
+  const inputTests = inputContent.split("------").map(x => x.trim()).filter(Boolean);
   const outputTests = expectedContent.split("------").map(x => x.trim()).filter(Boolean);
 
   const verdicts = [];
+  const TIMEOUT_MS = 2000;
 
   // Step 3: Loop through test cases
   for (let i = 0; i < inputTests.length; i++) {
@@ -43,6 +44,11 @@ const TexecuteCpp = async (filePath, inputFilePath, outputFilePath) => {
 
       let stdout = "";
       let stderr = "";
+
+      const timer = setTimeout(() => {
+        child.kill("SIGKILL");
+        reject("Time limit exceeded ⏱️");
+      }, TIMEOUT_MS);
 
       child.stdin.write(testInput);
       child.stdin.end();
@@ -56,27 +62,39 @@ const TexecuteCpp = async (filePath, inputFilePath, outputFilePath) => {
       });
 
       child.on("close", (code) => {
+        clearTimeout(timer);
         if (code !== 0 || stderr) {
-          return reject({ error: stderr || "Runtime error" });
+          return reject(stderr || "Runtime error");
         }
         resolve(stdout.trim());
       });
-    });
+    }).catch(error => error);
 
     const expected = outputTests[i] || "";
+
     verdicts.push({
       testCase: i + 1,
       expected,
-      actual: result,
-      verdict: result === expected ? "Passed ✅" : "Failed ❌",
+      actual: typeof result === "string" ? result : "",
+      verdict: result === expected ? "Passed ✅" :
+        result === "Time limit exceeded ⏱️" ? "Time Limit ⏱️" : "Failed ❌",
+      error: typeof result === "string" ? undefined : result
     });
+    if(expected!==result){
+      break;
+    }
+    
   }
+  const endTime = Date.now();           // End time
+const totalTime = endTime - startTime; // In milliseconds
 
   return {
     total: inputTests.length,
     passed: verdicts.filter(v => v.verdict === "Passed ✅").length,
     failed: verdicts.filter(v => v.verdict === "Failed ❌").length,
-    verdicts,
+    timedOut: verdicts.filter(v => v.verdict === "Time Limit ⏱️").length,
+     totalTimeMs:totalTime,
+    verdicts
   };
 };
 
