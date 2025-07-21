@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function PostProblems() {
+  const API_URL = process.env.REACT_APP_SERVER_API;
   const [form, setForm] = useState({
     QID: '',
     name: '',
@@ -34,7 +35,7 @@ function PostProblems() {
     setSuccess('');
 
     try {
-      const res = await axios.post('http://localhost:5000/problems', form);
+      const res = await axios.post(`${API_URL}/problems`, form);
       if (res.data.success) {
         setSuccess("✅ Question posted successfully!");
       }
@@ -63,61 +64,102 @@ function PostProblems() {
       <div style={{ backgroundColor: '#1c1f26', minHeight: '100vh' }}>
         <div className="container py-5">
           <div className="card shadow p-5 mx-auto" style={{ maxWidth: '1000px', backgroundColor: '#2c2f36', color: 'white' }}>
-  <h2 className="text-center mb-4 fw-bold">Post a New Problem</h2>
-  <form onSubmit={handleSubmit}>
-    <div className="row">
-      {/* Left column inputs */}
-      <div className="col-md-6">
-        <div className="mb-3">
-          <label htmlFor="QID" className="form-label">QID</label>
-          <input type="text" className="form-control" id="QID" name="QID" value={form.QID} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="name" className="form-label">Problem Name</label>
-          <input type="text" className="form-control" id="name" name="name" value={form.name} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="tag" className="form-label">Tag</label>
-          <input type="text" className="form-control" id="tag" name="tag" value={form.tag} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="difficulty" className="form-label">Difficulty</label>
-          <select className="form-select" id="difficulty" name="difficulty" value={form.difficulty} onChange={handleChange} required>
-            <option value="">Select</option>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
-        </div>
-      </div>
+            <h2
+              className="mb-4 text-center fw-bold"
+              style={{
+                background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent"
+              }}
+            >
+              Post a New Problem
+            </h2>
 
-      {/* Right column for description */}
-      <div className="col-md-6">
-        <div className="mb-3">
-          <label htmlFor="description" className="form-label">Problem Description</label>
-          <textarea className="form-control" id="description" name="description" rows="12" value={form.description} onChange={handleChange} required></textarea>
-        </div>
-      </div>
-    </div>
+            <form onSubmit={handleSubmit}>
+              <div className="row">
+                {/* Left column inputs */}
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label htmlFor="QID" className="form-label"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600'
+                      }}
+                    >QID</label>
+                    <input type="text" className="form-control" id="QID" name="QID" value={form.QID} onChange={handleChange} required />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="name" className="form-label"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600'
+                      }}>Problem Name</label>
+                    <input type="text" className="form-control" id="name" name="name" value={form.name} onChange={handleChange} required />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="tag" className="form-label"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600'
+                      }}>Tag</label>
+                    <input type="text" className="form-control" id="tag" name="tag" value={form.tag} onChange={handleChange} required />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="difficulty" className="form-label"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600'
+                      }}>Difficulty</label>
+                    <select className="form-select" id="difficulty" name="difficulty" value={form.difficulty} onChange={handleChange} required>
+                      <option value="">Select</option>
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                </div>
 
-    {/* Status messages */}
-    {error && <div className="alert alert-danger">{error}</div>}
-    {success && <div className="alert alert-success">{success}</div>}
+                {/* Right column for description */}
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label htmlFor="description" className="form-label"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600'
+                      }}>Problem Description</label>
+                    <textarea className="form-control" id="description" name="description" rows="12" value={form.description} onChange={handleChange} required></textarea>
+                  </div>
+                </div>
+              </div>
 
-    {/* Buttons */}
-    <div className="d-flex justify-content-end gap-3 mt-4">
-      <button type="submit" className="btn btn-warning fw-bold text-dark">
-        <i className="bi bi-check-circle-fill me-2"></i>Submit Problem
-      </button>
-      <button type="button" className="btn btn-info fw-bold text-dark" onClick={() => navigate('/admindashboard')}>
-        <i className="bi bi-person-fill me-2"></i>Profile
-      </button>
-      <button type="button" className="btn btn-danger fw-bold" onClick={() => window.location.reload()}>
-        <i className="bi bi-arrow-clockwise me-2"></i>Post Another
-      </button>
-    </div>
-  </form>
-</div>
+              {/* Status messages */}
+              {error && <div className="alert alert-danger">{error}</div>}
+              {success && <div className="alert alert-success">{success}</div>}
+
+              {/* Buttons */}
+              <div className="d-flex justify-content-end gap-3 mt-4">
+                <button type="submit" className="btn btn-warning fw-bold text-dark">
+                  <i className="bi bi-check-circle-fill me-2"></i>Submit Problem
+                </button>
+                <button type="button" className="btn btn-info fw-bold text-dark" onClick={() => navigate('/admindashboard')}>
+                  <i className="bi bi-person-fill me-2"></i>Profile
+                </button>
+                <button type="button" className="btn btn-danger fw-bold" onClick={() => window.location.reload()}>
+                  <i className="bi bi-arrow-clockwise me-2"></i>Post Another
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </>

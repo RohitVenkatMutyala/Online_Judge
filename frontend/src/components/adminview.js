@@ -5,6 +5,7 @@ import axios from 'axios';
 import Navbar from './navbar';
 
 const Adminview = () => {
+   const API_URL = process.env.REACT_APP_SERVER_API;
   const { QID } = useParams();
   const { user } = useAuth();
   const [problem, setProblem] = useState(null);
@@ -12,7 +13,7 @@ const Adminview = () => {
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/problem/${QID}`);
+        const res = await axios.get(`${API_URL}/problem/${QID}`);
         setProblem(res.data.problem);
       } catch (err) {
         console.error('Error loading problem');
@@ -20,7 +21,7 @@ const Adminview = () => {
     };
 
     fetchProblem();
-  }, [QID]);
+  }, [QID,API_URL]);
 
   const getDifficultyBadge = (difficulty) => {
     switch (difficulty?.toLowerCase()) {

@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './navbar';
 
 const AProblems = () => {
+   const API_URL = process.env.REACT_APP_SERVER_API;
   const { user } = useAuth();
   const [problems, setProblems] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -18,7 +19,7 @@ const AProblems = () => {
     if (!user || user.role !== 'admin') return;
     const fetchProblems = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/problems');
+        const res = await axios.get(`${API_URL}/problems`);
         if (res.data.success) {
           setProblems(res.data.problems);
           setFiltered(res.data.problems);
@@ -28,7 +29,7 @@ const AProblems = () => {
       }
     };
     fetchProblems();
-  }, [user]);
+  }, [user,API_URL]);
 
   const handleFilterChange = (e) => {
     const value = e.target.value;
@@ -45,7 +46,7 @@ const AProblems = () => {
     const confirmDelete = window.confirm(`Are you sure you want to delete QID: ${qid}?`);
     if (!confirmDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/problem/${qid}`);
+      await axios.delete(`${API_URL}/problem/${qid}`);
       const updated = problems.filter(p => p.QID !== qid);
       setProblems(updated);
       setFiltered(updated);
@@ -79,7 +80,7 @@ const AProblems = () => {
       <Navbar />
       <div className="container my-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h3 className="fw-bold">📚 Manage Problems</h3>
+        
         </div>
 
         {error && <div className="alert alert-danger">{error}</div>}
@@ -88,11 +89,12 @@ const AProblems = () => {
         <div className="input-group mb-4">
           <input
             type="text"
-            className="form-control"
+            className="form-control bg-body text-body border border-secondary-subtle shadow-sm"
             placeholder="🔍 Filter by tag (e.g., array, dp, hash)"
             value={filterTag}
             onChange={handleFilterChange}
           />
+
           <span className="input-group-text"><i className="bi bi-filter"></i></span>
         </div>
 
@@ -109,7 +111,13 @@ const AProblems = () => {
               <div className="card shadow-sm border-0">
                 <div className="card-body d-flex justify-content-between align-items-center">
                   <div>
-                    <h5 className="mb-1">{q.name}</h5>
+                    <h5 className="mb-1"
+                      style={{
+                        background: 'linear-gradient(to right,#f12711, #f5af19)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600'
+                      }}>{q.name}</h5>
                     <div className="d-flex gap-2 align-items-center flex-wrap">
                       <span className="text-muted small">QID: {q.QID}</span>
                       {q.tag && <span className={getTagBadge(q.tag)}>{q.tag}</span>}
@@ -117,8 +125,8 @@ const AProblems = () => {
                     </div>
                   </div>
                   <div className="d-flex gap-2">
-                    <button className="btn btn-outline-primary btn-sm" onClick={() => handleViewClick(q.QID)}>👁 View</button>
-                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(q.QID)}>🗑 Delete</button>
+                    <button className="btn btn-outline-primary btn-sm" onClick={() => handleViewClick(q.QID)}> View</button>
+                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(q.QID)}> Delete</button>
                   </div>
                 </div>
               </div>

@@ -14,8 +14,8 @@ import AProblems from './components/AProblem';
 import Adminview from './components/adminview';
 import UploadTestCase from './components/testcase';
 import { ThemeProvider } from './context/ThemeContext'; // you'll create this file
-
-
+import Submission from './components/submissions';
+import Contexts from './components/context';
 
 
 function App() {
@@ -37,6 +37,8 @@ function App() {
             <Route path="/adminproblem/:QID" element={<Adminview />} />
               <Route path="/test" element={<UploadTestCase />} />
           < Route path="/contribute" element={<Contribute/>} />
+          <Route path = "/sub" element={<Submission/>}/>
+        <Route path ="/contexts" element ={<Contexts/>}  />
         </Routes>
       </Router>
     </AuthProvider>

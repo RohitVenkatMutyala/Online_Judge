@@ -45,7 +45,17 @@ function ADashboard() {
     (
        <div className="book-inner">
       <div className="book-page text-center">
-        <h3 className="fw-bold mb-2">🛡️ Admin Info</h3>
+         <h2
+          className="mb-4 text-center fw-bold"
+          style={{
+            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
+         🛡️ Admin Info
+        </h2>
+       
         <div className="sketch-box">
           <h5 className="fw-bold">{user.firstname} {user.lastname}</h5>
           <p className="text-warning">📧 {user.email}</p>
@@ -58,13 +68,16 @@ function ADashboard() {
     // Page 1 - Admin Stats
     (    
       <div className="book-page text-start">
-        <h4 className="fw-bold mb-3">📊 Contribution Summary</h4>
-        <ul className="list-unstyled sketch-box">
-          <li>📝 Problems Posted: <strong>12</strong></li>
-          <li>📈 Average Difficulty: <span className="badge bg-warning text-dark">Medium</span></li>
-          <li>🧪 Test Cases Reviewed: <strong>36</strong></li>
-          <li>⏱️ Last Activity: <strong>1 hour ago</strong></li>
-        </ul>
+         <h2
+          className="mb-4 text-center fw-bold"
+          style={{
+            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
+          📊 Contribution Summary
+        </h2>
       </div>
     
     ),
@@ -72,7 +85,17 @@ function ADashboard() {
     // Page 2 - Actions
     (  
       <div className="book-page text-center">
-        <h4 className="fw-bold mb-3">📂 Admin Actions</h4>
+         <h2
+          className="mb-4 text-center fw-bold"
+          style={{
+            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
+          📂 Admin Actions
+        </h2>
+        
         <div className="d-grid gap-3 sketch-box">
           <button
             className="btn btn-outline-warning fw-bold sketchy-btn"

@@ -21,14 +21,16 @@ const { Test } = require("./controllers/test.js");
 const {gtest} = require("./controllers/gettest.js");
 const {Stats} = require("./controllers/stats.js");
 const {AlProblems} = require("./controllers/problems.js");
+const  {Ahelp} = require ("./controllers/ahelp.js");
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+
 app.use(cors({
-    origin: true,
-    credentials: true
+  origin: "http://localhost:3000", // or the actual domain of your frontend
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -46,6 +48,20 @@ app.delete("/test/:QID",deleteTest);
 app.get("/test/:QID",gtest);
 app.get("/profile", profile);
 app.post("/rd",Stats);
+app.post("/help", async (req, res) => {
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: "Code is required" });
+  }
+
+  try {
+    const result = await Ahelp(code);
+    res.json({ result });
+  } catch (err) {
+    res.status(500).json({ error: "Server error while getting AI response" });
+  }
+});
 app.get("/", (req, res) => {
     res.status(200).json({ 
         message: "AlgoU Auth Server is running!",

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from './navbar';
 
 const UploadTestCase = () => {
+   const API_URL = process.env.REACT_APP_SERVER_API;
   const { user } = useAuth();
   const [QID, setQID] = useState('');
   const [inputFile, setInputFile] = useState(null);
@@ -18,7 +19,7 @@ const UploadTestCase = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await axios.delete(`http://localhost:5000/test/${qid}`);
+      const res = await axios.delete(`${API_URL}/test/${qid}`);
       setDeleteMessage(res.data.message || `✅ QID ${qid} deleted.`);
       setDeleteType('success');
     } catch (error) {
@@ -42,7 +43,7 @@ const UploadTestCase = () => {
     formData.append('outputFile', outputFile);
 
     try {
-      const res = await axios.post('http://localhost:5000/test', formData, {
+      const res = await axios.post(`${API_URL}/test`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true
       });
@@ -83,12 +84,29 @@ const UploadTestCase = () => {
               <div className="card-body p-4">
                 <div className="d-flex align-items-center mb-4">
                   <i className="bi bi-beaker fs-4 text-primary me-2"></i>
-                  <h4 className="mb-0">Upload Test Case</h4>
+                  <h4
+                    className="mb-0"
+                    style={{
+                      background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent"
+                    }}
+                  >
+                    Upload Test Case
+                  </h4>
+
                 </div>
 
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                   <div className="mb-3">
-                    <label htmlFor="qid" className="form-label fw-semibold">Question ID (QID)</label>
+                    <label htmlFor="qid" className="form-label fw-semibold"
+                     style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}
+                    >Question ID (QID)</label>
                     <input
                       type="text"
                       className="form-control"
@@ -101,7 +119,13 @@ const UploadTestCase = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-semibold">Input Test Case (.txt)</label>
+                    <label className="form-label fw-semibold"
+                     style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>Input Test Case (.txt)</label>
                     <input
                       type="file"
                       className="form-control"
@@ -113,7 +137,13 @@ const UploadTestCase = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-semibold">Expected Output File (.txt)</label>
+                    <label className="form-label fw-semibold"
+                     style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>Expected Output File (.txt)</label>
                     <input
                       type="file"
                       className="form-control"
@@ -144,7 +174,17 @@ const UploadTestCase = () => {
               <div className="card-body p-4">
                 <div className="d-flex align-items-center mb-3">
                   <i className="bi bi-trash3 fs-5 text-danger me-2"></i>
-                  <h5 className="mb-0">Delete Test Case</h5>
+                  <h4
+                    className="mb-0"
+                    style={{
+                      background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent"
+                    }}
+                  >
+                    Delete Test Case
+                  </h4>
+
                 </div>
 
                 <form

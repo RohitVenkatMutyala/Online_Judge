@@ -29,7 +29,8 @@ function Dashboard() {
     // Page 2: Auth
     <div key="auth" className="book-page text-center">
       <h6>🔐 Auth Service</h6>
-      <p className="text-success fw-bold">Authenticated ✅</p>
+      <p className="text-success fw-bold">Authenticated ✅ </p>
+        <p className="text-success fw-bold">Session Will Expire in 24 Hr✅ </p>
     </div>,
 
     // Page 3: Navigation
@@ -45,35 +46,49 @@ function Dashboard() {
 
     // Page 4: Stats
     <div key="stats" className="book-page text-start">
-      <h6>📊 Problem Stats</h6>
-      <ul className="list-unstyled mt-3">
-        <li>✅ Solved: <strong>18</strong></li>
-        <li>🕓 Pending: <strong>5</strong></li>
-        <li>🔁 Retried: <strong>3</strong></li>
-        <li>⚔️ Difficulty: <span className="badge bg-warning text-dark">Intermediate</span></li>
-      </ul>
+     <h2
+          className="mb-4 text-center fw-bold"
+          style={{
+            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
+          📅 Stats
+        </h2>
+   <strong>UnderConstruction</strong>
     </div>,
 
     // Page 5: Submissions
     <div key="submissions" className="book-page text-start">
-      <h6>📦 Recent Submissions</h6>
-      <ul className="mt-3">
-        <li>✅ <strong>Reverse Linked List</strong> - Passed</li>
-        <li>❌ <strong>Stock Span</strong> - Failed</li>
-        <li>✅ <strong>Balanced Brackets</strong> - Passed</li>
-        <li>🧪 <strong>Binary Search</strong> - Running...</li>
-      </ul>
+   
+       <h2
+          className="mb-4 text-center fw-bold"
+          style={{
+            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
+        📦 Recent Submissions
+        </h2>
+        <strong>UnderConstruction</strong>
     </div>,
 
     // Page 6: Activity
     <div key="activity" className="book-page text-start">
-      <h6>🧠 Activity</h6>
-      <ul className="mt-3">
-        <li>📅 Joined: <strong>Mar 2024</strong></li>
-        <li>🏆 Rank: <span className="badge bg-info">#342</span></li>
-        <li>⚡ Streak: <strong>5 days</strong></li>
-        <li>💡 Level: <span className="badge bg-purple">Thinker</span></li>
-      </ul>
+      
+         <h2
+          className="mb-4 text-center fw-bold"
+          style={{
+            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
+          🧠 Activity
+        </h2>
+        <strong>UnderConstruction</strong>
     </div>
   ];
 

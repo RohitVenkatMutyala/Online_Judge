@@ -8,7 +8,7 @@ const {TexecuteCpp}  = require("./texecuteCpp");
 const cors= require("cors");
 const app = express();
 app.use(express.json());
-
+const {db}= require("../firebase");
 app.use(cors({
     origin: true,
     credentials: true
@@ -17,9 +17,9 @@ app.use(cors({
 
 const submit = async (req, res) => {
   //  console.log("Submit received body:", req.body);
-    const { language = "cpp", code, input, expectedOutput } = req.body;
+    const { language = "cpp", code, input, expectedOutput ,id,QID } = req.body;
 
-    if (!code || !input || !expectedOutput) {
+    if (!code || !input || !expectedOutput || !id || !QID) {
         return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -39,6 +39,17 @@ const submit = async (req, res) => {
         } else {
             return res.status(400).json({ message: "Unsupported language" });
         }
+
+      const verdict = result.passed === result.total ? "Passed" : "Failed";
+      const submissionsDoc = {
+        id,
+        QID,
+        code,
+        language,
+        verdict,
+        submittedAt: new Date().toISOString()
+      };
+      await db.collection("submissions").add(submissionsDoc);
 
         return res.json({
             success: true,

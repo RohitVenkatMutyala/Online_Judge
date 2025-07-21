@@ -7,6 +7,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { useTheme } from '../context/ThemeContext'; // Theme context
 
 function Navbar() {
+  
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -21,9 +22,40 @@ function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: '#20232a' }}>
       <div className="container-fluid px-4">
-        <Link className="navbar-brand d-flex align-items-center text-white fw-bold" to="/">
-          <i className="bi bi-lightbulb-fill text-warning me-2"></i> AlgoArena
+
+        <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 100 100"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00C9FF" />
+                <stop offset="100%" stopColor="#92FE9D" />
+              </linearGradient>
+              <linearGradient id="grad2" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#f12711" />
+                <stop offset="100%" stopColor="#f5af19" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="40" fill="url(#grad1)" />
+            <path
+              d="M50 20 L60 45 L40 45 Z"
+              fill="url(#grad2)"
+              stroke="#222"
+              strokeWidth="2"
+            />
+            <circle cx="50" cy="65" r="5" fill="#222" />
+          </svg>
+          <span className="fw-bold fs-4" style={{ background: 'linear-gradient(to right, #f12711, #f5af19)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
+            Randoman
+          </span>
         </Link>
+
+
+
 
         <button
           className="navbar-toggler bg-light"
@@ -44,22 +76,46 @@ function Navbar() {
                 {isAdmin ? (
                   <>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/admindashboard">
+                      <Link className="nav-link text-white" to="/admindashboard"
+                       style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>
                         <i className="bi bi-person-workspace me-1"></i> Profile
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/postproblem">
+                      <Link className="nav-link text-white" to="/postproblem"
+                       style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>
                         <i className="bi bi-pencil-square me-1"></i> Post Problem
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/test">
-                        <i className="bi bi-beaker"></i> U_TC
+                      <Link className="nav-link text-white" to="/test"
+                       style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>
+                        <i className="bi bi-beaker"></i> Set_TC
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/adminproblems">
+                      <Link className="nav-link text-white" to="/adminproblems"
+                       style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>
                         <i className="bi bi-list-task me-1"></i> View Problems
                       </Link>
                     </li>
@@ -67,15 +123,54 @@ function Navbar() {
                 ) : (
                   <>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/dashboard">
-                        <i className="bi bi-person-circle me-1"></i> Profile
+                      <Link
+                        className="nav-link"
+                        to="/dashboard"
+                        style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}
+                      >
+                        <i className="bi bi-person-workspace me-1"></i> Profile
                       </Link>
                     </li>
+
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/problems">
+                      <Link className="nav-link text-white" to="/problems"
+                          style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>
                         <i className="bi bi-list-task me-1"></i> Problems
                       </Link>
                     </li>
+                    <li className="nav-item">
+                      <Link className="nav-link text-white d-flex align-items-center gap-2" to="/contexts"
+                          style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>
+                        <i className="bi bi-stopwatch"></i> Contexts
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link text-white d-flex align-items-center gap-2" to="/sub"
+                          style={{
+                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '600'
+                        }}>
+                        <i className="bi bi-journal-check me-1"></i> Submissions
+                      </Link>
+                    </li>
+
                   </>
                 )}
                 <li className="nav-item">
