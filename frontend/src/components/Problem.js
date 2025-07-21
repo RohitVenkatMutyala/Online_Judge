@@ -22,10 +22,10 @@ const Problems = () => {
         const res = await axios.get(`http://localhost:5000/problems/user/${user._id}`);
 
         if (res.data.success) {
-         
+
           setProblems(res.data.problems);
           setFiltered(res.data.problems);
-           
+
         }
       } catch (err) {
         setError('Error loading problems');
@@ -81,7 +81,7 @@ const Problems = () => {
     <>
       <Navbar />
       <div className="container my-5">
-        <h3 className="mb-4 fw-bold">Start Shaping the Ideas</h3>
+     
 
         {error && <div className="alert alert-danger">{error}</div>}
 
@@ -103,17 +103,32 @@ const Problems = () => {
               <div className="card shadow-sm position-relative h-100">
                 {/* Top-right status badge */}
                 <div
-                  className={`position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded-pill small ${
-                    q.status === 'Solved' ? 'bg-success' : 'bg-secondary'
-                  }`}
+                  className={`position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded-pill small ${q.status === 'Solved' ? 'bg-success' : 'bg-secondary'
+                    }`}
                 >
                   {q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}
                 </div>
 
                 <div className="card-body d-flex flex-column justify-content-between">
                   <div>
-                    <large className="text-muted">{`QID${q.QID}`}</large>
-                    <h5 className="card-title mt-1">{q.name}</h5>
+                    <large className="text-muted"
+                       style={{
+                        background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent"
+                      }}
+                    ><strong>{`QID ('_') ${q.QID}`}</strong></large>
+                    <h5
+                      className="card-title mt-1"
+                      style={{
+                        background: "linear-gradient(to right,  #11998e, #38ef7d)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent"
+                      }}
+                    >
+                      {q.name}
+                    </h5>
+
 
                     {/* Tags */}
                     {q.tag && (
