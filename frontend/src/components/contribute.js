@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './navbar';
 
 export const Contribute = () => {
-   const API_URL = process.env.REACT_APP_SERVER_API;
+  const API_URL = process.env.REACT_APP_SERVER_API;
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,19 +51,19 @@ export const Contribute = () => {
             >
               Welcome to Randoman
             </h1>
-         <p className="fs-5 text-muted">
-  
-  <ul className="mt-3 text-start">
-    <li><strong>🌟 Fast and Secure Login</strong></li>
-    <li><strong>⚙️ Full Admin Control</strong> — Post, Edit, and Delete Questions Easily</li>
-    <li>🧪 <strong>Advanced Testcase Management</strong> — Manage each question’s testcases <strong>independently</strong> for high flexibility</li>
-    <li>🔁 <strong>Update or Delete Testcases</strong> without changing the original question</li>
-    <li>📂 <strong>Bulk Upload Support</strong> — Add <strong>30+ input/output testcases</strong> in a single click</li>
-    <li>🚫 Say goodbye to <strong>dummy testcases</strong> — Every question is <strong>stress-tested</strong> for reliability</li>
-    <li>🎨 Beautiful UI with <strong>Seamless Dark Mode</strong></li>
-   
-  </ul>
-</p>
+            <p className="fs-5 ">
+
+              <ul className="mt-3 ">
+                <li><strong>🌟 Fast and Secure Login</strong></li>
+                <li><strong>⚙️ Full Admin Control</strong> — Post, Edit, and Delete Questions Easily</li>
+                <li>🧪 <strong>Advanced Testcase Management</strong> — Manage each question’s testcases <strong>independently</strong> for high flexibility</li>
+                <li>🔁 <strong>Update or Delete Testcases</strong> without changing the original question</li>
+                <li>📂 <strong>Bulk Upload Support</strong> — Add <strong>30+ input/output testcases</strong> in a single click</li>
+                <li>🚫 Say goodbye to <strong>dummy testcases</strong> — Every question is <strong>stress-tested</strong> for reliability</li>
+                <li>🎨 Beautiful UI with <strong>Seamless Dark Mode</strong></li>
+
+              </ul>
+            </p>
 
           </div>
 
@@ -77,22 +77,22 @@ export const Contribute = () => {
               }}
             >
               <form onSubmit={handleSubmit} className="p-4 border rounded shadow" style={{ width: '100%', maxWidth: '400px' }}>
-                 <h2
-                className="mb-4 text-center"
-                style={{
-                  background: 'linear-gradient(to right, #FFA000, #FFC107)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 'bold',
-                }}
-              >
-                ADMIN
-              </h2>
+                <h2
+                  className="mb-4 text-center"
+                  style={{
+                    background: 'linear-gradient(to right, #FFA000, #FFC107)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ADMIN
+                </h2>
 
                 {error && <div className="alert alert-danger">{error}</div>}
 
                 <div className="mb-3">
-                 
+
                   <input
                     type="email"
                     className="form-control"
@@ -104,7 +104,7 @@ export const Contribute = () => {
                 </div>
 
                 <div className="mb-3">
-                  
+
                   <div className="input-group">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -116,28 +116,29 @@ export const Contribute = () => {
                     />
                     <button
                       type="button"
-                      className="btn btn-outline-secondary"
+                      className="btn btn-outline-light border-opacity-50 "
                       onClick={() => setShowPassword(!showPassword)}
                       tabIndex={-1}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
+
                   </div>
                 </div>
 
                 <button type="submit" className="btn btn-warning  w-100" disabled={loading}>
-                   {loading ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    Loading...
-                  </>
-                ) : (
-                  'Login'
-                )}
+                  {loading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Loading...
+                    </>
+                  ) : (
+                    'Login'
+                  )}
                 </button>
               </form>
 
