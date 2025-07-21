@@ -59,7 +59,7 @@ const AlProblems = async (req, res) => {
 
     const response = questions.map(q => ({
       QID: q.QID,
-      name: q.title,
+      name: q.name,
       tag: q.tag,
       difficulty: q.difficulty,
       status: statusMap[q._id.toString()] || 'Unsolved',
