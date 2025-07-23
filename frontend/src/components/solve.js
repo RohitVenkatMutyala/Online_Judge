@@ -7,11 +7,11 @@ import Navbar from './navbar';
 import { useTheme } from '../context/ThemeContext';
 import { db } from "../firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-
+import ReactMarkdown from "react-markdown";
 const Solve = () => {
-   const API_URL = process.env.REACT_APP_SERVER_API;
-   const API_COM = process.env.REACT_APP_COMPILER_API;
-   console.log(API_COM);
+  const API_URL = process.env.REACT_APP_SERVER_API;
+  const API_COM = process.env.REACT_APP_COMPILER_API;
+  console.log(API_COM);
   const { QID } = useParams();
   const { user } = useAuth();
   const [problem, setProblem] = useState(null);
@@ -252,7 +252,9 @@ int main() {
                 </p>
                 <hr />
                 <div className="fs-6 text-body" style={{ whiteSpace: 'pre-wrap' }}>
-                  {problem.description}
+                 <ReactMarkdown>
+  {problem.description}
+</ReactMarkdown>
                 </div>
 
               </div>
@@ -371,8 +373,7 @@ int main() {
                       onClick={handlesubmit}
                       style={{
                         background: 'linear-gradient(to right, #f12711, #f5af19)',
-                      
-                      }}
+}}
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (

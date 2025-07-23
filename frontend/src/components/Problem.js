@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './navbar';
 
 const Problems = () => {
+   const API_URL = process.env.REACT_APP_SERVER_API;
   const { user } = useAuth();
   const [problems, setProblems] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -19,7 +20,11 @@ const Problems = () => {
 
     const fetchProblems = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/problems/user/${user._id}`);
+        const res = await axios.get(`${API_URL}/problems/user/${user._id}`
+          , {
+          withCredentials: true,
+        }
+        );
 
         if (res.data.success) {
 
@@ -33,7 +38,7 @@ const Problems = () => {
     };
 
     fetchProblems();
-  }, [user]);
+  }, [user,API_URL]);
 
   const handleFilterChange = (e) => {
     const value = e.target.value;
