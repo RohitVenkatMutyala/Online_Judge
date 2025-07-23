@@ -1,17 +1,18 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const API_URL = process.env.REACT_APP_SERVER_API;
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Automatically fetch user from /profile using cookie
-  const fetchUser = async () => {
+  // ✅ Wrapped in useCallback to avoid redefinition on every render
+  const fetchUser = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/profile', {
-        withCredentials: true, // Send cookie!
+      const res = await axios.get(`${API_URL}/profile`, {
+        withCredentials: true, // Send the cookie
       });
       setUser(res.data.user);
     } catch (err) {
@@ -19,14 +20,15 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL]); // Only re-create if API_URL changes
 
+  // ✅ Call once on mount (dependency is stable due to useCallback)
   useEffect(() => {
-    fetchUser(); // Check login status on app load
-  }, []);
+    fetchUser();
+  }, [fetchUser]);
 
   const logout = async () => {
-    await axios.post('http://localhost:5000/logout', {}, { withCredentials: true });
+    await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
     setUser(null);
   };
 

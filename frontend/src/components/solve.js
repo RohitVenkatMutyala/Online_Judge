@@ -373,7 +373,8 @@ int main() {
                       onClick={handlesubmit}
                       style={{
                         background: 'linear-gradient(to right, #f12711, #f5af19)',
-}}
+
+                      }}
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (

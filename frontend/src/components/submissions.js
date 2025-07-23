@@ -124,6 +124,8 @@ const Submission = () => {
         const QID = submissions[index].QID ;
         const response = await axios.post(`${API_URL}/help`, { code ,QID });
         const result = response.data.result || "No suggestion returned.";
+       
+
         // 💾 Save to Firestore
         await setDoc(doc(helpResponsesRef, helpId), {
           userId: user._id,
