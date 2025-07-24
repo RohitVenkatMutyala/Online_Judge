@@ -35,6 +35,7 @@ int main() {
   const [outputtest, setOutputTest] = useState('');
   const [activeTab, setActiveTab] = useState('input');
   const [TotalTime, setTime] = useState();
+ 
 
   // Load code, language, input from localStorage
   useEffect(() => {
@@ -96,7 +97,10 @@ int main() {
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setLanguage(newLang);
-    saveToFirebase({ language: newLang });
+   
+
+    saveToFirebase({ language: newLang }); 
+  
   };
 
   const handleinput = (e) => {
@@ -252,9 +256,9 @@ int main() {
                 </p>
                 <hr />
                 <div className="fs-6 text-body" style={{ whiteSpace: 'pre-wrap' }}>
-                 <ReactMarkdown>
-  {problem.description}
-</ReactMarkdown>
+                  <ReactMarkdown>
+                    {problem.description}
+                  </ReactMarkdown>
                 </div>
 
               </div>
@@ -369,20 +373,18 @@ int main() {
                     </button>
 
                     <button
-                      className="btn btn-success w-50 d-flex align-items-center justify-content-center gap-1"
+                      className="btn btn-outline-success w-50 d-flex align-items-center justify-content-center gap-1"
                       onClick={handlesubmit}
-                      style={{
-                        background: 'linear-gradient(to right, #f12711, #f5af19)',
 
-                      }}
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
                         <>
-                          <div className="spinner-border spinner-border-sm text-light" role="status"></div>
+                          <div className="spinner-border spinner-border-sm text-success" role="status"></div>
                           Submitting...
                         </>
                       ) : (
+
                         <>
                           <i className="bi bi-rocket-takeoff-fill"></i> Submit Code
                         </>
