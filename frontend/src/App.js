@@ -1,5 +1,4 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import LoginForm from './components/LoginForm';
@@ -22,210 +21,27 @@ import Contexts from './components/context';
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<>
-              <Helmet>
-                <title>Randoman</title>
-              </Helmet>
-              <Home /></>} />
-            <Route path="/login" element={<>
-              <Helmet>
-                <title>Login - Randoman</title>
-              </Helmet>
-              <LoginForm /></>} />
-            <Route
-              path="/adminlogin"
-              element={
-                <>
-                  <Helmet><title>Admin Login - Randoman</title></Helmet>
-                  <Contribute />
-                </>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <>
-                  <Helmet><title>Register - Randoman</title></Helmet>
-                  <RegisterForm />
-                </>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <>
-                  <Helmet><title>Dashboard - Randoman</title></Helmet>
-                  <Dashboard />
-                </>
-              }
-            />
-            <Route
-              path="/problem/:QID"
-              element={
-                <>
-                  <Helmet><title>Solve Problem - Randoman</title></Helmet>
-                  <Solve />
-                </>
-              }
-            />
-            <Route
-              path="/admindashboard"
-              element={
-                <>
-                  <Helmet><title>Admin Dashboard - Randoman</title></Helmet>
-                  <ADashboard />
-                </>
-              }
-            />
-            <Route
-              path="/problems"
-              element={
-                <>
-                  <Helmet><title>Problems - Randoman</title></Helmet>
-                  <Problems />
-                </>
-              }
-            />
-            <Route
-              path="/adminproblems"
-              element={
-                <>
-                  <Helmet><title>Admin Problems - Randoman</title></Helmet>
-                  <AProblems />
-                </>
-              }
-            />
-            <Route
-              path="/postproblem"
-              element={
-                <>
-                  <Helmet><title>Post Problem - Randoman</title></Helmet>
-                  <PostProblems />
-                </>
-              }
-            />
-            <Route
-              path="/adminlogin"
-              element={
-                <>
-                  <Helmet><title>Admin Login - Randoman</title></Helmet>
-                  <Contribute />
-                </>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <>
-                  <Helmet><title>Register - Randoman</title></Helmet>
-                  <RegisterForm />
-                </>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <>
-                  <Helmet><title>Dashboard - Randoman</title></Helmet>
-                  <Dashboard />
-                </>
-              }
-            />
-            <Route
-              path="/problem/:QID"
-              element={
-                <>
-                  <Helmet><title>Solve Problem - Randoman</title></Helmet>
-                  <Solve />
-                </>
-              }
-            />
-            <Route
-              path="/admindashboard"
-              element={
-                <>
-                  <Helmet><title>Admin Dashboard - Randoman</title></Helmet>
-                  <ADashboard />
-                </>
-              }
-            />
-            <Route
-              path="/problems"
-              element={
-                <>
-                  <Helmet><title>Problems - Randoman</title></Helmet>
-                  <Problems />
-                </>
-              }
-            />
-            <Route
-              path="/adminproblems"
-              element={
-                <>
-                  <Helmet><title>Admin Problems - Randoman</title></Helmet>
-                  <AProblems />
-                </>
-              }
-            />
-            <Route
-              path="/postproblem"
-              element={
-                <>
-                  <Helmet><title>Post Problem - Randoman</title></Helmet>
-                  <PostProblems />
-                </>
-              }
-            />
-            <Route
-              path="/adminproblem/:QID"
-              element={
-                <>
-                  <Helmet><title>Admin View Problem - Randoman</title></Helmet>
-                  <Adminview />
-                </>
-              }
-            />
-            <Route
-              path="/test"
-              element={
-                <>
-                  <Helmet><title>Test Cases - Randoman</title></Helmet>
-                  <UploadTestCase />
-                </>
-              }
-            />
-            <Route
-              path="/contribute"
-              element={
-                <>
-                  <Helmet><title>Contribute - Randoman</title></Helmet>
-                  <Contribute />
-                </>
-              }
-            />
-            <Route
-              path="/sub"
-              element={
-                <>
-                  <Helmet><title>Submissions - Randoman</title></Helmet>
-                  <Submission />
-                </>
-              }
-            />
-            <Route
-              path="/contexts"
-              element={
-                <>
-                  <Helmet><title>Contexts - Randoman</title></Helmet>
-                  <Contexts />
-                </>
-              }
-            />          </Routes>
-        </Router>
-      </AuthProvider>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home/>} />
+           <Route path="/login" element={<LoginForm />} />
+           <Route path ="/adminlogin" element={<Contribute/>}/>
+          <Route path='/register' element={<RegisterForm/>}/>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/problem/:QID" element={<Solve />} />
+            <Route path="/admindashboard" element={<ADashboard />} />
+          <Route path="/problems" element={< Problems/>} />
+          <Route path="/adminproblems" element={< AProblems/>} />
+           <Route path="/postproblem" element={< PostProblems/>} />
+            <Route path="/adminproblem/:QID" element={<Adminview />} />
+              <Route path="/test" element={<UploadTestCase />} />
+          < Route path="/contribute" element={<Contribute/>} />
+          <Route path = "/sub" element={<Submission/>}/>
+        <Route path ="/contexts" element ={<Contexts/>}  />
+        </Routes>
+      </Router>
+    </AuthProvider>
     </ThemeProvider>
   );
 }
