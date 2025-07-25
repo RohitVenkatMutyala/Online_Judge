@@ -35,7 +35,7 @@ int main() {
   const [outputtest, setOutputTest] = useState('');
   const [activeTab, setActiveTab] = useState('input');
   const [TotalTime, setTime] = useState();
- 
+
 
   // Load code, language, input from localStorage
   useEffect(() => {
@@ -97,10 +97,10 @@ int main() {
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setLanguage(newLang);
-   
 
-    saveToFirebase({ language: newLang }); 
-  
+
+    saveToFirebase({ language: newLang });
+
   };
 
   const handleinput = (e) => {
