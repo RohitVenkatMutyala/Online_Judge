@@ -20,13 +20,20 @@ const Solve = () => {
   const { theme } = useTheme();
 
 
-  const [code, setCode] = useState(`#include <iostream>
+  const [language, setLanguage] = useState('cpp');
+  const [code, setCode] = useState(
+  language === 'cpp' ? `#include <iostream>
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
   return 0;
-}`);
-  const [language, setLanguage] = useState('cpp');
+}` : language === 'py' ? `print("Hello, World!")` :
+  `public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello, World!");
+  }
+}`
+);
   const [output, setOutput] = useState('');
   const [verdicts, setVerdicts] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
