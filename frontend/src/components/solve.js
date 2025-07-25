@@ -19,14 +19,31 @@ const Solve = () => {
   const [input, setInput] = useState('');
   const { theme } = useTheme();
 
-
-  const [code, setCode] = useState(`#include <iostream>
+ const [language, setLanguage] = useState('cpp');
+  const [code, setCode] = useState("");
+ 
+  useEffect(() => {
+    if (language === 'cpp'&& code.trim()==="") {
+      setCode(`#include <iostream>
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
   return 0;
 }`);
-  const [language, setLanguage] = useState('cpp');
+    } else if (language === 'py'&& code.trim()==="") {
+      setCode(`print("Hello, World!")`);
+    } else if (language === 'java'&& code.trim()==="") {
+      setCode(`public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello, World!");
+  }
+}`);
+    } else if (language === 'javascript'&& code.trim()==="") {
+      setCode(`console.log("Hello, World!");`);
+    } else {
+      setCode('// Language not supported');
+    }
+  }, [language]);
   const [output, setOutput] = useState('');
   const [verdicts, setVerdicts] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
