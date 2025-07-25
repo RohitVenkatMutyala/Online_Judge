@@ -30,7 +30,7 @@ int main() {
   std::cout << "Hello, World!" << std::endl;
   return 0;
 }`);
-    } else if (language === 'python') {
+    } else if (language === 'py') {
       setCode(`print("Hello, World!")`);
     } else if (language === 'java') {
       setCode(`public class Main {
