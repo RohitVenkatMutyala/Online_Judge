@@ -23,14 +23,14 @@ const [language, setLanguage] = useState('cpp');
   const [code, setCode] = useState("");
   
   useEffect(() => {
-    if (language === 'cpp') {
+    if (language === 'cpp' && code.trim() ===" ") {
       setCode(`#include <iostream>
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
   return 0;
 }`);
-    } else if (language === 'py') {
+    } else if (language === 'py' && code.trim() ===" ") {
       setCode(`print("Hello, World!")`);
     } else if (language === 'java') {
       setCode(`public class Main {
@@ -38,7 +38,7 @@ int main() {
     System.out.println("Hello, World!");
   }
 }`);
-    } else if (language === 'javascript') {
+    } else if (language === 'javascript' && code.trim() ===" ") {
       setCode(`console.log("Hello, World!");`);
     } else {
       setCode('// Language not supported');
