@@ -7,7 +7,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { useTheme } from '../context/ThemeContext'; // Theme context
 
 function Navbar() {
-  
+
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -49,9 +49,30 @@ function Navbar() {
             />
             <circle cx="50" cy="65" r="5" fill="#222" />
           </svg>
-          <span className="fw-bold fs-4" style={{ background: 'linear-gradient(to right, #f12711, #f5af19)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
-            Randoman
-          </span>
+        <span
+  className="fw-bold fs-4"
+  style={{
+    background: 'linear-gradient(to right, #f12711, #f5af19',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    fontWeight: '600',
+    transition: 'all 20s ease',
+    cursor: 'pointer',
+  }}
+  onMouseEnter={(e) => {
+    e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+    e.target.style.WebkitBackgroundClip = 'text';
+    e.target.style.WebkitTextFillColor = 'transparent';
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19';
+    e.target.style.WebkitBackgroundClip = 'text';
+    e.target.style.WebkitTextFillColor = 'transparent';
+  }}
+>
+  Randoman
+</span>
+
         </Link>
 
 
@@ -77,44 +98,88 @@ function Navbar() {
                   <>
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/admindashboard"
-                       style={{
+                        style={{
                           background: 'linear-gradient(to right, #11998e, #38ef7d)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
                         }}>
                         <i className="bi bi-person-workspace me-1"></i> Profile
                       </Link>
                     </li>
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/postproblem"
-                       style={{
+                        style={{
                           background: 'linear-gradient(to right, #11998e, #38ef7d)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
                         }}>
                         <i className="bi bi-pencil-square me-1"></i> Post Problem
                       </Link>
                     </li>
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/test"
-                       style={{
+                        style={{
                           background: 'linear-gradient(to right, #11998e, #38ef7d)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
                         }}>
                         <i className="bi bi-beaker"></i> Set_TC
                       </Link>
                     </li>
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/adminproblems"
-                       style={{
+                        style={{
                           background: 'linear-gradient(to right, #11998e, #38ef7d)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
                         }}>
                         <i className="bi bi-list-task me-1"></i> View Problems
                       </Link>
@@ -130,54 +195,127 @@ function Navbar() {
                           background: 'linear-gradient(to right, #11998e, #38ef7d)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
                         }}
                       >
                         <i className="bi bi-person-workspace me-1"></i> Profile
                       </Link>
                     </li>
+                    <Link
+                      className="nav-link text-white d-flex align-items-center gap-2"
+                      to="/problems"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                        e.target.style.WebkitBackgroundClip = 'text';
+                        e.target.style.WebkitTextFillColor = 'transparent';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                        e.target.style.WebkitBackgroundClip = 'text';
+                        e.target.style.WebkitTextFillColor = 'transparent';
+                      }}
+                    >
+                      <i className="bi bi-journal-check me-1"></i> Problems
+                    </Link>
+
+                    <Link
+                      className="nav-link text-white d-flex align-items-center gap-2"
+                      to="/contexts"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                        e.target.style.WebkitBackgroundClip = 'text';
+                        e.target.style.WebkitTextFillColor = 'transparent';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                        e.target.style.WebkitBackgroundClip = 'text';
+                        e.target.style.WebkitTextFillColor = 'transparent';
+                      }}
+                    >
+                      <i className="bi bi-journal-check me-1"></i> Contexts
+                    </Link>
 
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/problems"
-                          style={{
+                      <Link
+                        className="nav-link text-white d-flex align-items-center gap-2"
+                        to="/sub"
+                        style={{
                           background: 'linear-gradient(to right, #11998e, #38ef7d)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
-                        }}>
-                        <i className="bi bi-list-task me-1"></i> Problems
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white d-flex align-items-center gap-2" to="/contexts"
-                          style={{
-                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
-                        }}>
-                        <i className="bi bi-stopwatch"></i> Contexts
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white d-flex align-items-center gap-2" to="/sub"
-                          style={{
-                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: '600'
-                        }}>
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                          e.target.style.WebkitBackgroundClip = 'text';
+                          e.target.style.WebkitTextFillColor = 'transparent';
+                        }}
+                      >
                         <i className="bi bi-journal-check me-1"></i> Submissions
                       </Link>
                     </li>
 
+
                   </>
                 )}
                 <li className="nav-item">
-                  <button className="btn btn-outline-warning ms-lg-3" onClick={handleLogout}>
+                  <button
+                    onClick={handleLogout}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                      e.target.style.color = 'white';
+                      e.target.style.border = 'none';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'transparent';
+                      e.target.style.color = '#ffc107';
+                      e.target.style.border = '1px solid #ffc107';
+                    }}
+                    style={{
+                      background: 'transparent',
+                      color: '#ffc107',
+                      border: '1px solid #ffc107',
+                      padding: '8px 16px',
+                      borderRadius: '5px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
                     <i className="bi bi-box-arrow-right me-1"></i> Logout
                   </button>
                 </li>
+
               </>
             ) : (
               <li className="nav-item">
@@ -190,8 +328,26 @@ function Navbar() {
             <li className="nav-item d-flex align-items-center ms-2">
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="btn btn-outline-light btn-sm"
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                  e.target.style.color = 'white';
+                  e.target.style.border = 'none';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#f8f9fa'; // Bootstrap light
+                  e.target.style.border = '1px solid #f8f9fa';
+                }}
                 title="Toggle theme"
+                style={{
+                  background: 'transparent',
+                  color: '#f8f9fa',
+                  border: '1px solid #f8f9fa',
+                  padding: '6px 12px',
+                  borderRadius: '5px',
+                  transition: 'all 0.3s ease',
+                  fontSize: '1rem',
+                }}
               >
                 {theme === 'dark' ? (
                   <i className="bi bi-sun-fill"></i>
@@ -200,6 +356,7 @@ function Navbar() {
                 )}
               </button>
             </li>
+
           </ul>
         </div>
       </div>

@@ -18,7 +18,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./navbar";
 import axios from "axios";
 
-const getTodayDate = () => new Date().toISOString().slice(0, 10);
+const getTodayDate = () => {
+  const today = new Date();
+  return today.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+};
+
+// Output: "2025-07-23" (format: YYYY-MM-DD)
+
 
 const Submission = () => {
 

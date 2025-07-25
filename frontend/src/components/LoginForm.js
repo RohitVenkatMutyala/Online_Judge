@@ -38,30 +38,8 @@ function LoginForm() {
     <>
       <Navbar />
       <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-dark text-light">
-           <div className="row w-100 p-4">
-        <div className="col-md-6 d-flex flex-column justify-content-center p-4">
-            <h1
-              className="display-5 fw-bold mb-4"
-              style={{
-                background: 'linear-gradient(to right, #8e44ad, #3498db)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Welcome to Randoman
-            </h1>
-            <p className="fs-5">
-              Randoman is your go-to platform for collaborative code editing, live previewing,
-              and seamless developer interaction. Whether you're a beginner or a pro,
-              our sleek interface helps bring ideas to life.
-                 <ul className="mt-3">
-              <li>🌟 Fast and Secure Login</li>
-              <li>⚙️ Smart Admin Management</li>
-              <li>🎨 Beautiful UI + Dark Mode</li>
-              <li>📊 Intuitive Dashboards</li>
-            </ul>
-            </p>
-          </div>
+          
+          
 
    
         
@@ -190,7 +168,7 @@ function LoginForm() {
             </form>
           </div>
           </div>
-        </div>
+        
         </div>
     
     </>
