@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './sketchy.css'; // contains book styles
+import './sketchy.css'; // assuming it styles the book effect
 import Navbar from './navbar';
 
 function Dashboard() {
@@ -18,77 +18,90 @@ function Dashboard() {
     );
   }
 
+  const buttonStyle = {
+    border: 'none',
+    color: 'white',
+    padding: '10px',
+    borderRadius: '8px',
+    fontWeight: '600',
+    transition: 'all 0.3s ease-in-out',
+    width: '100%',
+  };
+
   const pages = [
-    // Page 1: User Info
     <div key="user" className="book-page text-center">
       <h6>👤 User</h6>
       <h4>{user.firstname} {user.lastname}</h4>
       <p>{user.email}</p>
     </div>,
 
-    // Page 2: Auth
     <div key="auth" className="book-page text-center">
       <h6>🔐 Auth Service</h6>
-      <p className="text-success fw-bold">Authenticated ✅ </p>
-        <p className="text-success fw-bold">Session Will Expire in 24 Hr✅ </p>
+      <p className="text-success fw-bold">Authenticated ✅</p>
+      <p className="text-success fw-bold">Session expires in 24 hrs ✅</p>
     </div>,
 
-    // Page 3: Navigation
     <div key="nav" className="book-page text-center">
       <h6>🧭 Navigation</h6>
-      <button className="btn btn-outline-success w-100 mb-2" onClick={() => navigate('/problems')}>
+      <button
+        onClick={() => navigate('/problems')}
+        style={{
+          ...buttonStyle,
+          background: 'linear-gradient(to right, #00c6ff, #0072ff)',
+        }}
+        onMouseEnter={e => e.target.style.background = 'linear-gradient(to right, #36d1dc, #5b86e5)'}
+        onMouseLeave={e => e.target.style.background = 'linear-gradient(to right, #00c6ff, #0072ff)'}
+      >
         🚀 Solve Problems
       </button>
-      <button className="btn btn-outline-danger w-100" onClick={async () => { await logout(); navigate('/'); }}>
+      <button
+        onClick={async () => { await logout(); navigate('/'); }}
+        style={{
+          ...buttonStyle,
+          background: 'linear-gradient(to right, #f12711, #f5af19)',
+          marginTop: '10px',
+        }}
+        onMouseEnter={e => e.target.style.background = 'linear-gradient(to right, #ff416c, #ff4b2b)'}
+        onMouseLeave={e => e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)'}
+      >
         🚪 Logout
       </button>
     </div>,
 
-    // Page 4: Stats
-    <div key="stats" className="book-page text-start">
-     <h2
-          className="mb-4 text-center fw-bold"
-          style={{
-            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent"
-          }}
-        >
-          📅 Stats
-        </h2>
-   <strong>UnderConstruction</strong>
+    <div key="stats" className="book-page text-center">
+      <h2 style={{
+        background: 'linear-gradient(to right, #ff416c, #ff4b2b)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        fontWeight: 'bold',
+      }}>
+        📅 Stats
+      </h2>
+      <p><strong>Under Construction</strong></p>
     </div>,
 
-    // Page 5: Submissions
-    <div key="submissions" className="book-page text-start">
-   
-       <h2
-          className="mb-4 text-center fw-bold"
-          style={{
-            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent"
-          }}
-        >
+    <div key="submissions" className="book-page text-center">
+      <h2 style={{
+        background: 'linear-gradient(to right, #ff416c, #ff4b2b)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        fontWeight: 'bold',
+      }}>
         📦 Recent Submissions
-        </h2>
-        <strong>UnderConstruction</strong>
+      </h2>
+      <p><strong>Under Construction</strong></p>
     </div>,
 
-    // Page 6: Activity
-    <div key="activity" className="book-page text-start">
-      
-         <h2
-          className="mb-4 text-center fw-bold"
-          style={{
-            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent"
-          }}
-        >
-          🧠 Activity
-        </h2>
-        <strong>UnderConstruction</strong>
+    <div key="activity" className="book-page text-center">
+      <h2 style={{
+        background: 'linear-gradient(to right, #ff416c, #ff4b2b)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        fontWeight: 'bold',
+      }}>
+        🧠 Activity
+      </h2>
+      <p><strong>Under Construction</strong></p>
     </div>
   ];
 
@@ -96,21 +109,44 @@ function Dashboard() {
     <>
       <Navbar />
       <div className="container my-5 d-flex justify-content-center align-items-center">
-        <div className="book shadow-lg">
+        <div
+          className="book shadow-lg p-4 rounded-4"
+          style={{
+            background: 'rgba(28,28,30,0.85)',
+            backdropFilter: 'blur(10px)',
+            maxWidth: '600px',
+            width: '100%',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}
+        >
           <div className="book-inner animate-page">
             {pages[pageIndex]}
           </div>
-          <div className="book-controls mt-3 d-flex justify-content-between px-4">
+          <div className="book-controls mt-4 d-flex justify-content-between align-items-center">
             <button
-              className="btn btn-outline-secondary"
+              className="btn"
+              style={{
+                ...buttonStyle,
+                background: 'linear-gradient(to right, #bdc3c7, #2c3e50)',
+                width: 'auto',
+                padding: '6px 12px',
+              }}
               onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
               disabled={pageIndex === 0}
             >
               ◀️ Previous
             </button>
-            <span className="text-muted align-self-center">Page {pageIndex + 1} of {pages.length}</span>
+
+            <span className="text-light fw-semibold">Page {pageIndex + 1} of {pages.length}</span>
+
             <button
-              className="btn btn-outline-primary"
+              className="btn"
+              style={{
+                ...buttonStyle,
+                background: 'linear-gradient(to right, #00b09b, #96c93d)',
+                width: 'auto',
+                padding: '6px 12px',
+              }}
               onClick={() => setPageIndex(prev => Math.min(pages.length - 1, prev + 1))}
               disabled={pageIndex === pages.length - 1}
             >
