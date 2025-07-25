@@ -7,7 +7,7 @@ import Navbar from './navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function RegisterForm() {
-  const API_URL = process.env.REACT_APP_SERVER_API;
+   const API_URL = process.env.REACT_APP_SERVER_API;
   const [form, setForm] = useState({
     firstname: '',
     lastname: '',
@@ -37,7 +37,7 @@ function RegisterForm() {
     } catch (err) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
-        setLoading(false);
+         setLoading(false);
       } else {
         setError('Registration failed. Please try again.');
         setLoading(false);
@@ -48,127 +48,148 @@ function RegisterForm() {
   return (
     <>
       <Navbar />
-      <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-dark text-light">
+        <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-dark text-light">
+           <div className="row w-100 p-4">
+             <div className="col-md-6 d-flex flex-column justify-content-center p-4">
+            <h1
+              className="display-5 fw-bold mb-4"
+              style={{
+                background: 'linear-gradient(to right, #8e44ad, #3498db)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Welcome to Randoman
+            </h1>
+            <div className="mt-3">
+  <h5>🔐 Secure & Seamless Registration</h5>
+  <ul  className='textmuted'  style={{fontSize: '1.20em'}}>
+    <li>Your personal information and code are stored securely using <strong>end-to-end encryption</strong>.</li>
+    <li>We follow <strong>industry-standard best practices</strong> to protect your data.</li>
+    <li>Your privacy is our priority — data is <strong>safe, private, and accessible only to you</strong>.</li>
+    <li>Register with confidence and start building, collaborating, and innovating securely with <strong>Randoman</strong>.</li>
+  </ul>
+</div>
 
-
-
-        <div className="col-md-6 d-flex justify-content-center">
-          <div
-            className="p-5 rounded-4 shadow-lg text-center w-100"
+          </div>
+          
+       <div className="col-md-6 d-flex justify-content-center">
+            <div
+              className="p-5 rounded-4 shadow-lg text-center w-100"
+              style={{
+                maxWidth: '500px',
+               
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 border rounded shadow"
+          style={{ width: '100%', maxWidth: '450px' }}
+        >
+          <h2
+            className="mb-4 text-center"
             style={{
-              maxWidth: '500px',
-
-              backdropFilter: 'blur(10px)',
+              background: 'linear-gradient(to right, #FFA000, #FFC107)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 'bold',
             }}
           >
-            <form
-              onSubmit={handleSubmit}
-              className="p-4 border rounded shadow"
-              style={{ width: '100%', maxWidth: '450px' }}
-            >
-              <h2
-                className="mb-4 text-center"
-                style={{
-                  background: 'linear-gradient(to right, #FFA000, #FFC107)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 'bold',
-                }}
-              >
-                Register
-              </h2>
+            Register
+          </h2>
 
-              {error && <div className="alert alert-danger">{error}</div>}
+          {error && <div className="alert alert-danger">{error}</div>}
 
-              <div className="mb-3">
+          <div className="mb-3">
+         
+            <input
+              type="text"
+              className="form-control"
+              placeholder="First Name"
+              value={form.firstname}
+              onChange={(e) => setForm({ ...form, firstname: e.target.value })}
+              required
+            />
+          </div>
 
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="First Name"
-                  value={form.firstname}
-                  onChange={(e) => setForm({ ...form, firstname: e.target.value })}
-                  required
-                />
-              </div>
+          <div className="mb-3">
+           
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Last Name"
+              value={form.lastname}
+              onChange={(e) => setForm({ ...form, lastname: e.target.value })}
+              required
+            />
+          </div>
 
-              <div className="mb-3">
+          <div className="mb-3">
+           
+            <input
+              type="email"
+              className="form-control"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+            />
+          </div>
 
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Last Name"
-                  value={form.lastname}
-                  onChange={(e) => setForm({ ...form, lastname: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-
-                <div className="input-group">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    className="form-control"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-              <div className="mb-3" style={{ display: 'none' }}>
-                <label className="form-label">Role</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
-
-                />
-              </div>
-
+          <div className="mb-4">
+          
+            <div className="input-group">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-control"
+                placeholder="Password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+              />
               <button
-                type="submit"
-
-                className="btn text-white w-100"
-                style={{
-                  background: 'linear-gradient(to right, #FF8F00, #FFCA28)',
-                  border: 'none',
-                  transition: 'background 0.3s ease',
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 114, 255, 0.4)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                disabled={loading}
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
               >
-                {loading ? (
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          <div className="mb-3" style={{ display: 'none' }}>
+            <label className="form-label">Role</label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+
+            />
+          </div>
+
+          <button
+            type="submit"
+           
+            className="btn text-white w-100"
+            style={{
+              background: 'linear-gradient(to right, #FF8F00, #FFCA28)',
+              border: 'none',
+              transition: 'background 0.3s ease',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 114, 255, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+             disabled={loading}
+          >
+             {loading ? (
                   <>
                     <span
                       className="spinner-border spinner-border-sm me-2"
@@ -180,13 +201,13 @@ function RegisterForm() {
                 ) : (
                   'Register'
                 )}
-              </button>
+          </button>
 
-            </form>
-          </div>
-        </div>
+        </form>
       </div>
-
+      </div>
+      </div>
+      </div>
     </>
   );
 }
