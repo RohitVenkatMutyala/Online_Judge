@@ -1,11 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import Navbar from './navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Home() {
-    const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleAdmin = () => {
@@ -18,8 +16,7 @@ function Home() {
 
   return (
     <>
- <Navbar />
- <div className="container-fluid bg-dark text-light py-5 min-vh-100 d-flex align-items-center">
+ <Navbar /><div className="container-fluid bg-dark text-light py-5 min-vh-100 d-flex align-items-center">
   <div className="container">
     <div className="row justify-content-center">
       <div
@@ -50,7 +47,6 @@ function Home() {
           </div>
 
           {/* Right Side - Login Buttons */}
-            if (!${user} || ${user.role} === 'admin') {
           <div className="col-md-6 d-flex flex-column justify-content-center align-items-center mt-4 mt-md-0">
            
             <div className="d-grid gap-3 w-100 px-4">
@@ -82,7 +78,6 @@ function Home() {
               </button>
             </div>
           </div>
-}
         </div>
       </div>
     </div>
