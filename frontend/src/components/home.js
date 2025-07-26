@@ -138,25 +138,24 @@ function Home() {
     </div>
 
     {/* Stats */}
- <div className="row text-center mt-4">
-  <div className="col-md-3">
-    <h4 className="fw-bold text-body">100%</h4>
-    <p className="text-secondary">Learning</p>
-  </div>
-  <div className="col-md-3">
-    <h4 className="fw-bold text-body">100%</h4>
-    <p className="text-secondary">Real-time Sync</p>
-  </div>
-  <div className="col-md-3">
-    <h4 className="fw-bold text-body">99+</h4>
-    <p className="text-secondary">Active Users</p>
-  </div>
-  <div className="col-md-3">
-    <h4 className="fw-bold text-body">∞</h4>
-    <p className="text-secondary">Growth Potential</p>
-  </div>
-</div>
-
+    <div className="row text-center mt-4">
+      <div className="col-md-3">
+        <h4 className="fw-bold text-primary">100%</h4>
+        <p className="text-muted">Learning</p>
+      </div>
+      <div className="col-md-3">
+        <h4 className="fw-bold text-success">100%</h4>
+        <p className="text-muted">Real-time Sync</p>
+      </div>
+      <div className="col-md-3">
+        <h4 className="fw-bold text-info">99+</h4>
+        <p className="text-muted">Active Users</p>
+      </div>
+      <div className="col-md-3">
+        <h4 className="fw-bold text-warning">∞</h4>
+        <p className="text-muted">Growth Potential</p>
+      </div>
+    </div>
   </div>
 </div>
 
