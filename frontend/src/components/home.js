@@ -50,7 +50,7 @@ function Home() {
           </div>
 
           {/* Right Side - Login Buttons */}
-            if (!${user} || ${user.role} === 'admin') {
+          {   (!user || user.role === 'admin') && (
           <div className="col-md-6 d-flex flex-column justify-content-center align-items-center mt-4 mt-md-0">
            
             <div className="d-grid gap-3 w-100 px-4">
@@ -81,7 +81,7 @@ function Home() {
                 <i className="bi bi-wrench-adjustable-circle me-2"></i> Admin Login
               </button>
             </div>
-          </div>
+          </div>)
 }
         </div>
       </div>
