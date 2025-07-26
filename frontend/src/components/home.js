@@ -104,7 +104,7 @@ function Home() {
         Why Randoman?
       </span>
     </h2>
-    <p className="text-center text-muted mb-5">
+    <p className="text-center text-secondary mb-5">
       Not just another coding platform — we’re building the future of collaborative development.
     </p>
 
@@ -141,19 +141,19 @@ function Home() {
     <div className="row text-center mt-4">
       <div className="col-md-3">
         <h4 className="fw-bold text-primary">100%</h4>
-        <p className="text-muted">Learning</p>
+        <p className="text-secondary">Learning</p>
       </div>
       <div className="col-md-3">
         <h4 className="fw-bold text-success">100%</h4>
-        <p className="text-muted">Real-time Sync</p>
+        <p className="text-secondary">Real-time Sync</p>
       </div>
       <div className="col-md-3">
         <h4 className="fw-bold text-info">99+</h4>
-        <p className="text-muted">Active Users</p>
+        <p className="text-secondary">Active Users</p>
       </div>
       <div className="col-md-3">
         <h4 className="fw-bold text-warning">∞</h4>
-        <p className="text-muted">Growth Potential</p>
+        <p className="text-secondary">Growth Potential</p>
       </div>
     </div>
   </div>
