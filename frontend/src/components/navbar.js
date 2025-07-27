@@ -257,7 +257,7 @@ function Navbar() {
                         e.target.style.WebkitTextFillColor = 'transparent';
                       }}
                     >
-                      <i className="bi bi-journal-check me-1"></i> Contexts
+                      <i className="bi bi-journal-check me-1"></i> Contests
                     </Link>
 
                     <li className="nav-item">
