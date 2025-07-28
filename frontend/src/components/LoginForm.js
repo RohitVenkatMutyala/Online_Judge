@@ -36,7 +36,7 @@ function LoginForm() {
   };
    if (user ) {
     return (
-      navigate('/')
+      navigate('/dashboard')
     );
   }
 

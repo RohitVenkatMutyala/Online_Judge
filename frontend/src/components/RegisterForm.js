@@ -47,7 +47,7 @@ function RegisterForm() {
   };
   if (user ) {
     return (
-      navigate('/')
+      navigate('/dashboard')
     );
   }
 
