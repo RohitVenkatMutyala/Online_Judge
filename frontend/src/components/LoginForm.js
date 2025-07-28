@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './navbar';
 
 function LoginForm() {
+  const {user}= useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,11 @@ function LoginForm() {
       setLoading(false);
     }
   };
+   if (user || user.role === 'admin') {
+    return (
+      navigate('/')
+    );
+  }
 
   return (
     <>

@@ -7,6 +7,7 @@ import Navbar from './navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function RegisterForm() {
+  const { user } = useAuth();
   const API_URL = process.env.REACT_APP_SERVER_API;
   const [form, setForm] = useState({
     firstname: '',
@@ -44,6 +45,12 @@ function RegisterForm() {
       }
     }
   };
+  if (user || user.role === 'admin') {
+    return (
+      navigate('/')
+    );
+  }
+
 
   return (
     <>
@@ -90,8 +97,9 @@ function RegisterForm() {
                   onChange={(e) => setForm({ ...form, firstname: e.target.value })}
                   required
                 />
-                  <small className="text-muted">No of Characters should be more then 10</small>
-              </div>
+                <div>
+                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">No of Characters should be more then 10</small>
+                </div></div>
 
               <div className="mb-3">
 
@@ -103,8 +111,9 @@ function RegisterForm() {
                   onChange={(e) => setForm({ ...form, lastname: e.target.value })}
                   required
                 />
-                 <small className="text-muted">No of Characters should be more then 10</small>
-              </div>
+                <div>
+                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">No of Characters should be more then 10</small>
+                </div></div>
 
               <div className="mb-3">
 
@@ -116,8 +125,9 @@ function RegisterForm() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
                 />
-                 <small className="text-muted">Please Follow these format .......@gmail.com</small>
-              </div>
+                <div>
+                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">Please Follow these format .......@gmail.com</small>
+                </div></div>
 
               <div className="mb-4">
 
@@ -138,7 +148,10 @@ function RegisterForm() {
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-                   <small className="text-muted">Try To Make yours Credentials Unique then Others </small>
+                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+                    Try To Make your Credentials Unique than Others
+                  </small>
+
                 </div>
               </div>
               <div className="mb-3" style={{ display: 'none' }}>
