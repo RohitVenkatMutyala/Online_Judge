@@ -90,6 +90,7 @@ function RegisterForm() {
                   onChange={(e) => setForm({ ...form, firstname: e.target.value })}
                   required
                 />
+                  <small className="text-muted">No of Characters should be more then 10</small>
               </div>
 
               <div className="mb-3">
@@ -102,6 +103,7 @@ function RegisterForm() {
                   onChange={(e) => setForm({ ...form, lastname: e.target.value })}
                   required
                 />
+                 <small className="text-muted">No of Characters should be more then 10</small>
               </div>
 
               <div className="mb-3">
@@ -114,6 +116,7 @@ function RegisterForm() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
                 />
+                 <small className="text-muted">Please Follow these format .......@gmail.com</small>
               </div>
 
               <div className="mb-4">
@@ -135,6 +138,7 @@ function RegisterForm() {
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
+                   <small className="text-muted">Try To Make yours Credentials Unique then Others </small>
                 </div>
               </div>
               <div className="mb-3" style={{ display: 'none' }}>
