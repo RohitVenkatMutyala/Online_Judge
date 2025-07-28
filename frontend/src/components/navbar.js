@@ -23,7 +23,7 @@ function Navbar() {
     <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: '#20232a' }}>
       <div className="container-fluid px-4">
 
-        <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
+        <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-2">
           <svg
             width="32"
             height="32"
