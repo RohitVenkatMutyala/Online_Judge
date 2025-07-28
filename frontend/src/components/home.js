@@ -15,6 +15,11 @@ function Home() {
   const handleLogin = () => {
     navigate('/login');
   };
+   if (user ) {
+    return (
+      navigate('/dashboard')
+    );
+  }
 
   return (
     <>
