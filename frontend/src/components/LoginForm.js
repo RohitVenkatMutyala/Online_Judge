@@ -34,7 +34,7 @@ function LoginForm() {
       setLoading(false);
     }
   };
-   if (user || user.role === 'admin') {
+   if (user ) {
     return (
       navigate('/')
     );

@@ -45,7 +45,7 @@ function RegisterForm() {
       }
     }
   };
-  if (user || user.role === 'admin') {
+  if (user ) {
     return (
       navigate('/')
     );
