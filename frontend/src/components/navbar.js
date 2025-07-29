@@ -115,7 +115,7 @@ function Navbar() {
                           e.target.style.WebkitBackgroundClip = 'text';
                           e.target.style.WebkitTextFillColor = 'transparent';
                         }}>
-                        <i className="bi bi-person-workspace me-1"></i> Profile
+                        <i className="bi bi-person-workspace me-1"></i> Dashboard
                       </Link>
                     </li>
                     <li className="nav-item">
@@ -209,7 +209,7 @@ function Navbar() {
                           e.target.style.WebkitTextFillColor = 'transparent';
                         }}
                       >
-                        <i className="bi bi-person-workspace me-1"></i> Profile
+                        <i className="bi bi-person-workspace me-1"></i> Dashboard
                       </Link>
                     </li>
                     <Link
