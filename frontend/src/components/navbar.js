@@ -315,16 +315,7 @@ function Navbar() {
                     <i className="bi bi-box-arrow-right me-1"></i> Logout
                   </button>
                 </li>
-
-              </>
-            ) : (
-              <li className="nav-item">
-                <Link className="nav-link text-white" to="/login">
-                  <i className="bi bi-box-arrow-in-right me-1"></i> Login
-                </Link>
-              </li>
-            )}
-            {/* Theme Toggle */}
+                 {/* Theme Toggle */}
             <li className="nav-item d-flex align-items-center ms-2">
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -356,6 +347,16 @@ function Navbar() {
                 )}
               </button>
             </li>
+
+              </>
+            ) : (
+              <li className="nav-item">
+                <Link className="nav-link text-white" to="/login">
+                  <i className="bi bi-box-arrow-in-right me-1"></i> Login
+                </Link>
+              </li>
+            )}
+           
 
           </ul>
         </div>
