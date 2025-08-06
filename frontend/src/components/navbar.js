@@ -386,7 +386,8 @@ function Navbar() {
                       fontSize: '0.9rem'
                     }}
                   >
-                   
+                    <i className="bi bi-person-circle"></i>
+                    <span>{user?.firstname }</span>
                     {isAdmin && (
                       <span 
                         className="badge rounded-pill ms-1"
@@ -494,8 +495,6 @@ function Navbar() {
                 )}
               </button>
             </li>}
-             <i className="bi bi-person-circle"></i>
-                    <span>{user?.firstname }</span>
           </ul>
         </div>
       </div>
