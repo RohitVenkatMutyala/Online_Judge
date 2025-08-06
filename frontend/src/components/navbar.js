@@ -351,10 +351,34 @@ function Navbar() {
               </>
             ) : (
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/login">
+                  <button
+                    onClick={handleLogout}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                      e.target.style.color = 'white';
+                      e.target.style.border = 'none';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'transparent';
+                      e.target.style.color = '#ffc107';
+                      e.target.style.border = '1px solid #ffc107';
+                    }}
+                    style={{
+                      background: 'transparent',
+                      color: '#ffc107',
+                      border: '1px solid #ffc107',
+                      padding: '8px 16px',
+                      borderRadius: '5px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                  <Link className="nav-link text-white" to="/login">
                   <i className="bi bi-box-arrow-in-right me-1"></i> Login
                 </Link>
-              </li>
+                  </button>
+                </li>
+             
             )}
            
 
