@@ -363,7 +363,7 @@ const Submission = () => {
                           <div className="bg-light rounded p-3">
                             <div className="d-flex align-items-center mb-3">
                               <i className="bi bi-robot text-primary fs-4 me-2"></i>
-                              <h6 className="mb-0 text-dark fw-semibold">AI Code Analysis</h6>
+                              <h6 className="mb-0 text-dark fw-semibold">Catch The Logic ('_')</h6>
                             </div>
                             <div className="text-dark">
                               <ReactMarkdown
