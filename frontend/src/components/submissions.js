@@ -173,7 +173,7 @@ const Submission = () => {
               <div className="text-center mb-4">
                 <h2 className="fw-bold mb-3" 
                     style={{
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      background:  "linear-gradient(to right, #ff416c, #ff4b2b)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent"
                     }}>
@@ -187,7 +187,7 @@ const Submission = () => {
               {/* Stats Card */}
               <div className="card border-0 mb-4" 
                    style={{
-                     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                     background:  "linear-gradient(to right, #ff416c, #ff4b2b)",
                    }}>
                 <div className="card-body py-3">
                   <div className="row align-items-center text-white">
@@ -339,9 +339,7 @@ const Submission = () => {
                                 <i className="bi bi-file-code me-1"></i>
                                 {submission.language} Code
                               </small>
-                              <small className="text-muted">
-                                Click to copy
-                              </small>
+                             
                             </div>
                             <pre 
                               className="p-3 m-0 text-white overflow-auto" 
