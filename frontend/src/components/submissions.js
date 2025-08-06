@@ -23,11 +23,7 @@ const getTodayDate = () => {
   return today.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 };
 
-// Output: "2025-07-23" (format: YYYY-MM-DD)
-
-
 const Submission = () => {
-
   const API_URL = process.env.REACT_APP_SERVER_API;
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState([]);
@@ -51,7 +47,6 @@ const Submission = () => {
         if (docSnap.exists()) {
           setHelpCount(docSnap.data().count || 0);
         } else {
-          // First time use today: initialize with 0
           await setDoc(helpDocRef, {
             userId: user._id,
             date: today,
@@ -88,7 +83,7 @@ const Submission = () => {
           ...doc.data()
         }));
         setSubmissions(data);
-        //These will for retriving the previous Help from helpResponses Collection
+        
         const helps = {};
         for (const submission of data) {
           const helpId = `${user._id}_${submission.docId}`;
@@ -117,7 +112,6 @@ const Submission = () => {
       setLoadingHelp(prev => ({ ...prev, [index]: true }));
       setHelpResponses(prev => ({ ...prev, [index]: "Checking saved help..." }));
 
-      // 🔍 Check if help response already exists for this submission
       const helpId = `${user._id}_${submissions[index].docId}`;
       const helpDoc = await getDoc(doc(helpResponsesRef, helpId));
 
@@ -126,13 +120,10 @@ const Submission = () => {
         setHelpResponses(prev => ({ ...prev, [index]: saved }));
         setHelpExpanded(index);
       } else {
-        // 🧠 Request fresh help
-        const QID = submissions[index].QID ;
-        const response = await axios.post(`${API_URL}/help`, { code ,QID });
+        const QID = submissions[index].QID;
+        const response = await axios.post(`${API_URL}/help`, { code, QID });
         const result = response.data.result || "No suggestion returned.";
-       
 
-        // 💾 Save to Firestore
         await setDoc(doc(helpResponsesRef, helpId), {
           userId: user._id,
           submissionId: submissions[index].docId,
@@ -156,6 +147,14 @@ const Submission = () => {
     }
   };
 
+  const getVerdictBadge = (verdict) => {
+    const badgeClass = verdict === "Passed" 
+      ? "badge bg-success" 
+      : verdict === "Failed" 
+        ? "badge bg-danger" 
+        : "badge bg-secondary";
+    return <span className={badgeClass}>{verdict}</span>;
+  };
 
   const filtered = filter === "All"
     ? submissions
@@ -166,156 +165,242 @@ const Submission = () => {
   return (
     <>
       <Navbar />
-      <div className="container my-5 text-light bg-dark rounded p-4">
-        <h2
-          className="mb-4 text-center fw-bold"
-          style={{
-            background: "linear-gradient(to right, #ff416c, #ff4b2b)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent"
-          }}
-        >
-          Submissions Done By ('_') {user?.firstname} {user?.lastname}
-        </h2>
+      <div className="container-fluid my-4">
+        <div className="row justify-content-center">
+          <div className="col-lg-10 col-xl-8">
+            <div className="bg-dark rounded-4 p-4 shadow-lg">
+              {/* Header Section */}
+              <div className="text-center mb-4">
+                <h2 className="fw-bold mb-3" 
+                    style={{
+                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent"
+                    }}>
+                  My Code Submissions
+                </h2>
+                <p className="text-muted mb-0">
+                  Welcome back, <span className="text-warning fw-semibold">{user?.firstname} {user?.lastname}</span>
+                </p>
+              </div>
 
-        <div className="d-flex justify-content-between align-items-center rounded p-3 shadow mb-3 fw-bold text-white"
-          style={{
-            background: "linear-gradient(to right,#f12711,#f5af19)",
-            fontSize: "1.1rem"
-          }}
-        >
-          <strong><span>{today}</span></strong>
-          <span>Help Used Today: <strong>{helpCount}</strong> / 20</span>
-        </div>
-
-
-        <div className="mb-4">
-          <label htmlFor="filter" className="form-label text-light"
-            style={{
-              background: 'linear-gradient(to right, #11998e, #38ef7d)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontWeight: '600'
-            }}>Filter by Verdict:</label>
-          <select
-            id="filter"
-            className="form-select bg-dark text-light border-secondary"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="All">All</option>
-            {verdicts.map((v, idx) => (
-              <option key={idx} value={v}>{v}</option>
-            ))}
-          </select>
-        </div>
-
-        {filtered.length === 0 ? (
-          <div className="alert alert-info text-dark bg-light">No submissions found.</div>
-        ) : (
-          <div className="accordion" id="submissionAccordion">
-            {filtered.map((submission, index) => (
-              <div className="card mb-3 bg-secondary text-light" key={index}>
-                <div className="card-header d-flex flex-wrap justify-content-between align-items-center bg-dark text-light">
-                  <div><strong>QID:</strong> {submission.QID}</div>
-                  <div><strong>{submission.language}</strong></div>
-                  <div><strong>Verdict:</strong> {submission.verdict}</div>
-                  <small className="text-muted">{new Date(submission.submittedAt).toLocaleString()}</small>
-                  {/* View Previous Help Button */}
-                  {helpResponses[submission.docId] && (
-                    <button
-                      className="btn btn-sm btn-outline-info me-2"
-                      onClick={() => {
-                        setHelpExpanded(index);
-                        setHelpResponses(prev => ({
-                          ...prev,
-                          [index]: helpResponses[submission.docId]
-                        }));
-                      }}
-                    >
-                      View Previous Help
-                    </button>
-                  )}
-
-                  <button
-                    className="btn btn-sm btn-outline-primary ms-2"
-                    onClick={() => setExpanded(expanded === index ? null : index)}
-                  >
-                    {expanded === index ? "Hide Code" : "View Code"}
-                  </button>
-
-                  <button
-                    className="btn btn-sm btn-outline-warning ms-2 d-flex align-items-center gap-2"
-                    disabled={loadingHelp[index]}
-                    onClick={() => handleHelpRequest(submission.code, index)}
-                  >
-                    {loadingHelp[index] ? (
-                      <>
-                        <span
-                          className="spinner-border spinner-border-sm"
-                          role="status"
-                          aria-hidden="true"
-                        ></span>
-                        Loading...
-                      </>
-                    ) : (
-                      "Take Help"
-                    )}
-                  </button>
-                  {helpResponses[index] && !loadingHelp[index] && (
-                    <button
-                      className="btn btn-sm btn-outline-secondary ms-2"
-                      onClick={() =>
-                        setHelpExpanded(helpExpanded === index ? null : index)
-                      }
-                    >
-                      {helpExpanded === index ? "Hide Help" : "Show Help"}
-                    </button>
-                  )}
-
-                </div>
-
-                {expanded === index && (
-                  <div className="card-body p-0">
-                    <pre className="p-3 m-0 rounded bg-black text-white overflow-auto" style={{ maxHeight: '400px' }}>
-                      <code>{submission.code || "// No code submitted."}</code>
-                    </pre>
-                  </div>
-                )}
-
-                {helpExpanded === index && (
-                  <div className="card-body bg-light text-dark border-top">
-                    <strong>Catch The Logic ('_')</strong>
-                    <div className="mt-2 p-2 bg-white rounded text-dark">
-                      <ReactMarkdown
-                        children={helpResponses[index]}
-                        components={{
-                          code({ node, inline, className, children, ...props }) {
-                            const match = /language-(\w+)/.exec(className || "");
-                            return !inline && match ? (
-                              <SyntaxHighlighter
-                                style={oneDark}
-                                language={match[1]}
-                                PreTag="div"
-                                {...props}
-                              >
-                                {String(children).replace(/\n$/, "")}
-                              </SyntaxHighlighter>
-                            ) : (
-                              <code className={className} {...props}>
-                                {children}
-                              </code>
-                            );
-                          },
-                        }}
-                      />
+              {/* Stats Card */}
+              <div className="card border-0 mb-4" 
+                   style={{
+                     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                   }}>
+                <div className="card-body py-3">
+                  <div className="row align-items-center text-white">
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center">
+                        <i className="bi bi-calendar-date me-2 fs-5"></i>
+                        <span className="fw-semibold">{today}</span>
+                      </div>
+                    </div>
+                    <div className="col-md-6 text-md-end">
+                      <div className="d-flex align-items-center justify-content-md-end">
+                        <i className="bi bi-question-circle me-2 fs-5"></i>
+                        <span>Help Used: <strong>{helpCount}/20</strong></span>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
-            ))}
+
+              {/* Filter Section */}
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <label htmlFor="filter" className="form-label text-light mb-2">
+                    <i className="bi bi-funnel me-2"></i>Filter by Status:
+                  </label>
+                  <select
+                    id="filter"
+                    className="form-select bg-secondary text-light border-secondary"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                  >
+                    <option value="All">All Submissions ({submissions.length})</option>
+                    {verdicts.map((v, idx) => (
+                      <option key={idx} value={v}>
+                        {v} ({submissions.filter(sub => sub.verdict === v).length})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Submissions List */}
+              {filtered.length === 0 ? (
+                <div className="text-center py-5">
+                  <i className="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+                  <h5 className="text-light">No submissions found</h5>
+                  <p className="text-muted">Try adjusting your filter or submit some code first!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filtered.map((submission, index) => (
+                    <div key={index} className="card bg-dark border-secondary mb-3 shadow-sm">
+                      {/* Card Header */}
+                      <div className="card-header bg-gradient border-0 p-3" 
+                           style={{
+                             background: "linear-gradient(90deg, #2c3e50 0%, #34495e 100%)"
+                           }}>
+                        <div className="row align-items-center">
+                          {/* Left side - Problem info */}
+                          <div className="col-lg-6">
+                            <div className="d-flex flex-wrap align-items-center gap-3">
+                              <div className="d-flex align-items-center">
+                                <span className="badge bg-primary me-2">QID: {submission.QID}</span>
+                                <span className="badge bg-info text-dark">{submission.language}</span>
+                              </div>
+                              <div>
+                                {getVerdictBadge(submission.verdict)}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Right side - Timestamp and actions */}
+                          <div className="col-lg-6">
+                            <div className="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+                              <small className="text-muted me-2">
+                                <i className="bi bi-clock me-1"></i>
+                                {new Date(submission.submittedAt).toLocaleString()}
+                              </small>
+                              
+                              {/* Action Buttons */}
+                              <div className="btn-group btn-group-sm" role="group">
+                                <button
+                                  className="btn btn-outline-light"
+                                  onClick={() => setExpanded(expanded === index ? null : index)}
+                                  title="View Code"
+                                >
+                                  <i className="bi bi-code-slash me-1"></i>
+                                  {expanded === index ? "Hide" : "Code"}
+                                </button>
+                                
+                                {helpResponses[submission.docId] && (
+                                  <button
+                                    className="btn btn-outline-info"
+                                    onClick={() => {
+                                      setHelpExpanded(index);
+                                      setHelpResponses(prev => ({
+                                        ...prev,
+                                        [index]: helpResponses[submission.docId]
+                                      }));
+                                    }}
+                                    title="View Previous Help"
+                                  >
+                                    <i className="bi bi-eye me-1"></i>
+                                    Previous
+                                  </button>
+                                )}
+                                
+                                <button
+                                  className="btn btn-outline-warning"
+                                  disabled={loadingHelp[index] || helpCount >= 20}
+                                  onClick={() => handleHelpRequest(submission.code, index)}
+                                  title={helpCount >= 20 ? "Daily help limit reached" : "Get AI Help"}
+                                >
+                                  {loadingHelp[index] ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                      Loading
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="bi bi-lightbulb me-1"></i>
+                                      Help
+                                    </>
+                                  )}
+                                </button>
+                                
+                                {helpResponses[index] && !loadingHelp[index] && (
+                                  <button
+                                    className="btn btn-outline-success"
+                                    onClick={() => setHelpExpanded(helpExpanded === index ? null : index)}
+                                    title="Toggle Help Response"
+                                  >
+                                    <i className="bi bi-chat-left-text me-1"></i>
+                                    {helpExpanded === index ? "Hide" : "Show"}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Code Section */}
+                      {expanded === index && (
+                        <div className="card-body p-0">
+                          <div className="bg-black rounded-bottom overflow-hidden">
+                            <div className="d-flex align-items-center justify-content-between bg-secondary px-3 py-2 border-bottom">
+                              <small className="text-light">
+                                <i className="bi bi-file-code me-1"></i>
+                                {submission.language} Code
+                              </small>
+                              <small className="text-muted">
+                                Click to copy
+                              </small>
+                            </div>
+                            <pre 
+                              className="p-3 m-0 text-white overflow-auto" 
+                              style={{ 
+                                maxHeight: '400px',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                lineHeight: '1.4'
+                              }}
+                              onClick={() => navigator.clipboard?.writeText(submission.code || "")}
+                            >
+                              <code>{submission.code || "// No code submitted."}</code>
+                            </pre>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Help Response Section */}
+                      {helpExpanded === index && (
+                        <div className="card-body border-top">
+                          <div className="bg-light rounded p-3">
+                            <div className="d-flex align-items-center mb-3">
+                              <i className="bi bi-robot text-primary fs-4 me-2"></i>
+                              <h6 className="mb-0 text-dark fw-semibold">AI Code Analysis</h6>
+                            </div>
+                            <div className="text-dark">
+                              <ReactMarkdown
+                                children={helpResponses[index]}
+                                components={{
+                                  code({ node, inline, className, children, ...props }) {
+                                    const match = /language-(\w+)/.exec(className || "");
+                                    return !inline && match ? (
+                                      <SyntaxHighlighter
+                                        style={oneDark}
+                                        language={match[1]}
+                                        PreTag="div"
+                                        {...props}
+                                      >
+                                        {String(children).replace(/\n$/, "")}
+                                      </SyntaxHighlighter>
+                                    ) : (
+                                      <code className={`${className} bg-light text-dark p-1 rounded`} {...props}>
+                                        {children}
+                                      </code>
+                                    );
+                                  },
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </>
   );
