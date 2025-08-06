@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, User } from 'lucide-react';
 import Navbar from './navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -18,7 +18,7 @@ function RegisterForm() {
 
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { setUser } = useAuth();
+  const { setUser,user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -44,6 +44,11 @@ function RegisterForm() {
       }
     }
   };
+ if(user){
+  return(
+    navigate("/dashboard")
+  )
+ }
 
   return (
     <>

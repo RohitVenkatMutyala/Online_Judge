@@ -16,6 +16,11 @@ function Home() {
     navigate('/login');
   };
 
+   if(user){
+  return(
+    navigate("/dashboard")
+  )
+ }
   return (
     <>
  <Navbar />

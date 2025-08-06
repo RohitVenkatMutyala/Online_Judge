@@ -12,7 +12,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser,user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +33,11 @@ function LoginForm() {
       setLoading(false);
     }
   };
-
+ if(user){
+  return(
+    navigate("/dashboard")
+  )
+ }
   return (
     <>
       <Navbar />
