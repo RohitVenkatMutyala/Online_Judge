@@ -7,7 +7,6 @@ import Navbar from './navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function RegisterForm() {
-  const { user } = useAuth();
   const API_URL = process.env.REACT_APP_SERVER_API;
   const [form, setForm] = useState({
     firstname: '',
@@ -45,165 +44,394 @@ function RegisterForm() {
       }
     }
   };
-  if (user ) {
-    return (
-      navigate('/dashboard')
-    );
-  }
-
 
   return (
     <>
       <Navbar />
-      <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-dark text-light">
+      <div 
+        className="container-fluid min-vh-100 d-flex align-items-center justify-content-center text-light"
+        style={{
+          background: 'linear-gradient(135deg, #0d1117 0%, #1c1c1e 50%, #2c2c2e 100%)',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="container">
+          <div className="row justify-content-center">
+            
+            {/* Left Column - Welcome Section */}
+            <div className="col-lg-6 d-flex align-items-center mb-5 mb-lg-0">
+              <div className="text-center text-lg-start">
+                <h1 
+                  className="display-4 fw-bold mb-4"
+                  style={{
+                    background: 'linear-gradient(135deg, #8e44ad, #3498db, #e74c3c)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  Join Randoman Today
+                </h1>
+                <p className="fs-5 text-light opacity-75 mb-4">
+                  Start your coding journey with our collaborative development platform
+                </p>
+                
+                {/* Feature Highlights */}
+                <div className="row g-3 mb-4">
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">🎯</div>
+                      <h6 className="fw-semibold text-light mb-1">Get Started</h6>
+                      <small className="text-muted">Free forever</small>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">👥</div>
+                      <h6 className="fw-semibold text-light mb-1">Team Up</h6>
+                      <small className="text-muted">Collaborate instantly</small>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">🔒</div>
+                      <h6 className="fw-semibold text-light mb-1">Secure</h6>
+                      <small className="text-muted">Your data protected</small>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">📈</div>
+                      <h6 className="fw-semibold text-light mb-1">Grow</h6>
+                      <small className="text-muted">Learn & improve</small>
+                    </div>
+                  </div>
+                </div>
 
-
-
-        <div className="col-md-6 d-flex justify-content-center">
-          <div
-            className="p-5 rounded-4 shadow-lg text-center w-100"
-            style={{
-              maxWidth: '500px',
-
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <form
-              onSubmit={handleSubmit}
-              className="p-4 border rounded shadow"
-              style={{ width: '100%', maxWidth: '450px' }}
-            >
-              <h2
-                className="mb-4 text-center"
-                style={{
-                  background: 'linear-gradient(to right, #FFA000, #FFC107)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 'bold',
-                }}
-              >
-                Register
-              </h2>
-
-              {error && <div className="alert alert-danger">{error}</div>}
-
-              <div className="mb-3">
-
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="First Name"
-                  value={form.firstname}
-                  onChange={(e) => setForm({ ...form, firstname: e.target.value })}
-                  required
-                />
-                <div>
-                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">No of Characters should be more then 10</small>
-                </div></div>
-
-              <div className="mb-3">
-
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Last Name"
-                  value={form.lastname}
-                  onChange={(e) => setForm({ ...form, lastname: e.target.value })}
-                  required
-                />
-                <div>
-                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">No of Characters should be more then 10</small>
-                </div></div>
-
-              <div className="mb-3">
-
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                />
-                <div>
-                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">Please Follow these format .......@gmail.com</small>
-                </div></div>
-
-              <div className="mb-4">
-
-                <div className="input-group">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    className="form-control"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                  <small className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-                    Try To Make your Credentials Unique than Others
-                  </small>
-
+                {/* Benefits */}
+                <div className="d-flex justify-content-center justify-content-lg-start gap-4 text-center">
+                  <div>
+                    <h4 className="fw-bold text-info mb-1">Free</h4>
+                    <small className="text-muted">Sign Up</small>
+                  </div>
+                  <div>
+                    <h4 className="fw-bold text-success mb-1">5min</h4>
+                    <small className="text-muted">Setup Time</small>
+                  </div>
+                  <div>
+                    <h4 className="fw-bold text-warning mb-1">∞</h4>
+                    <small className="text-muted">Possibilities</small>
+                  </div>
                 </div>
               </div>
-              <div className="mb-3" style={{ display: 'none' }}>
-                <label className="form-label">Role</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+            </div>
 
-                />
-              </div>
-
-              <button
-                type="submit"
-
-                className="btn text-white w-100"
+            {/* Right Column - Register Form */}
+            <div className="col-lg-6 d-flex justify-content-center">
+              <div
+                className="p-5 rounded-4 shadow-lg w-100 position-relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(to right, #FF8F00, #FFCA28)',
-                  border: 'none',
-                  transition: 'background 0.3s ease',
+                  maxWidth: '500px',
+                  background: 'rgba(28, 28, 30, 0.95)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
                 }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 114, 255, 0.4)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                disabled={loading}
               >
-                {loading ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    Loading...
-                  </>
-                ) : (
-                  'Register'
-                )}
-              </button>
+                {/* Decorative Elements */}
+                <div 
+                  className="position-absolute"
+                  style={{
+                    top: '-50px',
+                    right: '-50px',
+                    width: '100px',
+                    height: '100px',
+                    background: 'linear-gradient(135deg, #8e44ad, #3498db)',
+                    borderRadius: '50%',
+                    opacity: '0.1',
+                    filter: 'blur(40px)'
+                  }}
+                ></div>
+                <div 
+                  className="position-absolute"
+                  style={{
+                    bottom: '-30px',
+                    left: '-30px',
+                    width: '80px',
+                    height: '80px',
+                    background: 'linear-gradient(135deg, #f12711, #f5af19)',
+                    borderRadius: '50%',
+                    opacity: '0.1',
+                    filter: 'blur(30px)'
+                  }}
+                ></div>
 
-            </form>
+                <form onSubmit={handleSubmit} className="position-relative">
+                  <div className="text-center mb-4">
+                    <div 
+                      className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        background: 'linear-gradient(135deg, #FF8F00, #FFCA28)',
+                        fontSize: '2.5rem'
+                      }}
+                    >
+                      🚀
+                    </div>
+                    <h2
+                      className="fw-bold"
+                      style={{
+                        background: 'linear-gradient(135deg, #FFA000, #FFC107)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                    >
+                      CREATE ACCOUNT
+                    </h2>
+                    <p className="text-muted">Join our developer community</p>
+                  </div>
+
+                  {error && (
+                    <div 
+                      className="alert alert-danger rounded-3 border-0"
+                      style={{
+                        background: 'rgba(220, 53, 69, 0.1)',
+                        borderLeft: '4px solid #dc3545'
+                      }}
+                    >
+                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label text-light fw-semibold">
+                        <i className="bi bi-person-fill me-2"></i>
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control form-control-lg rounded-3"
+                        placeholder="Enter first name"
+                        value={form.firstname}
+                        onChange={(e) => setForm({ ...form, firstname: e.target.value })}
+                        required
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#fff',
+                          fontSize: '1rem',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = '#FFA000';
+                          e.currentTarget.style.boxShadow = '0 0 0 0.2rem rgba(255, 160, 0, 0.25)';
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-light fw-semibold">
+                        <i className="bi bi-person-fill me-2"></i>
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control form-control-lg rounded-3"
+                        placeholder="Enter last name"
+                        value={form.lastname}
+                        onChange={(e) => setForm({ ...form, lastname: e.target.value })}
+                        required
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#fff',
+                          fontSize: '1rem',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = '#FFA000';
+                          e.currentTarget.style.boxShadow = '0 0 0 0.2rem rgba(255, 160, 0, 0.25)';
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label text-light fw-semibold">
+                      <i className="bi bi-envelope-fill me-2"></i>
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      className="form-control form-control-lg rounded-3"
+                      placeholder="Enter your email"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      required
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#fff',
+                        fontSize: '1rem',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#FFA000';
+                        e.currentTarget.style.boxShadow = '0 0 0 0.2rem rgba(255, 160, 0, 0.25)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label text-light fw-semibold">
+                      <i className="bi bi-lock-fill me-2"></i>
+                      Password
+                    </label>
+                    <div className="input-group">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        className="form-control form-control-lg rounded-start-3"
+                        placeholder="Create a strong password"
+                        value={form.password}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        required
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRight: 'none',
+                          color: '#fff',
+                          fontSize: '1rem',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = '#FFA000';
+                          e.currentTarget.style.boxShadow = '0 0 0 0.2rem rgba(255, 160, 0, 0.25)';
+                          e.currentTarget.nextElementSibling.style.borderColor = '#FFA000';
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.nextElementSibling.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary rounded-end-3"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderLeft: 'none',
+                          color: '#fff',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    <small className="text-muted mt-1 d-block">
+                      Use 8+ characters with a mix of letters, numbers & symbols
+                    </small>
+                  </div>
+
+                  {/* Hidden role field */}
+                  <div style={{ display: 'none' }}>
+                    <input
+                      type="text"
+                      value={form.role}
+                      onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-lg w-100 d-flex align-items-center justify-content-center rounded-3 fw-bold"
+                    style={{
+                      background: 'linear-gradient(135deg, #FF8F00, #FFCA28)',
+                      border: 'none',
+                      color: 'white',
+                      height: '55px',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 15px rgba(255, 143, 0, 0.3)'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 143, 0, 0.4)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 143, 0, 0.3)';
+                    }}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
+                        Creating your account...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-person-plus-fill me-2"></i>
+                        Create My Account
+                      </>
+                    )}
+                  </button>
+
+                  <div className="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <p className="text-muted mb-2">Already have an account?</p>
+                    <button
+                      type="button"
+                      className="btn fw-bold"
+                      onClick={() => navigate('/login')}
+                      style={{
+                        background: 'linear-gradient(135deg, #f12711, #f5af19)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 10px rgba(241, 39, 17, 0.3)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 15px rgba(241, 39, 17, 0.4)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 10px rgba(241, 39, 17, 0.3)';
+                      }}
+                    >
+                      <i className="bi bi-box-arrow-in-right me-2"></i>
+                      Sign In Instead
+                    </button>
+                    <p className="small text-muted mt-3 mb-0">
+                      By signing up, you agree to our Terms of Service and Privacy Policy
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
     </>
   );
 }
