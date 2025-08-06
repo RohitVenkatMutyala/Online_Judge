@@ -238,6 +238,9 @@ function RegisterForm() {
                           e.currentTarget.style.boxShadow = 'none';
                         }}
                       />
+                       <small className="text-muted mt-1 d-block">
+                      First name should contain atleast 8+ characters 
+                    </small>
                     </div>
                     <div className="col-md-6">
                       <label className="form-label text-light fw-semibold">
@@ -267,6 +270,9 @@ function RegisterForm() {
                           e.currentTarget.style.boxShadow = 'none';
                         }}
                       />
+                        <small className="text-muted mt-1 d-block">
+                      Last name should contain atleast 8+ characters 
+                    </small>
                     </div>
                   </div>
 
