@@ -48,13 +48,7 @@ function Home() {
           >
             Welcome to Randoman
           </h1>
-          <p className="fs-4 mb-4 text-light opacity-75 mx-auto" style={{ maxWidth: '800px' }}>
-            Master collaborative coding with our cutting-edge platform designed for developers who dream big
-          </p>
-          <p className="fs-5 mb-5 text-muted mx-auto" style={{ maxWidth: '900px' }}>
-            Your go-to platform for collaborative code editing, live previewing, and seamless developer interaction. 
-            Whether you're a beginner or a pro, our sleek interface helps bring ideas to life.
-          </p>
+       
         </div>
 
         {/* Stats Section - Inspired by AlgoUniversity */}
