@@ -353,7 +353,7 @@ function Navbar() {
               
               <li className="nav-item">
                 <Link className="nav-link text-white" to="/login">
-                  <i className="bi bi-box-arrow-in-right me-1"></i> Login
+                  <i className="bi bi-box-arrow-in-right me-1"></i> 
                 </Link>
               </li>
             )}
