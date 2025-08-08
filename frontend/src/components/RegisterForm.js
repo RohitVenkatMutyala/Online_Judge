@@ -76,10 +76,7 @@ function RegisterForm() {
                 >
                   Join Randoman Today
                 </h1>
-                <p className="fs-5 text-light opacity-75 mb-4">
-                  Start your coding journey with our collaborative development platform
-                </p>
-                
+             
                 {/* Feature Highlights */}
                 <div className="row g-3 mb-4">
                   <div className="col-6">
@@ -119,7 +116,7 @@ function RegisterForm() {
                     <small className="text-muted">Sign Up</small>
                   </div>
                   <div>
-                    <h4 className="fw-bold text-success mb-1">5min</h4>
+                    <h4 className="fw-bold text-success mb-1">1min</h4>
                     <small className="text-muted">Setup Time</small>
                   </div>
                   <div>

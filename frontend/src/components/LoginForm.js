@@ -64,9 +64,7 @@ function LoginForm() {
                 >
                   Welcome Back to Randoman
                 </h1>
-                <p className="fs-5 text-light opacity-75 mb-4">
-                  Continue your coding journey with our collaborative development platform
-                </p>
+              
                 
                 {/* Feature Highlights */}
                 <div className="row g-3 mb-4">
