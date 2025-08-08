@@ -110,28 +110,7 @@ function Home() {
                 <i className="bi bi-person-fill me-2"></i> 
                 Start Coding Now
               </button>
-              <button
-                onClick={handleAdmin}
-                className="btn btn-lg fw-semibold text-white py-3"
-                style={{
-                  background: 'linear-gradient(135deg, #11998e, #38ef7d)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 15px rgba(17, 153, 142, 0.3)'
-                }}
-                onMouseOver={e => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(17, 153, 142, 0.4)';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(17, 153, 142, 0.3)';
-                }}
-              >
-                <i className="bi bi-wrench-adjustable-circle me-2"></i> 
-                Admin Portal
-              </button>
+             
             </div>
           </div>
         </div>
