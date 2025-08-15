@@ -79,7 +79,8 @@ function Navbar() {
 
 
         <button
-          className="navbar-toggler bg-light"
+          className="navbar-toggler "
+          style={{ backgroundColor: '#ba5114ff' }}
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarContent"
