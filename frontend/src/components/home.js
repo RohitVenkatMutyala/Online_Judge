@@ -48,6 +48,20 @@ function Home() {
           >
             Welcome to Randoman
           </h1>
+           <h3
+            className="fw-bold display-3 mb-4"
+            style={{
+              background: 'linear-gradient(to right, #f12711, #f5af19)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+        The website is under maintenance. We will notify you when it is completed.  
+
+Regards,  
+randoman.online
+
+          </h3>
        
         </div>
 
