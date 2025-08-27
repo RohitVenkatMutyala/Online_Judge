@@ -49,7 +49,7 @@ function Home() {
             Welcome to Randoman
           </h1>
            <h3
-            className="fw-bold display-3 mb-4"
+            className="fw-bold display-5 mb-4"
             style={{
               background: 'linear-gradient(to right, #f12711, #f5af19)',
               WebkitBackgroundClip: 'text',
