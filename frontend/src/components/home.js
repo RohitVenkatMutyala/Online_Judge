@@ -70,7 +70,7 @@ randoman.online
           <div className="col-md-3 col-6 mb-4">
             <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
               <div className="fs-1 mb-2">💻</div>
-              <h3 className="fw-bold text-primary mb-1">100+</h3>
+              <h3 className="fw-bold text-primary mb-1">500+</h3>
               <p className="text-muted small mb-0">Active Developers</p>
             </div>
           </div>
