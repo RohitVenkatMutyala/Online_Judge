@@ -34,31 +34,7 @@ function Dashboard() {
       <h6>👤 User</h6>
       <h4>{user.firstname} {user.lastname}</h4>
       <p>{user.email}</p>
-      <div className="mt-4">
-        <button
-          onClick={() => navigate('/problems')}
-          style={{
-            ...buttonStyle,
-            background: 'linear-gradient(to right, #00c6ff, #0072ff)',
-          }}
-          onMouseEnter={e => e.target.style.background = 'linear-gradient(to right, #36d1dc, #5b86e5)'}
-          onMouseLeave={e => e.target.style.background = 'linear-gradient(to right, #00c6ff, #0072ff)'}
-        >
-          🚀 Solve Problems
-        </button>
-        <button
-          onClick={async () => { await logout(); navigate('/'); }}
-          style={{
-            ...buttonStyle,
-            background: 'linear-gradient(to right, #f12711, #f5af19)',
-            marginTop: '10px',
-          }}
-          onMouseEnter={e => e.target.style.background = 'linear-gradient(to right, #ff416c, #ff4b2b)'}
-          onMouseLeave={e => e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)'}
-        >
-          🚪 Logout
-        </button>
-      </div>
+   
     </div>
   ];
 
