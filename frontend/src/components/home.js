@@ -56,7 +56,8 @@ function Home() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-    
+     <para> "Where Time Matters"</para>
+<para>Don’t do things randomly when the Randoman is there to help you.</para>
 
           </h3>
        
