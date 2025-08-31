@@ -56,10 +56,7 @@ function Home() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-        The website is under maintenance. We will notify you when it is completed.  
-
-Regards,  
-randoman.online
+    
 
           </h3>
        
