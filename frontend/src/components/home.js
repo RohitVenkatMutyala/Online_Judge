@@ -220,11 +220,10 @@ function Home() {
             >
               🧠
             </div>
-            <h5 className="fw-bold text-light mb-3">Expert Mentorship</h5>
+            <h5 className="fw-bold text-light mb-3">Expert AI Mentorship</h5>
           </div>
           <p className="text-light opacity-75 text-center">
-            Get guidance from experienced developers who learned and grew with our platform. 
-            Peer-to-peer learning at its finest.
+           Learn from AI that grows with you and take your coding skills to the next level — the essence of peer-to-AI learning.
           </p>
         </div>
       </div>
