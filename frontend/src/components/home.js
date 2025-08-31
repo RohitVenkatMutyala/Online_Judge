@@ -571,7 +571,7 @@ function Home() {
       </div>
       <p className="text-secondary mb-2">© 2025 Randoman. All rights reserved.</p>
       <p className="text-secondary mb-2">
-        Version 4.0.1 | Build 20250822
+        Version 4.0.1 | Build 20250606
       </p>
     </div>
   </div>
