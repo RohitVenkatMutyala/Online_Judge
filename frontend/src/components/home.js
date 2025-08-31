@@ -25,7 +25,7 @@ function Home() {
     <>
  <Navbar />
  
- {/* Hero Section */}
+
  <div className="container-fluid bg-dark text-light py-5 min-vh-100 d-flex align-items-center">
   <div className="container">
     <div className="row justify-content-center">
@@ -36,7 +36,7 @@ function Home() {
           boxShadow: '0 0 25px rgba(0,0,0,0.5)',
         }}
       >
-        {/* Main Hero Content */}
+       
         <div className="text-center mb-5">
           <h1
             className="fw-bold display-3 mb-4"
@@ -62,7 +62,7 @@ function Home() {
        
         </div>
 
-        {/* Stats Section - Inspired by AlgoUniversity */}
+        
         <div className="row text-center mb-5 py-4">
           <div className="col-md-3 col-6 mb-4">
             <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
@@ -264,6 +264,177 @@ function Home() {
             Never lose your progress. Every change is automatically saved and tracked 
             to enhance your development experience.
           </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{/* Products Section - New Addition */}
+<div className="container-fluid py-5 bg-dark text-light border-top border-secondary">
+  <div className="container">
+    <div className="text-center mb-5">
+      <h2 className="fw-bold display-5 mb-3">
+        <span
+          style={{
+            background: 'linear-gradient(135deg, #e74c3c, #f39c12, #9b59b6)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Our Products
+        </span>
+      </h2>
+      <p className="fs-5 text-muted mb-0 mx-auto" style={{ maxWidth: '700px' }}>
+        Discover the cutting-edge tools built for passionate developers who dare to dream bigger
+      </p>
+    </div>
+
+    <div className="row justify-content-center">
+      <div className="col-lg-8 col-md-10">
+        <div 
+          className="p-5 rounded-4 border position-relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(155, 89, 182, 0.15), rgba(243, 156, 18, 0.15))',
+            borderColor: 'rgba(231, 76, 60, 0.4)',
+            transition: 'all 0.4s ease',
+            backdropFilter: 'blur(10px)',
+          }}
+          onMouseOver={e => {
+            e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 20px 40px rgba(231, 76, 60, 0.3)';
+            e.currentTarget.style.borderColor = 'rgba(231, 76, 60, 0.6)';
+          }}
+          onMouseOut={e => {
+            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.borderColor = 'rgba(231, 76, 60, 0.4)';
+          }}
+        >
+          {/* Product Badge */}
+          <div className="text-center mb-4">
+            <span 
+              className="badge px-4 py-2 rounded-pill fw-semibold"
+              style={{
+                background: 'linear-gradient(135deg, #e74c3c, #9b59b6)',
+                fontSize: '0.9rem',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+              }}
+            >
+              🚀 NEW PRODUCT LAUNCHING
+            </span>
+          </div>
+
+          {/* Product Icon & Title */}
+          <div className="text-center mb-4">
+            <div 
+              className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 position-relative"
+              style={{
+                width: '100px',
+                height: '100px',
+                background: 'linear-gradient(135deg, #e74c3c, #9b59b6, #f39c12)',
+                fontSize: '3rem',
+                animation: 'pulse 2s infinite'
+              }}
+            >
+              🛠️
+              <div 
+                className="position-absolute top-0 start-100 translate-middle"
+                style={{
+                  width: '25px',
+                  height: '25px',
+                  background: 'linear-gradient(135deg, #2ecc71, #27ae60)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px'
+                }}
+              >
+                ✨
+              </div>
+            </div>
+            <h3 className="fw-bold text-light mb-2">Software Collaborative Tool</h3>
+            <p className="text-muted fst-italic">For Passionate Developers</p>
+          </div>
+
+          {/* Key Features Grid */}
+          <div className="row g-3 mb-4">
+            <div className="col-md-6">
+              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(46, 204, 113, 0.1)' }}>
+                <div className="me-3 fs-4">🤖</div>
+                <div>
+                  <h6 className="fw-bold text-light mb-1">AI-Powered Engine</h6>
+                  <small className="text-muted">UML-to-code & code-to-UML generation</small>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(52, 152, 219, 0.1)' }}>
+                <div className="me-3 fs-4">⚡</div>
+                <div>
+                  <h6 className="fw-bold text-light mb-1">80% Faster Workflow</h6>
+                  <small className="text-muted">Minutes instead of hours setup</small>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(155, 89, 182, 0.1)' }}>
+                <div className="me-3 fs-4">👥</div>
+                <div>
+                  <h6 className="fw-bold text-light mb-1">Team Collaboration</h6>
+                  <small className="text-muted">Real-time editing & live UML preview</small>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(243, 156, 18, 0.1)' }}>
+                <div className="me-3 fs-4">🔧</div>
+                <div>
+                  <h6 className="fw-bold text-light mb-1">Debug & Export</h6>
+                  <small className="text-muted">Inline debugging & seamless sharing</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center">
+            <p className="text-light mb-3 fw-semibold">
+              🎯 Ready to revolutionize your development workflow?
+            </p>
+            <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center align-items-center">
+              <a
+                href="https://uml.randoman.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-lg fw-semibold text-dark px-5 py-3 text-decoration-none"
+                style={{
+                  background: 'linear-gradient(135deg, #e74c3c, #9b59b6)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(231, 76, 60, 0.4)'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(231, 76, 60, 0.5)';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.4)';
+                }}
+              >
+                <i className="bi bi-rocket-takeoff me-2"></i>
+                Launch Tool
+              </a>
+              <span className="text-muted">
+                <small>
+                  <i className="bi bi-clock me-1"></i>
+                  Stay tuned for more amazing products!
+                </small>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
