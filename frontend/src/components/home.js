@@ -562,7 +562,21 @@ function Home() {
     ) : null}
   </div>
 </div>
-
+{/* Footer */}
+<footer className="bg-dark text-muted py-5" style={{ backgroundColor: '#111827' }}>
+  <div className="container">
+    <div className="text-center">
+      <div className="d-flex align-items-center justify-content-center mb-4">
+        <span className="fs-3 me-2">⚫</span>
+        <span className="ms-1 fs-5 fw-semibold text-white">Randoman</span>
+      </div>
+      <p className="text-secondary mb-2">© 2025 Randoman. All rights reserved.</p>
+      <p className="small text-muted" style={{ fontFamily: 'monospace' }}>
+        Version 4.0.1 | Build 20250822
+      </p>
+    </div>
+  </div>
+</footer>
 </>
   );
 }
