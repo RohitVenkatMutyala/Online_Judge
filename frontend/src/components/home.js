@@ -48,7 +48,7 @@ function Home() {
           >
             Welcome to Randoman
           </h1>
-          <div
+     <div
   className="fw-bold display-5 mb-4"
   style={{
     background: 'linear-gradient(to right, #f12711, #f5af19)',
@@ -57,10 +57,11 @@ function Home() {
   }}
 >
   <p>"Where Time Matters"</p>
-  <p style={{ marginTop: '10px' }}>
+  <p style={{ marginTop: '10px', fontSize: '20px', fontWeight: 'normal' }}>
     Don’t do things randomly when the Randoman is there to help you for the OA and Interview's.
   </p>
 </div>
+
 
        
         </div>
