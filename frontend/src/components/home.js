@@ -290,14 +290,15 @@ function Home() {
     </div>
 
     <div className="row justify-content-center">
-      <div className="col-lg-8 col-md-10">
+      <div className="col-lg-6 col-md-8">
         <div 
-          className="p-5 rounded-4 border position-relative overflow-hidden"
+          className="p-4 rounded-4 border position-relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(155, 89, 182, 0.15), rgba(243, 156, 18, 0.15))',
-            borderColor: 'rgba(231, 76, 60, 0.4)',
+            background: 'linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(155, 89, 182, 0.2), rgba(243, 156, 18, 0.2))',
+            borderColor: 'rgba(231, 76, 60, 0.5)',
             transition: 'all 0.4s ease',
             backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(28, 28, 30, 0.8)'
           }}
           onMouseOver={e => {
             e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
@@ -325,73 +326,72 @@ function Home() {
           </div>
 
           {/* Product Icon & Title */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-3">
             <div 
               className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 position-relative"
               style={{
-                width: '100px',
-                height: '100px',
+                width: '80px',
+                height: '80px',
                 background: 'linear-gradient(135deg, #e74c3c, #9b59b6, #f39c12)',
-                fontSize: '3rem',
-                animation: 'pulse 2s infinite'
+                fontSize: '2.5rem'
               }}
             >
               🛠️
               <div 
                 className="position-absolute top-0 start-100 translate-middle"
                 style={{
-                  width: '25px',
-                  height: '25px',
+                  width: '20px',
+                  height: '20px',
                   background: 'linear-gradient(135deg, #2ecc71, #27ae60)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '12px'
+                  fontSize: '10px'
                 }}
               >
                 ✨
               </div>
             </div>
-            <h3 className="fw-bold text-light mb-2">Software Collaborative Tool</h3>
-            <p className="text-muted fst-italic">For Passionate Developers</p>
+            <h4 className="fw-bold mb-2" style={{ color: '#ffffff' }}>Software Collaborative Tool</h4>
+            <p className="fst-italic" style={{ color: '#b0b0b0' }}>For Passionate Developers</p>
           </div>
 
           {/* Key Features Grid */}
-          <div className="row g-3 mb-4">
+          <div className="row g-2 mb-3">
             <div className="col-md-6">
-              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(46, 204, 113, 0.1)' }}>
-                <div className="me-3 fs-4">🤖</div>
+              <div className="d-flex align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(46, 204, 113, 0.15)', border: '1px solid rgba(46, 204, 113, 0.3)' }}>
+                <div className="me-2 fs-5">🤖</div>
                 <div>
-                  <h6 className="fw-bold text-light mb-1">AI-Powered Engine</h6>
-                  <small className="text-muted">UML-to-code & code-to-UML generation</small>
+                  <h6 className="fw-bold mb-1" style={{ color: '#ffffff', fontSize: '14px' }}>AI-Powered Engine</h6>
+                  <small style={{ color: '#d0d0d0', fontSize: '12px' }}>UML-to-code & code-to-UML generation</small>
                 </div>
               </div>
             </div>
             <div className="col-md-6">
-              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(52, 152, 219, 0.1)' }}>
-                <div className="me-3 fs-4">⚡</div>
+              <div className="d-flex align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(52, 152, 219, 0.15)', border: '1px solid rgba(52, 152, 219, 0.3)' }}>
+                <div className="me-2 fs-5">⚡</div>
                 <div>
-                  <h6 className="fw-bold text-light mb-1">80% Faster Workflow</h6>
-                  <small className="text-muted">Minutes instead of hours setup</small>
+                  <h6 className="fw-bold mb-1" style={{ color: '#ffffff', fontSize: '14px' }}>80% Faster Workflow</h6>
+                  <small style={{ color: '#d0d0d0', fontSize: '12px' }}>Minutes instead of hours setup</small>
                 </div>
               </div>
             </div>
             <div className="col-md-6">
-              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(155, 89, 182, 0.1)' }}>
-                <div className="me-3 fs-4">👥</div>
+              <div className="d-flex align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(155, 89, 182, 0.15)', border: '1px solid rgba(155, 89, 182, 0.3)' }}>
+                <div className="me-2 fs-5">👥</div>
                 <div>
-                  <h6 className="fw-bold text-light mb-1">Team Collaboration</h6>
-                  <small className="text-muted">Real-time editing & live UML preview</small>
+                  <h6 className="fw-bold mb-1" style={{ color: '#ffffff', fontSize: '14px' }}>Team Collaboration</h6>
+                  <small style={{ color: '#d0d0d0', fontSize: '12px' }}>Real-time editing & live UML preview</small>
                 </div>
               </div>
             </div>
             <div className="col-md-6">
-              <div className="d-flex align-items-center p-3 rounded-3" style={{ backgroundColor: 'rgba(243, 156, 18, 0.1)' }}>
-                <div className="me-3 fs-4">🔧</div>
+              <div className="d-flex align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(243, 156, 18, 0.15)', border: '1px solid rgba(243, 156, 18, 0.3)' }}>
+                <div className="me-2 fs-5">🔧</div>
                 <div>
-                  <h6 className="fw-bold text-light mb-1">Debug & Export</h6>
-                  <small className="text-muted">Inline debugging & seamless sharing</small>
+                  <h6 className="fw-bold mb-1" style={{ color: '#ffffff', fontSize: '14px' }}>Debug & Export</h6>
+                  <small style={{ color: '#d0d0d0', fontSize: '12px' }}>Inline debugging & seamless sharing</small>
                 </div>
               </div>
             </div>
@@ -399,21 +399,22 @@ function Home() {
 
           {/* CTA Section */}
           <div className="text-center">
-            <p className="text-light mb-3 fw-semibold">
+            <p className="mb-3 fw-semibold" style={{ color: '#ffffff', fontSize: '16px' }}>
               🎯 Ready to revolutionize your development workflow?
             </p>
-            <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center align-items-center">
+            <div className="d-flex flex-column flex-sm-row gap-2 justify-content-center align-items-center">
               <a
                 href="https://uml.randoman.online"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-lg fw-semibold text-dark px-5 py-3 text-decoration-none"
+                className="btn btn-lg fw-semibold text-dark px-4 py-2 text-decoration-none"
                 style={{
                   background: 'linear-gradient(135deg, #e74c3c, #9b59b6)',
                   border: 'none',
-                  borderRadius: '12px',
+                  borderRadius: '8px',
                   transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 15px rgba(231, 76, 60, 0.4)'
+                  boxShadow: '0 4px 15px rgba(231, 76, 60, 0.4)',
+                  fontSize: '16px'
                 }}
                 onMouseOver={e => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
@@ -427,8 +428,8 @@ function Home() {
                 <i className="bi bi-rocket-takeoff me-2"></i>
                 Launch Tool
               </a>
-              <span className="text-muted">
-                <small>
+              <span style={{ color: '#b0b0b0' }}>
+                <small style={{ fontSize: '13px' }}>
                   <i className="bi bi-clock me-1"></i>
                   Stay tuned for more amazing products!
                 </small>
