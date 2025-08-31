@@ -570,7 +570,7 @@ function Home() {
         <span className="ms-1 fs-5 fw-semibold text-white">Randoman</span>
       </div>
       <p className="text-secondary mb-2">© 2025 Randoman. All rights reserved.</p>
-      <p className="small text-muted" style={{ fontFamily: 'monospace' }}>
+      <p className="text-secondary mb-2">
         Version 4.0.1 | Build 20250822
       </p>
     </div>
