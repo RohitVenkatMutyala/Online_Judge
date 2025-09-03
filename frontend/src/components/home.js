@@ -16,6 +16,10 @@ function Home() {
     navigate('/login');
   };
 
+  const handleWatchDemo = () => {
+    window.open('https://drive.google.com/file/d/1erYInNK5HJpp7k4vX7VTQPeqH-djlgld/view', '_blank');
+  };
+
    if(user){
   return(
     navigate("/dashboard")
@@ -58,10 +62,39 @@ function Home() {
 >
   <p>"Where Time Matters"</p>
   <p style={{ marginTop: '10px', fontSize: '20px', fontWeight: 'normal' }}>
-    Don’t do things randomly when the Randoman is there to help you for the OA and Interview's.
+    Don't do things randomly when the Randoman is there to help you for the OA and Interview's.
   </p>
 </div>
 
+{/* Demo Video Section */}
+<div className="mb-4">
+  <button
+    onClick={handleWatchDemo}
+    className="btn btn-lg fw-semibold text-dark py-3 px-4 me-3 mb-3"
+    style={{
+      background: 'linear-gradient(135deg, #e74c3c, #8e44ad)',
+      border: 'none',
+      borderRadius: '12px',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)'
+    }}
+    onMouseOver={e => {
+      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.boxShadow = '0 8px 25px rgba(231, 76, 60, 0.4)';
+    }}
+    onMouseOut={e => {
+      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
+    }}
+  >
+    <i className="bi bi-play-circle-fill me-2"></i>
+    Watch Demo Tour
+  </button>
+  <p className="text-muted small">
+    <i className="bi bi-clock me-1"></i>
+    See Randoman in action - 2 min tour
+  </p>
+</div>
 
        
         </div>
