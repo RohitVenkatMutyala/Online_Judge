@@ -216,7 +216,7 @@ function Home() {
                 fontSize: '2rem'
               }}
             >
-              🤝
+               🤝 
             </div>
             <h5 className="fw-bold text-light mb-3">Live Doubt Sharing</h5>
             <span className="badge bg-info px-3 py-1 mb-3 rounded-pill">Coming Soon</span>
@@ -227,6 +227,7 @@ function Home() {
           </p>
         </div>
       </div>
+    
 
       <div className="col-lg-4 col-md-6">
         <div 
