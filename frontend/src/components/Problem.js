@@ -152,7 +152,7 @@ const Problems = () => {
                     <span className={getDifficultyBadge(q.difficulty)}>
                       {q.difficulty?.toUpperCase()}
                     </span>
-                    <button className="btn btn-outline-primary btn-sm" onClick={() => handleViewClick(q.QID)}> View</button>
+                    <button className="btn btn-outline-primary rounded-pill"onClick={() => handleViewClick(q.QID)}> View</button>
                     <button
                       onClick={() => handleSolveClick(q.QID)}
                       className="btn btn-outline-danger rounded-pill"
