@@ -14,6 +14,7 @@ const Problems = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+   const handleViewClick = (qid) => navigate(`/userproblem/${qid}`);
 
   useEffect(() => {
     if (!user) return;
@@ -151,6 +152,7 @@ const Problems = () => {
                     <span className={getDifficultyBadge(q.difficulty)}>
                       {q.difficulty?.toUpperCase()}
                     </span>
+                    <button className="btn btn-outline-primary btn-sm" onClick={() => handleViewClick(q.QID)}> View</button>
                     <button
                       onClick={() => handleSolveClick(q.QID)}
                       className="btn btn-outline-danger rounded-pill"

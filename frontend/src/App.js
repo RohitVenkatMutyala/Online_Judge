@@ -17,7 +17,7 @@ import UploadTestCase from './components/testcase';
 import { ThemeProvider } from './context/ThemeContext'; // you'll create this file
 import Submission from './components/submissions';
 import Contexts from './components/context';
-
+import Userview from './components/userview';
 
 function App() {
   return (
@@ -185,6 +185,15 @@ function App() {
                 <>
                   <Helmet><title>Admin View Problem - Randoman</title></Helmet>
                   <Adminview />
+                </>
+              }
+            />
+               <Route
+              path="/userproblem/:QID"
+              element={
+                <>
+                  <Helmet><title>View Problem - Randoman</title></Helmet>
+                  <Userview />
                 </>
               }
             />
