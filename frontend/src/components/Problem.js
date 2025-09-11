@@ -154,7 +154,7 @@ const Problems = () => {
                     <span className={getDifficultyBadge(q.difficulty)}>
                       {q.difficulty?.toUpperCase()}
                     </span>
-                    <button className="btn btn-outline-primary rounded-pill" onClick={() => handleViewClick(q.QID)}> View</button>
+                    <button className="btn btn-outline-primary rounded-pill" onClick={() => handleViewClick(q.QID)}> View &gt;</button>
                     {!q.tag?.includes("PYQ") && (
                       <button
                         onClick={() => handleSolveClick(q.QID)}
