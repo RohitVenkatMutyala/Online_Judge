@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import Navbar from './navbar';
+import ReactMarkdown from "react-markdown";
 
 const Adminview = () => {
    const API_URL = process.env.REACT_APP_SERVER_API;
@@ -83,7 +84,9 @@ const Adminview = () => {
 
             <hr />
                  <div className="fs-6 text-body" style={{ whiteSpace: 'pre-wrap' }}>
-                  {problem.description}
+                  <ReactMarkdown>
+                                    {problem.description}
+                                  </ReactMarkdown>
                 </div>
           </div>
         </div>
