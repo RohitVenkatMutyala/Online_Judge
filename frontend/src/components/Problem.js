@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './navbar';
 
 const Problems = () => {
-   const API_URL = process.env.REACT_APP_SERVER_API;
+  const API_URL = process.env.REACT_APP_SERVER_API;
   const { user } = useAuth();
   const [problems, setProblems] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -14,7 +14,7 @@ const Problems = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
-   const handleViewClick = (qid) => navigate(`/userproblem/${qid}`);
+  const handleViewClick = (qid) => navigate(`/userproblem/${qid}`);
 
   useEffect(() => {
     if (!user) return;
@@ -23,8 +23,8 @@ const Problems = () => {
       try {
         const res = await axios.get(`${API_URL}/problems/user/${user._id}`
           , {
-          withCredentials: true,
-        }
+            withCredentials: true,
+          }
         );
 
         if (res.data.success) {
@@ -39,7 +39,7 @@ const Problems = () => {
     };
 
     fetchProblems();
-  }, [user,API_URL]);
+  }, [user, API_URL]);
 
   const handleFilterChange = (e) => {
     const value = e.target.value;
@@ -87,7 +87,7 @@ const Problems = () => {
     <>
       <Navbar />
       <div className="container my-5">
-     
+
 
         {error && <div className="alert alert-danger">{error}</div>}
 
@@ -112,13 +112,15 @@ const Problems = () => {
                   className={`position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded-pill small ${q.status === 'Solved' ? 'bg-success' : 'bg-secondary'
                     }`}
                 >
-                  {q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}
+                  {!q.tag?.includes("PYQ") && (
+                    <span>{q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}</span>
+                  )}
                 </div>
 
                 <div className="card-body d-flex flex-column justify-content-between">
                   <div>
                     <large className="text-muted"
-                       style={{
+                      style={{
                         background: "linear-gradient(to right, #ff416c, #ff4b2b)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent"
@@ -152,15 +154,15 @@ const Problems = () => {
                     <span className={getDifficultyBadge(q.difficulty)}>
                       {q.difficulty?.toUpperCase()}
                     </span>
-                    <button className="btn btn-outline-primary rounded-pill"onClick={() => handleViewClick(q.QID)}> View</button>
-             {!q.tag?.includes("PYQ") && (
-  <button
-    onClick={() => handleSolveClick(q.QID)}
-    className="btn btn-outline-danger rounded-pill"
-  >
-    Solve &gt;
-  </button>
-)}
+                    <button className="btn btn-outline-primary rounded-pill" onClick={() => handleViewClick(q.QID)}> View</button>
+                    {!q.tag?.includes("PYQ") && (
+                      <button
+                        onClick={() => handleSolveClick(q.QID)}
+                        className="btn btn-outline-danger rounded-pill"
+                      >
+                        Solve &gt;
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
