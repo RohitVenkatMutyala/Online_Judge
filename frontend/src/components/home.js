@@ -30,11 +30,11 @@ function Home() {
       <Navbar />
 
 
-      <div className="container-fluid bg-dark text-light py-5 min-vh-50 d-flex align-items-center">
+      <div className="container-fluid bg-dark text-light py-4">
         <div className="container">
           <div className="row justify-content-center">
             <div
-              className="col-md-12 p-5 rounded-4 shadow-lg"
+              className="col-md-12 p-4 rounded-4 shadow-lg"
               style={{
                 backgroundColor: '#1c1c1e',
                 boxShadow: '0 0 25px rgba(0,0,0,0.5)',
@@ -90,7 +90,7 @@ function Home() {
                     <i className="bi bi-play-circle-fill me-2"></i>
                     Watch Demo Tour
                   </button>
-                 
+
                 </div>
 
 
@@ -150,7 +150,7 @@ function Home() {
                 Why Choose Randoman?
               </span>
             </h2>
-          
+
           </div>
 
           <div className="row g-4 mb-5">
@@ -486,7 +486,7 @@ function Home() {
                 Supported Languages
               </span>
             </h2>
-         
+
           </div>
 
           <div className="row justify-content-center">
@@ -561,7 +561,7 @@ function Home() {
       <div className="container-fluid py-5 text-light" style={{ background: 'linear-gradient(135deg, #1c1c1e, #2c2c2e)' }}>
         <div className="container text-center">
           <h3 className="fw-bold mb-3">Ready to Transform Your Coding Experience?</h3>
-       
+
           {!user || user.role === 'admin' ? (
             <button
               onClick={handleLogin}
