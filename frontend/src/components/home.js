@@ -62,7 +62,7 @@ function Home() {
                 >
                   <p>"Where Time Matters"</p>
                   <p style={{ marginTop: '10px', fontSize: '20px', fontWeight: 'normal' }}>
-                    Don't do things randomly when the Randoman is there to help you for the OA and Interview's.
+                    Don't do things randomly when the Randoman is there to help you .
                   </p>
                 </div>
 
@@ -92,7 +92,9 @@ function Home() {
                   </button>
 
                 </div>
-
+               <br></br>
+                 <br></br>
+                 
 
               </div>
 
