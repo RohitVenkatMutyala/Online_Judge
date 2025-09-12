@@ -30,7 +30,7 @@ function Home() {
       <Navbar />
 
 
-      <div className="container-fluid bg-dark text-light py-5 min-vh-100 d-flex align-items-center">
+      <div className="container-fluid bg-dark text-light py-5 min-vh-50 d-flex align-items-center">
         <div className="container">
           <div className="row justify-content-center">
             <div
@@ -486,9 +486,7 @@ function Home() {
                 Supported Languages
               </span>
             </h2>
-            <p className="fs-5 text-muted mb-4">
-              Code in your favorite languages with full compiler support
-            </p>
+         
           </div>
 
           <div className="row justify-content-center">
