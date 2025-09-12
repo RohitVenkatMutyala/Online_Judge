@@ -222,17 +222,27 @@ function Home() {
                   <span className="badge bg-success px-3 py-1 mb-3 rounded-pill">Exclusive</span>
                 </div>
                 <p className="text-light opacity-75 text-center">
-                  Have a specific goal in mind? Simply send your request to
-                  <strong> heisenberg@randoman.online </strong> and our team will
-                  curate tailored resources just for you.
+                  Have a specific goal in mind?
+                  Just let us know your request and our team will curate
+                  <strong> personalized resources </strong> exclusively for you.
                   <br /><br />
-                  Whether it’s preparing for <em>Company X</em> interviews or mastering
-                  a new technology, we’ll gather materials from real experiences and
-                  deliver what you need.
+                  Whether it’s preparing for <em>any company, semester exam, or competitive exam</em> interviews,
+                  or mastering a brand-new technology, we’ll gather materials from real-world
+                  experiences and deliver exactly what you need.
                   <br /><br />
-                  <span className="fw-bold">A unique feature no one else provides —
-                    learning personalized to your journey.</span>
+                  <span className="fw-bold">A feature no one else offers —
+                    truly personalized learning for your journey.</span>
                 </p>
+
+                <div className="text-center mt-3">
+                  <a
+                    href="mailto:heisenberg@randoman.online"
+                    className="btn btn-info px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                  >
+                    Request Feature
+                  </a>
+                </div>
+
 
               </div>
             </div>
@@ -270,8 +280,13 @@ function Home() {
                   <h5 className="fw-bold text-light mb-3">Expert AI Mentorship</h5>
                 </div>
                 <p className="text-light opacity-75 text-center">
-                  Learn from AI that grows with you and take your coding skills to the next level — the essence of peer-to-AI learning.
+                  Learn from an <strong>AI that evolves with your journey</strong> —
+                  adapting to your pace, understanding your goals, and pushing your
+                  coding skills to the next level.
+                  <br /><br />
+                  <span className="fw-bold">The true essence of peer-to-AI learning.</span>
                 </p>
+
               </div>
             </div>
 
@@ -307,9 +322,12 @@ function Home() {
                   <h5 className="fw-bold text-light mb-3">Auto Save Technology</h5>
                 </div>
                 <p className="text-light opacity-75 text-center">
-                  Never lose your progress. Every change is automatically saved and tracked
-                  to enhance your development experience.
+                  Never lose your progress.
+                  Every change is applied in <strong>milliseconds</strong>,
+                  automatically saved, and instantly replicated across any browser —
+                  enhancing your development experience without interruptions.
                 </p>
+
               </div>
             </div>
           </div>
@@ -620,9 +638,21 @@ function Home() {
             <p className="text-secondary mb-2">
               Version 4.0.1 | Build 20250606
             </p>
+
+            {/* Contact Info */}
+            <p className="text-secondary mb-0">
+              <i className="bi bi-envelope-fill me-2"></i>
+              <a
+                href="mailto:heisenberg@randoman.online"
+                className="text-decoration-none text-info fw-semibold"
+              >
+                Contact Us
+              </a>
+            </p>
           </div>
         </div>
       </footer>
+
     </>
   );
 }
