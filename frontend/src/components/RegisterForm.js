@@ -176,7 +176,7 @@ function RegisterForm() {
                     >
                       CREATE ACCOUNT
                     </h2>
-                    <p className="text-muted">Join our developer community</p>
+                   
                   </div>
 
                   {error && (
@@ -222,7 +222,7 @@ function RegisterForm() {
                         }}
                       />
                        <small className="text-muted mt-1 d-block">
-                      First name should contain atleast 8+ characters 
+                      First name should contain atleast 4+ characters 
                     </small>
                     </div>
                     <div className="col-md-6">
@@ -254,7 +254,7 @@ function RegisterForm() {
                         }}
                       />
                         <small className="text-muted mt-1 d-block">
-                      Last name should contain atleast 8+ characters 
+                      Last name should contain atleast 4+ characters 
                     </small>
                     </div>
                   </div>
@@ -416,9 +416,7 @@ function RegisterForm() {
                       <i className="bi bi-box-arrow-in-right me-2"></i>
                       Sign In Instead
                     </button>
-                    <p className="small text-muted mt-3 mb-0">
-                      By signing up, you agree to our Terms of Service and Privacy Policy
-                    </p>
+                   
                   </div>
                 </form>
               </div>

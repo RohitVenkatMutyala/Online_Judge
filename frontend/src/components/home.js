@@ -105,30 +105,24 @@ function Home() {
                   <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
                     <div className="fs-1 mb-2">💻</div>
                     <h3 className="fw-bold text-primary mb-1">500+</h3>
-                    <p className="text-muted small mb-0">Active Developers</p>
+                    <p className="text-muted small mb-0"> </p>
                   </div>
                 </div>
                 <div className="col-md-3 col-6 mb-4">
                   <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
                     <div className="fs-1 mb-2">⚡</div>
                     <h3 className="fw-bold text-success mb-1">99.9%</h3>
-                    <p className="text-muted small mb-0">Uptime</p>
+                    <p className="text-muted small mb-0"> </p>
                   </div>
                 </div>
                 <div className="col-md-3 col-6 mb-4">
                   <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
                     <div className="fs-1 mb-2">🔄</div>
                     <h3 className="fw-bold text-info mb-1">Real-time</h3>
-                    <p className="text-muted small mb-0">Collaboration</p>
+                    <p className="text-muted small mb-0"> </p>
                   </div>
                 </div>
-                <div className="col-md-3 col-6 mb-4">
-                  <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
-                    <div className="fs-1 mb-2">🚀</div>
-                    <h3 className="fw-bold text-warning mb-1">∞</h3>
-                    <p className="text-muted small mb-0">Possibilities</p>
-                  </div>
-                </div>
+                
               </div>
 
               {/* Login Buttons Section */}
@@ -183,9 +177,7 @@ function Home() {
                 Why Choose Randoman?
               </span>
             </h2>
-            <p className="fs-5 text-muted mb-0 mx-auto" style={{ maxWidth: '600px' }}>
-              Not just another coding platform — we're building the future of collaborative development
-            </p>
+          
           </div>
 
           <div className="row g-4 mb-5">
@@ -598,9 +590,7 @@ function Home() {
       <div className="container-fluid py-5 text-light" style={{ background: 'linear-gradient(135deg, #1c1c1e, #2c2c2e)' }}>
         <div className="container text-center">
           <h3 className="fw-bold mb-3">Ready to Transform Your Coding Experience?</h3>
-          <p className="fs-5 text-muted mb-4">
-            Join thousands of developers who are already building amazing projects with Randoman
-          </p>
+       
           {!user || user.role === 'admin' ? (
             <button
               onClick={handleLogin}

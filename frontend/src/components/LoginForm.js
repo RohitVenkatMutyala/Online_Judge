@@ -165,7 +165,7 @@ function LoginForm() {
                     >
                       LOGIN
                     </h2>
-                    <p className="text-muted">Access your coding workspace</p>
+                   
                   </div>
 
                   {error && (
@@ -326,9 +326,7 @@ function LoginForm() {
                       <i className="bi bi-person-plus-fill me-2"></i>
                       Create Account
                     </button>
-                    <p className="small text-muted mt-3 mb-0">
-                      Join our community of developers and start collaborating today
-                    </p>
+                    
                   </div>
                 </form>
               </div>
