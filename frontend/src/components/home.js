@@ -100,30 +100,6 @@ function Home() {
               </div>
 
 
-              <div className="row text-center mb-5 py-4">
-                <div className="col-md-3 col-6 mb-4">
-                  <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
-                    <div className="fs-1 mb-2">💻</div>
-                    <h3 className="fw-bold text-primary mb-1">500+</h3>
-                    <p className="text-muted small mb-0"> </p>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6 mb-4">
-                  <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
-                    <div className="fs-1 mb-2">⚡</div>
-                    <h3 className="fw-bold text-success mb-1">99.9%</h3>
-                    <p className="text-muted small mb-0"> </p>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6 mb-4">
-                  <div className="p-3 rounded-3 bg-secondary bg-opacity-10">
-                    <div className="fs-1 mb-2">🔄</div>
-                    <h3 className="fw-bold text-info mb-1">Real-time</h3>
-                    <p className="text-muted small mb-0"> </p>
-                  </div>
-                </div>
-                
-              </div>
 
               {/* Login Buttons Section */}
               {!user || user.role === 'admin' ? (
