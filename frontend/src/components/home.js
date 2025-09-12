@@ -90,10 +90,7 @@ function Home() {
                     <i className="bi bi-play-circle-fill me-2"></i>
                     Watch Demo Tour
                   </button>
-                  <p className="text-muted small">
-                    <i className="bi bi-clock me-1"></i>
-                    See Randoman in action - 2 min tour
-                  </p>
+                 
                 </div>
 
 
