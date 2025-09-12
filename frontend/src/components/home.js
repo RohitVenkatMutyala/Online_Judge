@@ -65,6 +65,40 @@ function Home() {
                     Don't do things randomly when the Randoman is there to help you .
                   </p>
                 </div>
+                {/* Login Buttons Section */}
+                {!user || user.role === 'admin' ? (
+                  <div className="row justify-content-center">
+                    <div className="col-md-6 col-lg-4">
+                      <div className="d-grid gap-3">
+                        <button
+                          onClick={handleLogin}
+                          className="btn btn-lg fw-semibold text-dark py-3"
+                          style={{
+                            background: 'linear-gradient(135deg, #f12711, #f5af19)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 15px rgba(241, 39, 17, 0.3)'
+                          }}
+                          onMouseOver={e => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 8px 25px rgba(241, 39, 17, 0.4)';
+                          }}
+                          onMouseOut={e => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(241, 39, 17, 0.3)';
+                          }}
+                        >
+                          <i className="bi bi-person-fill me-2"></i>
+                          Start Coding Now
+                        </button>
+
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                <br></br>
 
                 {/* Demo Video Section */}
                 <div className="mb-4">
@@ -92,46 +126,12 @@ function Home() {
                   </button>
 
                 </div>
-               <br></br>
-                 <br></br>
-                 
 
               </div>
 
 
 
-              {/* Login Buttons Section */}
-              {!user || user.role === 'admin' ? (
-                <div className="row justify-content-center">
-                  <div className="col-md-6 col-lg-4">
-                    <div className="d-grid gap-3">
-                      <button
-                        onClick={handleLogin}
-                        className="btn btn-lg fw-semibold text-dark py-3"
-                        style={{
-                          background: 'linear-gradient(135deg, #f12711, #f5af19)',
-                          border: 'none',
-                          borderRadius: '12px',
-                          transition: 'all 0.3s ease',
-                          boxShadow: '0 4px 15px rgba(241, 39, 17, 0.3)'
-                        }}
-                        onMouseOver={e => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 8px 25px rgba(241, 39, 17, 0.4)';
-                        }}
-                        onMouseOut={e => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 4px 15px rgba(241, 39, 17, 0.3)';
-                        }}
-                      >
-                        <i className="bi bi-person-fill me-2"></i>
-                        Start Coding Now
-                      </button>
 
-                    </div>
-                  </div>
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
