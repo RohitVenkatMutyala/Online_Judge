@@ -206,7 +206,7 @@ function Home() {
                     href="mailto:heisenberg@randoman.online"
                     className="btn btn-info px-4 py-2 fw-semibold rounded-pill shadow-sm"
                   >
-                    Request Feature
+                    Request Prep
                   </a>
                 </div>
 
