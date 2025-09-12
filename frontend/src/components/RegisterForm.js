@@ -83,47 +83,33 @@ function RegisterForm() {
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">🎯</div>
                       <h6 className="fw-semibold text-light mb-1">Get Started</h6>
-                      <small className="text-muted">Free forever</small>
+                      <small className="text-muted">  </small>
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">👥</div>
                       <h6 className="fw-semibold text-light mb-1">Team Up</h6>
-                      <small className="text-muted">Collaborate instantly</small>
+                      <small className="text-muted"> </small>
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">🔒</div>
                       <h6 className="fw-semibold text-light mb-1">Secure</h6>
-                      <small className="text-muted">Your data protected</small>
+                      <small className="text-muted"> </small>
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">📈</div>
                       <h6 className="fw-semibold text-light mb-1">Grow</h6>
-                      <small className="text-muted">Learn & improve</small>
+                      <small className="text-muted"> </small>
                     </div>
                   </div>
                 </div>
 
-                {/* Benefits */}
-                <div className="d-flex justify-content-center justify-content-lg-start gap-4 text-center">
-                  <div>
-                    <h4 className="fw-bold text-info mb-1">Free</h4>
-                    <small className="text-muted">Sign Up</small>
-                  </div>
-                  <div>
-                    <h4 className="fw-bold text-success mb-1">1min</h4>
-                    <small className="text-muted">Setup Time</small>
-                  </div>
-                  <div>
-                    <h4 className="fw-bold text-warning mb-1">∞</h4>
-                    <small className="text-muted">Possibilities</small>
-                  </div>
-                </div>
+          
               </div>
             </div>
 

@@ -72,47 +72,33 @@ function LoginForm() {
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">⚡</div>
                       <h6 className="fw-semibold text-light mb-1">Real-time</h6>
-                      <small className="text-muted">Collaboration</small>
+                      <small className="text-muted"> </small>
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">💾</div>
                       <h6 className="fw-semibold text-light mb-1">Auto Save</h6>
-                      <small className="text-muted">Never lose work</small>
+                      <small className="text-muted"> </small>
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">🤝</div>
                       <h6 className="fw-semibold text-light mb-1">Community</h6>
-                      <small className="text-muted">Learn together</small>
+                      <small className="text-muted"> </small>
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
                       <div className="fs-4 mb-2">🚀</div>
                       <h6 className="fw-semibold text-light mb-1">Fast</h6>
-                      <small className="text-muted">Lightning quick</small>
+                      <small className="text-muted"> </small>
                     </div>
                   </div>
                 </div>
 
-                {/* Stats */}
-                <div className="d-flex justify-content-center justify-content-lg-start gap-4 text-center">
-                  <div>
-                    <h4 className="fw-bold text-primary mb-1">100+</h4>
-                    <small className="text-muted">Active Users</small>
-                  </div>
-                  <div>
-                    <h4 className="fw-bold text-success mb-1">99.9%</h4>
-                    <small className="text-muted">Uptime</small>
-                  </div>
-                  <div>
-                    <h4 className="fw-bold text-warning mb-1">24/7</h4>
-                    <small className="text-muted">Support</small>
-                  </div>
-                </div>
+            
               </div>
             </div>
 
