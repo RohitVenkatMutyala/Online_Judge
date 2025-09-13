@@ -50,7 +50,7 @@ function Home() {
                     WebkitTextFillColor: 'transparent',
                   }}
                 >
-                  Welcome to Randoman
+                  Discover Randoman
                 </h1>
                 <div
                   className="fw-bold display-5 mb-4"
