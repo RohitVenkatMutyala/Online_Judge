@@ -369,7 +369,7 @@ function Home() {
                   Have a specific goal in mind? Just tell us, and we’ll curate <strong>personalized resources</strong> —
                   whether it’s for <em>company prep, semester exams, competitive tests</em>, or learning new tech, all tailored from real-world insights.
                   <br /><br />
-                  <span className="fw-bold">A feature no one else offers — truly personalized learning for your journey.</span>
+               
                 </p>
 
                 <div className="text-center mt-3">
