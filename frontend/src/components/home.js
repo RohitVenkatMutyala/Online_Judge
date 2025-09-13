@@ -58,13 +58,26 @@ function Home() {
                     background: 'linear-gradient(to right, #f12711, #f5af19)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
+                    lineHeight: '1.4',
+                    letterSpacing: '0.5px',
                   }}
                 >
-                  <p>"Where Time Matters"</p>
-                  <p style={{ marginTop: '10px', fontSize: '20px', fontWeight: 'normal' }}>
-                    Don't do things randomly when the Randoman is there to help you .
+                  <p style={{ fontSize: '28px', marginBottom: '8px', fontStyle: 'italic' }}>
+                    "Where Time Matters"
+                  </p>
+                  <p
+                    style={{
+                      marginTop: '12px',
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#ddd',
+                    }}
+                  >
+                    Don’t waste hours on uncertainty — <strong>Randoman</strong> empowers you
+                    to act with <em>clarity, speed, and precision</em>.
                   </p>
                 </div>
+
                 {/* Feature Highlights */}
                 <div className="row g-4 mb-5">
                   {/* Real-time */}
@@ -129,17 +142,26 @@ function Home() {
                           style={{
                             width: '70px',
                             height: '70px',
-                            background: 'linear-gradient(135deg, #ffc107, #ff5722)',
+                            background: 'linear-gradient(135deg, #ff512f, #dd2476)',
                             fontSize: '2rem'
                           }}
                         >
-                          💾
+                          ⚙️
                         </div>
-                        <h5 className="fw-bold text-light mb-2">Auto Save</h5>
+                        <h5 className="fw-bold text-light mb-2">Rapid Prototyping Tool </h5>
+                        <span className="badge bg-warning text-dark px-3 py-1 mb-3 rounded-pill">
+                          Powered by Randoman
+                        </span>
                       </div>
                       <p className="text-light opacity-75 text-center">
-                        Never worry about losing progress — <strong>every keystroke is saved automatically</strong> in real-time.
+                        Transform the way you build — what usually takes <strong>8 to 10 hours</strong> of
+                        development work can now be <strong>prototyped in under 5 seconds</strong>.
+                        <br /><br />
+                        A breakthrough feature under the <em>Randoman innovation suite</em> —
+                        designed to <strong>accelerate software development</strong> without compromising
+                        quality or flexibility.
                       </p>
+
                     </div>
                   </div>
 
