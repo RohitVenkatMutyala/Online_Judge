@@ -43,7 +43,7 @@ function Home() {
 
               <div className="text-center mb-5">
                 <h1
-                  className="fw-bold display-3 mb-4"
+                  className="fw-bold display-3 mb-3"
                   style={{
                     background: 'linear-gradient(to right, #8e44ad, #3498db)',
                     WebkitBackgroundClip: 'text',
@@ -52,31 +52,34 @@ function Home() {
                 >
                   Discover Randoman
                 </h1>
-                <div
-                  className="fw-bold display-5 mb-4"
+
+                <p
+                  className="fw-bold mb-3"
                   style={{
+                    fontSize: '28px',
+                    fontStyle: 'italic',
                     background: 'linear-gradient(to right, #f12711, #f5af19)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    lineHeight: '1.4',
-                    letterSpacing: '0.5px',
                   }}
                 >
-                  <p style={{ fontSize: '28px', marginBottom: '8px', fontStyle: 'italic' }}>
-                    "Where Time Matters"
-                  </p>
-                  <p
-                    style={{
-                      marginTop: '12px',
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#ddd',
-                    }}
-                  >
-                    Don’t waste hours on uncertainty — <strong>Randoman</strong> empowers you
-                    to act with <em>clarity, speed, and precision</em>.
-                  </p>
-                </div>
+                  "Where Time Matters"
+                </p>
+
+                <p
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: '400',
+                    color: '#ddd',
+                    lineHeight: '1.6',
+                    maxWidth: '650px',
+                    margin: '0 auto',
+                  }}
+                >
+                  Don’t waste hours on uncertainty — <strong>Randoman</strong> empowers you
+                  to act with <em>clarity, speed, and precision</em>.
+                </p>
+
 
                 {/* Feature Highlights */}
                 <div className="row g-4 mb-5">
