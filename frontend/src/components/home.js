@@ -27,7 +27,7 @@ function Home() {
   }
   return (
     <>
-    <Navbar/>
+      <Navbar />
 
 
       <div className="container-fluid bg-dark text-light py-4">
@@ -65,37 +65,161 @@ function Home() {
                     Don't do things randomly when the Randoman is there to help you .
                   </p>
                 </div>
-                   {/* Feature Highlights */}
-                <div className="row g-3 mb-4">
-                  <div className="col-6">
-                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
-                      <div className="fs-4 mb-2">⚡</div>
-                      <h6 className="fw-semibold text-light mb-1">Real-time</h6>
-                      <small className="text-muted"> </small>
+                {/* Feature Highlights */}
+                <div className="row g-4 mb-5">
+                  {/* Real-time */}
+                  <div className="col-lg-3 col-md-6">
+                    <div
+                      className="p-4 rounded-4 h-100 border position-relative overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(142, 68, 173, 0.1), rgba(52, 152, 219, 0.1))',
+                        borderColor: 'rgba(142, 68, 173, 0.3)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.transform = 'translateY(-5px)';
+                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(142, 68, 173, 0.2)';
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <div className="text-center mb-3">
+                        <div
+                          className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                          style={{
+                            width: '70px',
+                            height: '70px',
+                            background: 'linear-gradient(135deg, #8e44ad, #3498db)',
+                            fontSize: '2rem'
+                          }}
+                        >
+                          ⚡
+                        </div>
+                        <h5 className="fw-bold text-light mb-2">Real-time</h5>
+                      </div>
+                      <p className="text-light opacity-75 text-center">
+                        Experience <strong>instant collaboration</strong> with live updates that sync across all devices in milliseconds.
+                      </p>
                     </div>
                   </div>
-                  <div className="col-6">
-                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
-                      <div className="fs-4 mb-2">💾</div>
-                      <h6 className="fw-semibold text-light mb-1">Auto Save</h6>
-                      <small className="text-muted"> </small>
+
+                  {/* Auto Save */}
+                  <div className="col-lg-3 col-md-6">
+                    <div
+                      className="p-4 rounded-4 h-100 border position-relative overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 87, 34, 0.1))',
+                        borderColor: 'rgba(255, 193, 7, 0.3)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.transform = 'translateY(-5px)';
+                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(255, 193, 7, 0.2)';
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <div className="text-center mb-3">
+                        <div
+                          className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                          style={{
+                            width: '70px',
+                            height: '70px',
+                            background: 'linear-gradient(135deg, #ffc107, #ff5722)',
+                            fontSize: '2rem'
+                          }}
+                        >
+                          💾
+                        </div>
+                        <h5 className="fw-bold text-light mb-2">Auto Save</h5>
+                      </div>
+                      <p className="text-light opacity-75 text-center">
+                        Never worry about losing progress — <strong>every keystroke is saved automatically</strong> in real-time.
+                      </p>
                     </div>
                   </div>
-                  <div className="col-6">
-                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
-                      <div className="fs-4 mb-2">🤝</div>
-                      <h6 className="fw-semibold text-light mb-1">Community</h6>
-                      <small className="text-muted"> </small>
+
+                  {/* Community */}
+                  <div className="col-lg-3 col-md-6">
+                    <div
+                      className="p-4 rounded-4 h-100 border position-relative overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(0, 123, 255, 0.1))',
+                        borderColor: 'rgba(23, 162, 184, 0.3)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.transform = 'translateY(-5px)';
+                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(23, 162, 184, 0.2)';
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <div className="text-center mb-3">
+                        <div
+                          className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                          style={{
+                            width: '70px',
+                            height: '70px',
+                            background: 'linear-gradient(135deg, #17a2b8, #007bff)',
+                            fontSize: '2rem'
+                          }}
+                        >
+                          🤝
+                        </div>
+                        <h5 className="fw-bold text-light mb-2">Community</h5>
+                      </div>
+                      <p className="text-light opacity-75 text-center">
+                        Connect with a <strong>vibrant community</strong> of developers and grow together with shared learning.
+                      </p>
                     </div>
                   </div>
-                  <div className="col-6">
-                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
-                      <div className="fs-4 mb-2">🚀</div>
-                      <h6 className="fw-semibold text-light mb-1">Fast</h6>
-                      <small className="text-muted"> </small>
+
+                  {/* Fast */}
+                  <div className="col-lg-3 col-md-6">
+                    <div
+                      className="p-4 rounded-4 h-100 border position-relative overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(23, 162, 184, 0.1))',
+                        borderColor: 'rgba(40, 167, 69, 0.3)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.transform = 'translateY(-5px)';
+                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(40, 167, 69, 0.2)';
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <div className="text-center mb-3">
+                        <div
+                          className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                          style={{
+                            width: '70px',
+                            height: '70px',
+                            background: 'linear-gradient(135deg, #28a745, #17a2b8)',
+                            fontSize: '2rem'
+                          }}
+                        >
+                          🚀
+                        </div>
+                        <h5 className="fw-bold text-light mb-2">Fast</h5>
+                      </div>
+                      <p className="text-light opacity-75 text-center">
+                        Build and deploy at <strong>lightning speed</strong>, optimized for performance and efficiency.
+                      </p>
                     </div>
                   </div>
                 </div>
+
                 {/* Login Buttons Section */}
                 {!user || user.role === 'admin' ? (
                   <div className="row justify-content-center">
@@ -130,10 +254,10 @@ function Home() {
                 ) : null}
 
                 <br></br>
-                 <br></br>
-                  <br></br>
-                     
-             
+                <br></br>
+                <br></br>
+
+
 
                 {/* Demo Video Section */}
                 <div className="mb-4">
