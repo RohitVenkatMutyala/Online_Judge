@@ -27,7 +27,7 @@ function Home() {
   }
   return (
     <>
-    
+    <Navbar/>
 
 
       <div className="container-fluid bg-dark text-light py-4">
@@ -101,6 +101,38 @@ function Home() {
                 <br></br>
                  <br></br>
                   <br></br>
+                     
+                {/* Feature Highlights */}
+                <div className="row g-3 mb-4">
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">⚡</div>
+                      <h6 className="fw-semibold text-light mb-1">Real-time</h6>
+                      <small className="text-muted"> </small>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">💾</div>
+                      <h6 className="fw-semibold text-light mb-1">Auto Save</h6>
+                      <small className="text-muted"> </small>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">🤝</div>
+                      <h6 className="fw-semibold text-light mb-1">Community</h6>
+                      <small className="text-muted"> </small>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                      <div className="fs-4 mb-2">🚀</div>
+                      <h6 className="fw-semibold text-light mb-1">Fast</h6>
+                      <small className="text-muted"> </small>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Demo Video Section */}
                 <div className="mb-4">
