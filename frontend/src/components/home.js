@@ -41,124 +41,95 @@ function Home() {
               }}
             >
 
-  <div className="text-center mb-5">
-  {/* Main Title */}
-  <h1
-    className="fw-bold display-3 mb-3"
-    style={{
-      background: 'linear-gradient(to right, #8e44ad, #3498db)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      letterSpacing: '1px',
-    }}
-  >
-    Welcome to <span style={{ fontStyle: 'italic' }}>Randoman</span>
-  </h1>
+              <div className="text-center mb-5">
+                <h1
+                  className="fw-bold display-3 mb-4"
+                  style={{
+                    background: 'linear-gradient(to right, #8e44ad, #3498db)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  Welcome to Randoman
+                </h1>
+                <div
+                  className="fw-bold display-5 mb-4"
+                  style={{
+                    background: 'linear-gradient(to right, #f12711, #f5af19)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  <p>"Where Time Matters"</p>
+                  <p style={{ marginTop: '10px', fontSize: '20px', fontWeight: 'normal' }}>
+                    Don't do things randomly when the Randoman is there to help you .
+                  </p>
+                </div>
+                {/* Login Buttons Section */}
+                {!user || user.role === 'admin' ? (
+                  <div className="row justify-content-center">
+                    <div className="col-md-6 col-lg-4">
+                      <div className="d-grid gap-3">
+                        <button
+                          onClick={handleLogin}
+                          className="btn btn-lg fw-semibold text-dark py-3"
+                          style={{
+                            background: 'linear-gradient(135deg, #f12711, #f5af19)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 15px rgba(241, 39, 17, 0.3)'
+                          }}
+                          onMouseOver={e => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 8px 25px rgba(241, 39, 17, 0.4)';
+                          }}
+                          onMouseOut={e => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(241, 39, 17, 0.3)';
+                          }}
+                        >
+                          <i className="bi bi-person-fill me-2"></i>
+                          Start Coding Now
+                        </button>
 
-  {/* Subheading */}
-  <div
-    className="fw-bold display-6 mb-4"
-    style={{
-      background: 'linear-gradient(to right, #f12711, #f5af19)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-    }}
-  >
-    <p style={{ fontSize: '28px', marginBottom: '8px' }}>
-      "Where Time Matters"
-    </p>
-    <p
-      style={{
-        marginTop: '10px',
-        fontSize: '18px',
-        fontWeight: '400',
-        color: '#ddd',
-      }}
-    >
-      Don’t do things randomly when <strong>Randoman</strong> is here to guide
-      you with precision and speed.
-    </p>
-  </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
 
-  {/* Login Buttons Section */}
-  {!user || user.role === 'admin' ? (
-    <div className="row justify-content-center">
-      <div className="col-md-6 col-lg-4">
-        <div className="d-grid gap-3">
-          <button
-            onClick={handleLogin}
-            className="btn btn-lg fw-semibold text-dark py-3"
-            style={{
-              background: 'linear-gradient(135deg, #f12711, #f5af19)',
-              border: 'none',
-              borderRadius: '14px',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(241, 39, 17, 0.3)',
-              fontSize: '18px',
-              letterSpacing: '0.5px',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow =
-                '0 10px 25px rgba(241, 39, 17, 0.5)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow =
-                '0 4px 15px rgba(241, 39, 17, 0.3)';
-            }}
-          >
-            <i className="bi bi-person-fill me-2"></i>
-            Start Coding Now
-          </button>
-        </div>
-      </div>
-    </div>
-  ) : null}
+                <br></br>
+                 <br></br>
+                  <br></br>
 
-  {/* Spacer */}
-  <div style={{ margin: '40px 0' }}></div>
+                {/* Demo Video Section */}
+                <div className="mb-4">
+                  <button
+                    onClick={handleWatchDemo}
+                    className="btn btn-lg fw-semibold text-dark py-3 px-4 me-3 mb-3"
+                    style={{
+                      background: 'linear-gradient(135deg, #e74c3c, #8e44ad)',
+                      border: 'none',
+                      borderRadius: '12px',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)'
+                    }}
+                    onMouseOver={e => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(231, 76, 60, 0.4)';
+                    }}
+                    onMouseOut={e => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
+                    }}
+                  >
+                    <i className="bi bi-play-circle-fill me-2"></i>
+                    Watch Demo Tour
+                  </button>
 
-  {/* Demo Video Section */}
-  <div className="mb-4">
-    <button
-      onClick={handleWatchDemo}
-      className="btn btn-lg fw-semibold text-light py-3 px-4 me-3 mb-3"
-      style={{
-        background: 'linear-gradient(135deg, #e74c3c, #8e44ad)',
-        border: 'none',
-        borderRadius: '14px',
-        transition: 'all 0.3s ease',
-        boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)',
-        fontSize: '18px',
-      }}
-      onMouseOver={(e) => {
-        e.currentTarget.style.transform = 'translateY(-3px)';
-        e.currentTarget.style.boxShadow =
-          '0 10px 25px rgba(231, 76, 60, 0.5)';
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow =
-          '0 4px 15px rgba(231, 76, 60, 0.3)';
-      }}
-    >
-      <i className="bi bi-play-circle-fill me-2"></i>
-      Watch Demo Tour
-    </button>
-    <p
-      style={{
-        marginTop: '10px',
-        fontSize: '16px',
-        color: '#ccc',
-      }}
-    >
-      Explore our interactive tour and see how Randoman can transform the way
-      you code.
-    </p>
-  </div>
-</div>
+                </div>
 
+              </div>
 
 
 
