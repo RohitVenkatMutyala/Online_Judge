@@ -153,9 +153,9 @@ function Home() {
                           Powered by Randoman
                         </span>
                       </div>
-                  <p className="text-light opacity-75 text-center">
-  Transform software development — cut <strong>8–10 hours</strong> of work into <strong>just 5 seconds</strong> with the <em>Randoman innovation suite</em>.
-</p>
+                      <p className="text-light opacity-75 text-center">
+                        Transform software development — cut <strong>8–10 hours</strong> of work into <strong>just 5 seconds</strong> with the <em>Randoman innovation suite</em>.
+                      </p>
 
 
                     </div>
@@ -366,16 +366,10 @@ function Home() {
                   <span className="badge bg-success px-3 py-1 mb-3 rounded-pill">Exclusive</span>
                 </div>
                 <p className="text-light opacity-75 text-center">
-                  Have a specific goal in mind?
-                  Just let us know your request and our team will curate
-                  <strong> personalized resources </strong> exclusively for you.
+                  Have a specific goal in mind? Just tell us, and we’ll curate <strong>personalized resources</strong> —
+                  whether it’s for <em>company prep, semester exams, competitive tests</em>, or learning new tech, all tailored from real-world insights.
                   <br /><br />
-                  Whether it’s preparing for <em>any company, semester exam, or competitive exam</em> interviews,
-                  or mastering a brand-new technology, we’ll gather materials from real-world
-                  experiences and deliver exactly what you need.
-                  <br /><br />
-                  <span className="fw-bold">A feature no one else offers —
-                    truly personalized learning for your journey.</span>
+                  <span className="fw-bold">A feature no one else offers — truly personalized learning for your journey.</span>
                 </p>
 
                 <div className="text-center mt-3">
@@ -386,6 +380,7 @@ function Home() {
                     Request Prep
                   </a>
                 </div>
+
 
 
               </div>
