@@ -153,14 +153,10 @@ function Home() {
                           Powered by Randoman
                         </span>
                       </div>
-                      <p className="text-light opacity-75 text-center">
-                        Transform the way you build — what usually takes <strong>8 to 10 hours</strong> of
-                        development work can now be <strong>prototyped in under 5 seconds</strong>.
-                        <br /><br />
-                        A breakthrough feature under the <em>Randoman innovation suite</em> —
-                        designed to <strong>accelerate software development</strong> without compromising
-                        quality or flexibility.
-                      </p>
+                  <p className="text-light opacity-75 text-center">
+  Transform software development — cut <strong>8–10 hours</strong> of work into <strong>just 5 seconds</strong> with the <em>Randoman innovation suite</em>.
+</p>
+
 
                     </div>
                   </div>
