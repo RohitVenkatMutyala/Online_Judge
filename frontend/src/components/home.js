@@ -27,7 +27,7 @@ function Home() {
   }
   return (
     <>
-      <Navbar />
+    
 
 
       <div className="container-fluid bg-dark text-light py-4">
