@@ -111,6 +111,7 @@ function Home() {
                           ⚡
                         </div>
                         <h5 className="fw-bold text-light mb-2">Real-time</h5>
+                        <span className="badge bg-danger px-3 py-1 mb-3 rounded-pill">Instant</span>
                       </div>
                       <p className="text-light opacity-75 text-center">
                         Experience <strong>instant collaboration</strong> with live updates that sync across all devices in milliseconds.
@@ -192,6 +193,7 @@ function Home() {
                           🤝
                         </div>
                         <h5 className="fw-bold text-light mb-2">Community</h5>
+                        <span className="badge bg-primary px-3 py-1 mb-3 rounded-pill">Collaborative</span>
                       </div>
                       <p className="text-light opacity-75 text-center">
                         Connect with a <strong>vibrant community</strong> of developers and grow together with shared learning.
@@ -230,6 +232,7 @@ function Home() {
                           🚀
                         </div>
                         <h5 className="fw-bold text-light mb-2">Fast</h5>
+                        <span className="badge bg-warning text-dark px-3 py-1 mb-3 rounded-pill">Lightning</span>
                       </div>
                       <p className="text-light opacity-75 text-center">
                         Build and deploy at <strong>lightning speed</strong>, optimized for performance and efficiency.
@@ -417,6 +420,7 @@ function Home() {
                     🧠
                   </div>
                   <h5 className="fw-bold text-light mb-3">Expert AI Mentorship</h5>
+                  <span className="badge bg-primary px-3 py-1 mb-3 rounded-pill">Premium</span>
                 </div>
                 <p className="text-light opacity-75 text-center">
                   Learn from an <strong>AI that evolves with your journey</strong> —
@@ -459,6 +463,7 @@ function Home() {
                     📊
                   </div>
                   <h5 className="fw-bold text-light mb-3">Auto Save Technology</h5>
+                  <span className="badge bg-warning text-dark px-3 py-1 mb-3 rounded-pill">New</span>
                 </div>
                 <p className="text-light opacity-75 text-center">
                   Never lose your progress.
