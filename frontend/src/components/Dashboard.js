@@ -136,35 +136,7 @@ function Dashboard() {
             {pages[pageIndex]}
           </div>
           <div className="book-controls mt-4 d-flex justify-content-between align-items-center">
-            <button
-              className="btn"
-              style={{
-                ...buttonStyle,
-                background: 'linear-gradient(to right, #bdc3c7, #2c3e50)',
-                width: 'auto',
-                padding: '6px 12px',
-              }}
-              onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
-              disabled={pageIndex === 0}
-            >
-
-            </button>
-
-
-
-            <button
-              className="btn"
-              style={{
-                ...buttonStyle,
-                background: 'linear-gradient(to right, #00b09b, #96c93d)',
-                width: 'auto',
-                padding: '6px 12px',
-              }}
-              onClick={() => setPageIndex(prev => Math.min(pages.length - 1, prev + 1))}
-              disabled={pageIndex === pages.length - 1}
-            >
-
-            </button>
+        
           </div>
         </div>
       </div>
