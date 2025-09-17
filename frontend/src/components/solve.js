@@ -372,9 +372,9 @@ int main() {
             <div className="problem-card" style={{ height: 'calc(100vh - 100px)', overflowY: 'auto' }}>
               {/* FIX: Removed `bg-white` class to make it theme-sensitive */}
               <div className="card-header border-0 p-4 pb-0">
-                <h1 className="gradient-text-secondary fw-bold mb-4 display-6">
+                <h4 className="gradient-text-secondary fw-bold mb-4 display-6">
                   {problem.name}
-                </h1>
+                </h4>
                 <div className="info-section rounded-3 p-4 mb-4">
                   <div className="row align-items-center">
                     <div className="col-md-6 mb-3 mb-md-0">
@@ -415,9 +415,7 @@ int main() {
 
               <div className="card-body p-4">
                 <div className="mb-4">
-                  <h4 className="gradient-text-primary fw-bold mb-3">
-                    📝 Problem Description
-                  </h4>
+                  
                 </div>
                 <div className="markdown-content">
                   <ReactMarkdown>
