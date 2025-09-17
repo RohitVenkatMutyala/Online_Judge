@@ -208,7 +208,10 @@ const Submission = () => {
                           className="bi bi-question-circle me-2 fs-5"
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
-                          title="You can use Help only 20 times a day. It resets every 24 hours."
+                          title="You can use Help up to 20 times per day. The count resets every 24 hours.
+For educational purposes, if you require additional requests, please contact us via email as mentioned.
+Standard accounts are limited to 20 requests per day, while premium users enjoy a higher limit.
+Every Help request is stored in your history — remember, every request counts."
                         ></i>
                         <span>Help Used: <strong>{helpCount}/20</strong></span>
 
