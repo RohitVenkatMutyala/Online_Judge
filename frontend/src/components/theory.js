@@ -382,7 +382,7 @@ const Theory = () => {
 
             {/* Hero Section */}
             <div className="theory-hero d-flex align-items-center">
-                <div className="container theory-hero-content">
+                
                     <div className="row justify-content-center">
                         <div className="col-lg-8">
                            
@@ -397,7 +397,7 @@ const Theory = () => {
                                 />
                             </div>
                         </div>
-                    </div>
+                    
                 </div>
             </div>
 
