@@ -471,7 +471,7 @@ int main() {
               <div className="card-header bg-dark text-white fw-semibold rounded-top">Code Editor</div>
               <div className="card-body p-0">
                 <Editor
-                  height="460px"
+                  height="650px"
                   language={
                     language === 'cpp' ? 'cpp' :
                       language === 'py' ? 'python' : 'java'
