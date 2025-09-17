@@ -24,54 +24,56 @@ function Navbar() {
       <div className="container-fluid px-4">
 
         <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-2">
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 100 100"
-            xmlns="http://www.w3.org/2000/svg"
+          <div className="mt-3">
+            <span
+              className="badge rounded-pill d-flex align-items-center justify-content-center shadow-sm position-relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, #f12711, #f5af19)',
+                color: '#fff',
+                fontWeight: 500,
+                fontSize: '0.9rem',
+                padding: '0.5rem 2rem', // shorter height, wider breadth
+                minWidth: '150px',
+                textAlign: 'center',
+                gap: '0.5rem' // space between icon and text
+              }}
+            >
+              <span style={{ fontSize: '1rem' }}>⚫</span>
+              Normal User
+              <span
+                className="position-absolute top-0 start-0 w-100 h-100"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  transform: 'rotate(-45deg)',
+                  pointerEvents: 'none'
+                }}
+              ></span>
+            </span>
+          </div>
+
+          <span
+            className="fw-bold fs-4"
+            style={{
+              background: 'linear-gradient(to right, #f12711, #f5af19',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: '600',
+              transition: 'all 20s ease',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+              e.target.style.WebkitBackgroundClip = 'text';
+              e.target.style.WebkitTextFillColor = 'transparent';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19';
+              e.target.style.WebkitBackgroundClip = 'text';
+              e.target.style.WebkitTextFillColor = 'transparent';
+            }}
           >
-            <defs>
-              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#00C9FF" />
-                <stop offset="100%" stopColor="#92FE9D" />
-              </linearGradient>
-              <linearGradient id="grad2" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#f12711" />
-                <stop offset="100%" stopColor="#f5af19" />
-              </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="40" fill="url(#grad1)" />
-            <path
-              d="M50 20 L60 45 L40 45 Z"
-              fill="url(#grad2)"
-              stroke="#222"
-              strokeWidth="2"
-            />
-            <circle cx="50" cy="65" r="5" fill="#222" />
-          </svg>
-        <span
-  className="fw-bold fs-4"
-  style={{
-    background: 'linear-gradient(to right, #f12711, #f5af19',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    fontWeight: '600',
-    transition: 'all 20s ease',
-    cursor: 'pointer',
-  }}
-  onMouseEnter={(e) => {
-    e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
-    e.target.style.WebkitBackgroundClip = 'text';
-    e.target.style.WebkitTextFillColor = 'transparent';
-  }}
-  onMouseLeave={(e) => {
-    e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19';
-    e.target.style.WebkitBackgroundClip = 'text';
-    e.target.style.WebkitTextFillColor = 'transparent';
-  }}
->
-  Randoman
-</span>
+            Randoman
+          </span>
 
         </Link>
 
@@ -339,49 +341,49 @@ function Navbar() {
                     <i className="bi bi-box-arrow-right me-1"></i> Logout
                   </button>
                 </li>
-                 {/* Theme Toggle */}
-            <li className="nav-item d-flex align-items-center ms-2">
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
-                  e.target.style.color = 'white';
-                  e.target.style.border = 'none';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = '#f8f9fa'; // Bootstrap light
-                  e.target.style.border = '1px solid #f8f9fa';
-                }}
-                title="Toggle theme"
-                style={{
-                  background: 'transparent',
-                  color: '#f8f9fa',
-                  border: '1px solid #f8f9fa',
-                  padding: '6px 12px',
-                  borderRadius: '5px',
-                  transition: 'all 0.3s ease',
-                  fontSize: '1rem',
-                }}
-              >
-                {theme === 'dark' ? (
-                  <i className="bi bi-sun-fill"></i>
-                ) : (
-                  <i className="bi bi-moon-stars-fill"></i>
-                )}
-              </button>
-            </li>
+                {/* Theme Toggle */}
+                <li className="nav-item d-flex align-items-center ms-2">
+                  <button
+                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                      e.target.style.color = 'white';
+                      e.target.style.border = 'none';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'transparent';
+                      e.target.style.color = '#f8f9fa'; // Bootstrap light
+                      e.target.style.border = '1px solid #f8f9fa';
+                    }}
+                    title="Toggle theme"
+                    style={{
+                      background: 'transparent',
+                      color: '#f8f9fa',
+                      border: '1px solid #f8f9fa',
+                      padding: '6px 12px',
+                      borderRadius: '5px',
+                      transition: 'all 0.3s ease',
+                      fontSize: '1rem',
+                    }}
+                  >
+                    {theme === 'dark' ? (
+                      <i className="bi bi-sun-fill"></i>
+                    ) : (
+                      <i className="bi bi-moon-stars-fill"></i>
+                    )}
+                  </button>
+                </li>
 
               </>
             ) : (
-              
+
               <li className="nav-item">
                 <Link className="nav-link text-white" to="/login">
-                 
+
                 </Link>
               </li>
             )}
-           
+
 
           </ul>
         </div>
