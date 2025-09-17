@@ -475,9 +475,7 @@ const Tview = () => {
                                 {/* Tutorial Header */}
                                 <div className="card-header bg-black border-0 p-5 pb-0">
                                     <div className="text-center mb-4">
-                                        <div className="mb-3">
-                                            <span className="fs-1">📖</span>
-                                        </div>
+                                      
                                         <h1 className="gradient-text-secondary fw-bold mb-4 display-5">
                                             {problem.name}
                                         </h1>
