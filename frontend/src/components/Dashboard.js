@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,6 +9,29 @@ function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [pageIndex, setPageIndex] = useState(0);
+
+  const [profileImage, setProfileImage] = useState(null);
+
+  // ✅ Load stored image when component mounts
+  useEffect(() => {
+    const storedImage = localStorage.getItem("profileImage");
+    if (storedImage) {
+      setProfileImage(storedImage);
+    }
+  }, []);
+
+  // ✅ Handle new image upload
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+        localStorage.setItem("profileImage", reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (!user || user.role === 'admin') {
     return (
@@ -28,13 +51,45 @@ function Dashboard() {
     width: '100%',
   };
 
-  // ✅ Only first page kept, all others removed
+  // ✅ Page with profile image upload + user info
   const pages = [
     <div key="user" className="book-page text-center">
+      {/* Profile Image Upload */}
+      <div className="d-flex justify-content-center mb-3">
+        <label htmlFor="profileUpload" style={{ cursor: "pointer" }}>
+          <div
+            className="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm overflow-hidden"
+            style={{ width: "120px", height: "120px" }}
+          >
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="Profile"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <span style={{ fontSize: "2rem" }}>👤</span>
+            )}
+          </div>
+        </label>
+        <input
+          type="file"
+          id="profileUpload"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{ display: "none" }}
+        />
+      </div>
+
+      {/* User Info */}
       <h6>👤 User</h6>
       <h4>{user.firstname} {user.lastname}</h4>
       <p>{user.email}</p>
-   
+
+      {/* Badge */}
+      <div className="mt-3">
+        <span className="badge bg-secondary">Normal User</span>
+      </div>
     </div>
   ];
 
@@ -70,7 +125,9 @@ function Dashboard() {
               ◀️ Previous
             </button>
 
-            <span className="text-light fw-semibold">Page {pageIndex + 1} of {pages.length}</span>
+            <span className="text-light fw-semibold">
+              Page {pageIndex + 1} of {pages.length}
+            </span>
 
             <button
               className="btn"
