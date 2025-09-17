@@ -391,7 +391,7 @@ const Theory = () => {
                                 <input
                                     type="text"
                                     className="form-control search-input"
-                                    placeholder="🔍 Search by tags (array, dp, hash, pyq...)"
+                                    placeholder="🔍 Search by tags (Such OS , CN etc...)"
                                     value={filterTag}
                                     onChange={handleFilterChange}
                                 />
