@@ -231,13 +231,10 @@ const Tview = () => {
           padding: 0.4rem 0.6rem;
           border-radius: 8px;
           font-size: 0.9em;
-          color: #e53e3e;
           font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
         }
         
         .tutorial-content pre {
-          background: linear-gradient(135deg, #2d3748, #4a5568);
-          color: #e2e8f0;
           padding: 2rem;
           border-radius: 16px;
           overflow-x: auto;
@@ -260,9 +257,8 @@ const Tview = () => {
         }
         
         .tutorial-content pre code {
-          background: transparent;
-          color: inherit;
-          border: none;
+          background: transparent !important;
+          border: none !important;
           padding: 0;
         }
         
@@ -341,8 +337,23 @@ const Tview = () => {
         }
         
         [data-bs-theme="light"] .tutorial-content code {
-          background: linear-gradient(135deg, #f7fafc, #edf2f7);
-          border: 1px solid #e2e8f0;
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          color: #e53e3e;
+        }
+        
+        [data-bs-theme="light"] .tutorial-content pre {
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+        }
+        
+        [data-bs-theme="light"] .tutorial-content pre code {
+          color: #2d3748 !important;
+        }
+        
+        [data-bs-theme="light"] .tutorial-content pre::before {
+          background: rgba(17, 153, 142, 0.1);
+          color: #11998e;
         }
         
         [data-bs-theme="light"] .tutorial-content blockquote {
@@ -374,9 +385,23 @@ const Tview = () => {
         }
         
         [data-bs-theme="dark"] .tutorial-content code {
-          background: linear-gradient(135deg, #2d3748, #4a5568);
+          background: #2d3748;
           border: 1px solid #4a5568;
           color: #fbb6ce;
+        }
+        
+        [data-bs-theme="dark"] .tutorial-content pre {
+          background: linear-gradient(135deg, #2d3748, #4a5568);
+          color: #e2e8f0;
+        }
+        
+        [data-bs-theme="dark"] .tutorial-content pre code {
+          color: #e2e8f0 !important;
+        }
+        
+        [data-bs-theme="dark"] .tutorial-content pre::before {
+          background: rgba(17, 153, 142, 0.2);
+          color: #38ef7d;
         }
         
         [data-bs-theme="dark"] .tutorial-content blockquote {
