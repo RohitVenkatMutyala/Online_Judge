@@ -394,7 +394,7 @@ int main() {
                           <div className="d-flex flex-wrap">
                             {problem.tag.split(',').map((tag, idx) => (
                               <span key={idx} className={`${getTagBadge(tag.trim())} tag-badge`}>
-                                #{tag.trim()}
+                                {tag.trim()}
                               </span>
                             ))}
                           </div>

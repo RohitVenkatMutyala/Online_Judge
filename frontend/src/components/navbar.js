@@ -260,7 +260,7 @@ function Navbar() {
                           e.target.style.boxShadow = '0 6px 20px rgba(241, 39, 17, 0.4)';
                         }}
                         onMouseLeave={(e) => {
-                          e.target.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a52)';
+                         
                           e.target.style.transform = 'translateY(0)';
                           e.target.style.boxShadow = '0 2px 8px rgba(238, 90, 82, 0.3)';
                         }}
