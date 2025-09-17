@@ -19,7 +19,7 @@ import Submission from './components/submissions';
 import Contexts from './components/context';
 import Userview from './components/userview';
 import Theory from './components/theory';
-
+import Tview from './components/tview';
 function App() {
   return (
     <ThemeProvider>
@@ -204,6 +204,15 @@ function App() {
                 <>
                   <Helmet><title>View Problem - Randoman</title></Helmet>
                   <Userview />
+                </>
+              }
+            />
+              <Route
+              path="/usertheory/:QID"
+              element={
+                <>
+                  <Helmet><title>Fundamentals - Randoman</title></Helmet>
+                  <Tview/>
                 </>
               }
             />

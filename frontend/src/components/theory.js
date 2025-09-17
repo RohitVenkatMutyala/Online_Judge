@@ -14,7 +14,7 @@ const Theory = () => {
     const [error, setError] = useState('');
 
     const navigate = useNavigate();
-    const handleViewClick = (qid) => navigate(`/userproblem/${qid}`);
+    const handleViewClick = (qid) => navigate(`/usertheory/${qid}`);
 
     useEffect(() => {
         if (!user) return;
