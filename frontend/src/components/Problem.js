@@ -258,7 +258,7 @@ const Problems = () => {
                     className="progress-bar"
                     style={{
                       width: `${totalCount > 0 ? (solvedCount / totalCount) * 100 : 0}%`,
-                      background: 'linear-gradient(to right, #38ef7d, #11998e)'
+                      background: 'linear-gradient(to right,  #f12711, #f5af19)'
                     }}
                   ></div>
                 </div>
