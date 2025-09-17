@@ -247,7 +247,7 @@ function Navbar() {
                         onClick={handleLogout}
                         className="btn rounded-3 px-4 py-2"
                         style={{
-                          background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+                         
                           border: 'none',
                           color: 'white',
                           fontWeight: '600',
@@ -284,7 +284,7 @@ function Navbar() {
                           justifyContent: 'center'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+                          e.target.style.background = 'linear-gradient(135deg,  #f12711, #f5af19)';
                           e.target.style.transform = 'scale(1.1)';
                           e.target.style.boxShadow = '0 4px 15px rgba(17, 153, 142, 0.4)';
                         }}
@@ -302,7 +302,7 @@ function Navbar() {
               ) : (
                 <li className="nav-item">
                   <Link 
-                    className="btn rounded-pill px-4 py-2"
+                    className="btn rounded-3 px-4 py-2"
                     to="/login"
                     style={{
                       background: 'linear-gradient(135deg, #11998e, #38ef7d)',
