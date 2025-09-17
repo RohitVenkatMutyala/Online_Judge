@@ -43,15 +43,15 @@ function Dashboard() {
   return (
     <>
       <Dnav />
-      <div className="container-fluid px-4 py-5" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      <div className="container-fluid px-4 py-5" style={{ minHeight: '100vh', backgroundColor: '#1a1a1a' }}>
         <div className="row justify-content-center">
           <div className="col-12 col-xl-10">
             <div
               className="dashboard-container shadow-lg rounded-4 overflow-hidden"
               style={{
-                background: 'rgba(255,255,255,0.95)',
+                background: 'rgba(26, 26, 26, 0.95)',
                 backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                border: '1px solid rgba(255,255,255,0.1)',
               }}
             >
               <div className="row g-0 h-100">
@@ -60,7 +60,7 @@ function Dashboard() {
                   <div 
                     className="profile-section h-100 d-flex flex-column align-items-center justify-content-center p-5"
                     style={{
-                      background: 'linear-gradient(145deg, #2c3e50, #34495e)',
+                      background: 'linear-gradient(145deg, #f12711, #f5af19)',
                       color: 'white'
                     }}
                   >
@@ -117,49 +117,19 @@ function Dashboard() {
                 <div className="col-12 col-lg-8">
                   <div className="navigation-section h-100 d-flex flex-column justify-content-center p-5">
                     <div className="text-center mb-5">
-                      <h1 className="display-4 fw-bold text-dark mb-3">Welcome to Dashboard</h1>
-                      <p className="lead text-muted">Choose your learning path and start your coding journey</p>
+                      <h1 className="display-4 fw-bold text-white mb-3">Welcome to Dashboard</h1>
+                      <p className="lead text-light opacity-75">Choose your learning path and start your coding journey</p>
                     </div>
 
                     <div className="navigation-grid">
-                      <div className="nav-card mb-4" onClick={() => navigate("/problems")}>
-                        <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
-                          <div className="nav-icon me-4">
-                            <i className="bi bi-puzzle-fill"></i>
-                          </div>
-                          <div className="nav-content flex-grow-1">
-                            <h4 className="mb-2 fw-bold">Solve Problems</h4>
-                            <p className="mb-0 text-muted">Practice coding with our curated problem sets</p>
-                          </div>
-                          <div className="nav-arrow">
-                            <i className="bi bi-arrow-right-circle-fill"></i>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="nav-card mb-4" onClick={() => navigate("/sub")}>
-                        <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
-                          <div className="nav-icon me-4">
-                            <i className="bi bi-check2-square"></i>
-                          </div>
-                          <div className="nav-content flex-grow-1">
-                            <h4 className="mb-2 fw-bold">Submissions</h4>
-                            <p className="mb-0 text-muted">Review your previous solutions and progress</p>
-                          </div>
-                          <div className="nav-arrow">
-                            <i className="bi bi-arrow-right-circle-fill"></i>
-                          </div>
-                        </div>
-                      </div>
-
                       <div className="nav-card mb-4" onClick={() => navigate("/funda")}>
                         <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
                           <div className="nav-icon me-4">
                             <i className="bi bi-book-half"></i>
                           </div>
                           <div className="nav-content flex-grow-1">
-                            <h4 className="mb-2 fw-bold">Fundamentals</h4>
-                            <p className="mb-0 text-muted">Master the core concepts and principles</p>
+                            <h4 className="mb-2 fw-bold text-white">Fundamentals</h4>
+                            <p className="mb-0 text-light opacity-90">Master the core concepts and principles</p>
                           </div>
                           <div className="nav-arrow">
                             <i className="bi bi-arrow-right-circle-fill"></i>
@@ -167,14 +137,44 @@ function Dashboard() {
                         </div>
                       </div>
 
-                      <div className="nav-card" onClick={() => navigate("/contexts")}>
+                      <div className="nav-card mb-4" onClick={() => navigate("/problems")}>
+                        <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
+                          <div className="nav-icon me-4">
+                            <i className="bi bi-puzzle-fill"></i>
+                          </div>
+                          <div className="nav-content flex-grow-1">
+                            <h4 className="mb-2 fw-bold text-white">Solve Problems</h4>
+                            <p className="mb-0 text-light opacity-90">Practice coding with our curated problem sets</p>
+                          </div>
+                          <div className="nav-arrow">
+                            <i className="bi bi-arrow-right-circle-fill"></i>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="nav-card mb-4" onClick={() => navigate("/contexts")}>
                         <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
                           <div className="nav-icon me-4">
                             <i className="bi bi-collection-fill"></i>
                           </div>
                           <div className="nav-content flex-grow-1">
-                            <h4 className="mb-2 fw-bold">Contexts</h4>
-                            <p className="mb-0 text-muted">Explore real-world examples and use cases</p>
+                            <h4 className="mb-2 fw-bold text-white">Contexts</h4>
+                            <p className="mb-0 text-light opacity-90">Explore real-world examples and use cases</p>
+                          </div>
+                          <div className="nav-arrow">
+                            <i className="bi bi-arrow-right-circle-fill"></i>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="nav-card" onClick={() => navigate("/sub")}>
+                        <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
+                          <div className="nav-icon me-4">
+                            <i className="bi bi-check2-square"></i>
+                          </div>
+                          <div className="nav-content flex-grow-1">
+                            <h4 className="mb-2 fw-bold text-white">Submissions</h4>
+                            <p className="mb-0 text-light opacity-90">Review your previous solutions and progress</p>
                           </div>
                           <div className="nav-arrow">
                             <i className="bi bi-arrow-right-circle-fill"></i>
@@ -219,7 +219,7 @@ function Dashboard() {
         }
 
         .nav-card-inner {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
           color: white;
           transition: all 0.3s ease;
           border: none;
@@ -227,8 +227,8 @@ function Dashboard() {
         }
 
         .nav-card:hover .nav-card-inner {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-          box-shadow: 0 8px 25px rgba(118, 75, 162, 0.3) !important;
+          background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
+          box-shadow: 0 8px 25px rgba(241, 39, 17, 0.3) !important;
         }
 
         .nav-icon {
