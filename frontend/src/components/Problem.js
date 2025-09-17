@@ -108,7 +108,7 @@ const Problems = () => {
       {/* Custom Styles */}
       <style jsx>{`
         .hero-section {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg,  #f12711 0%, #f5af19 100%);
           position: relative;
           overflow: hidden;
         }
@@ -275,7 +275,7 @@ const Problems = () => {
                     className="progress-bar"
                     style={{
                       width: `${totalCount > 0 ? (solvedCount / totalCount) * 100 : 0}%`,
-                      background: 'linear-gradient(to right, #f12711, #f5af19)'
+                      background: 'linear-gradient(to right, #11998e, #38ef7d)'
                     }}
                   ></div>
                 </div>
