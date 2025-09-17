@@ -88,23 +88,31 @@ function Dashboard() {
 
       {/* Badge */}
       <div className="mt-3">
-        <span className="badge rounded-pill d-flex align-items-center px-3 py-2 shadow-sm position-relative overflow-hidden"
+        <span
+          className="badge rounded-pill d-flex align-items-center justify-content-center shadow-sm position-relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #6f42c1, #6610f2)',
+            background: 'linear-gradient(135deg, #f12711, #f5af19)',
             color: '#fff',
             fontWeight: 500,
-            fontSize: '0.9rem'
-          }}>
+            fontSize: '0.9rem',
+            padding: '0.5rem 2rem', // shorter height, wider breadth
+            minWidth: '150px',       // ensures the badge is broader
+            textAlign: 'center'
+          }}
+        >
           <i className="bi bi-person-fill me-2"></i>
           Normal User
-          <span className="position-absolute top-0 start-0 w-100 h-100"
+          <span
+            className="position-absolute top-0 start-0 w-100 h-100"
             style={{
               background: 'rgba(255,255,255,0.1)',
               transform: 'rotate(-45deg)',
               pointerEvents: 'none'
-            }}></span>
+            }}
+          ></span>
         </span>
       </div>
+
 
 
     </div>
