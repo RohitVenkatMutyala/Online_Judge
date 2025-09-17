@@ -102,16 +102,14 @@ function Dnav() {
                   </filter>
                 </defs>
                 <circle cx="50" cy="50" r="40" fill="url(#logoGrad1)" opacity="0.95" filter="url(#glow)"/>
-                {/* This is the new inner circle */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="20"
-                  fill="none"
-                  stroke="url(#logoGrad2)"
-                  strokeWidth="5"
+                <path
+                  d="M50 18 L68 48 L32 48 Z"
+                  fill="url(#logoGrad2)"
+                  stroke="#fff"
+                  strokeWidth="2.5"
                   filter="url(#glow)"
                 />
+                <circle cx="50" cy="68" r="7" fill="#fff" opacity="0.9" filter="url(#glow)"/>
               </svg>
 
               {/* Animated Ring Effect */}
@@ -123,6 +121,7 @@ function Dnav() {
                   width: '55px',
                   height: '55px',
                   border: '2px solid transparent',
+                  borderRadius: '50%',
                   backgroundImage: 'linear-gradient(45deg, #f12711, #f5af19, #11998e, #38ef7d)',
                   backgroundClip: 'padding-box',
                   opacity: '0',
@@ -192,7 +191,7 @@ function Dnav() {
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
               {user ? (
                 <>
-
+                  
                   {/* Enhanced Action Buttons */}
                   <li className="nav-item ms-lg-3">
                     <div className="d-flex gap-2 align-items-center">
@@ -222,13 +221,14 @@ function Dnav() {
                         <i className="bi bi-box-arrow-right me-2"></i>
                         Logout
                       </button>
+           
                     </div>
                   </li>
                 </>
               ) : (
                 <li className="nav-item">
                   <Link
-                    className="btn rounded-pill px-4 py-2"
+                    className="btn rounded-3 px-4 py-2"
                     to="/login"
                     style={{
                       background: 'linear-gradient(135deg, #11998e, #38ef7d)',
