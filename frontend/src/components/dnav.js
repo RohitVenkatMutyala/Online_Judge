@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import { useTheme } from '../context/ThemeContext'; // Theme context
 
 function Dnav() {
-
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const handleLogout = async () => {
     await logout();
@@ -19,228 +18,354 @@ function Dnav() {
 
   const isAdmin = user?.role === 'admin' || user?.isAdmin;
 
-  return (
-    <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: '#20232a' }}>
-      <div className="container-fluid px-4">
-
-        <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-2">
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 100 100"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#00C9FF" />
-                <stop offset="100%" stopColor="#92FE9D" />
-              </linearGradient>
-              <linearGradient id="grad2" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#f12711" />
-                <stop offset="100%" stopColor="#f5af19" />
-              </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="40" fill="url(#grad1)" />
-            <path
-              d="M50 20 L60 45 L40 45 Z"
-              fill="url(#grad2)"
-              stroke="#222"
-              strokeWidth="2"
-            />
-            <circle cx="50" cy="65" r="5" fill="#222" />
-          </svg>
-        <span
-  className="fw-bold fs-4"
-  style={{
-    background: 'linear-gradient(to right, #f12711, #f5af19',
+  const navLinkStyle = {
+    background: 'linear-gradient(135deg, #11998e, #38ef7d)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     fontWeight: '600',
-    transition: 'all 20s ease',
-    cursor: 'pointer',
-  }}
-  onMouseEnter={(e) => {
-    e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
-    e.target.style.WebkitBackgroundClip = 'text';
-    e.target.style.WebkitTextFillColor = 'transparent';
-  }}
-  onMouseLeave={(e) => {
-    e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19';
-    e.target.style.WebkitBackgroundClip = 'text';
-    e.target.style.WebkitTextFillColor = 'transparent';
-  }}
->
-  Randoman
-</span>
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    padding: '10px 18px',
+    borderRadius: '12px',
+    position: 'relative',
+    textDecoration: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    backdropFilter: 'blur(5px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+  };
 
-        </Link>
+  const handleNavLinkHover = (e, isEnter) => {
+    if (isEnter) {
+      e.target.style.background = 'linear-gradient(135deg, #f12711, #f5af19)';
+      e.target.style.WebkitBackgroundClip = 'text';
+      e.target.style.WebkitTextFillColor = 'transparent';
+      e.target.style.transform = 'translateY(-3px) scale(1.02)';
+      e.target.style.boxShadow = '0 8px 25px rgba(241, 39, 17, 0.4)';
+      e.target.style.borderColor = 'rgba(241, 39, 17, 0.3)';
+    } else {
+      e.target.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+      e.target.style.WebkitBackgroundClip = 'text';
+      e.target.style.WebkitTextFillColor = 'transparent';
+      e.target.style.transform = 'translateY(0) scale(1)';
+      e.target.style.boxShadow = 'none';
+      e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+    }
+  };
 
+  return (
+    <>
+      {/* Premium Enhanced Navigation Bar */}
+      <nav className="navbar navbar-expand-lg sticky-top shadow-lg" 
+           style={{ 
+             background: 'linear-gradient(135deg, #1a1d23 0%, #20232a 30%, #2c3e50 70%, #34495e 100%)',
+             backdropFilter: 'blur(15px)',
+             borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
+             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+           }}>
+        <div className="container-fluid px-4 py-2">
+          
+          {/* Ultra-Enhanced Brand Logo */}
+          <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-3 py-2">
+            <div className="position-relative">
+              <svg
+                width="45"
+                height="45"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{
+                  filter: 'drop-shadow(0 6px 12px rgba(0, 201, 255, 0.4)) drop-shadow(0 0 20px rgba(146, 254, 157, 0.3))',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'rotate(20deg) scale(1.15)';
+                  e.target.style.filter = 'drop-shadow(0 8px 16px rgba(241, 39, 17, 0.5)) drop-shadow(0 0 30px rgba(245, 175, 25, 0.4))';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'rotate(0deg) scale(1)';
+                  e.target.style.filter = 'drop-shadow(0 6px 12px rgba(0, 201, 255, 0.4)) drop-shadow(0 0 20px rgba(146, 254, 157, 0.3))';
+                }}
+              >
+                <defs>
+                  <linearGradient id="logoGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#00C9FF" />
+                    <stop offset="35%" stopColor="#92FE9D" />
+                    <stop offset="70%" stopColor="#38ef7d" />
+                    <stop offset="100%" stopColor="#11998e" />
+                  </linearGradient>
+                  <linearGradient id="logoGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#f12711" />
+                    <stop offset="50%" stopColor="#f5af19" />
+                    <stop offset="100%" stopColor="#ff6b6b" />
+                  </linearGradient>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge> 
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+                <circle cx="50" cy="50" r="40" fill="url(#logoGrad1)" opacity="0.95" filter="url(#glow)"/>
+                <path
+                  d="M50 18 L68 48 L32 48 Z"
+                  fill="url(#logoGrad2)"
+                  stroke="#fff"
+                  strokeWidth="2.5"
+                  filter="url(#glow)"
+                />
+                <circle cx="50" cy="68" r="7" fill="#fff" opacity="0.9" filter="url(#glow)"/>
+              </svg>
+              
+              {/* Animated Ring Effect */}
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  left: '-5px',
+                  width: '55px',
+                  height: '55px',
+                  border: '2px solid transparent',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(45deg, #f12711, #f5af19, #11998e, #38ef7d)',
+                  backgroundClip: 'padding-box',
+                  opacity: '0',
+                  transition: 'all 0.4s ease'
+                }}
+                className="logo-ring"
+              ></div>
+            </div>
+            
+            <span
+              className="fw-bold"
+              style={{
+                background: 'linear-gradient(135deg, #f12711 0%, #f5af19 30%, #ff6b6b 70%, #ee5a52 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontSize: '2rem',
+                fontWeight: '800',
+                letterSpacing: '-0.8px',
+                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                cursor: 'pointer',
+                textShadow: '0 4px 8px rgba(241, 39, 17, 0.3)',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 30%, #00C9FF 70%, #92FE9D 100%)';
+                e.target.style.WebkitBackgroundClip = 'text';
+                e.target.style.WebkitTextFillColor = 'transparent';
+                e.target.style.transform = 'scale(1.08)';
+                e.target.style.textShadow = '0 6px 12px rgba(17, 153, 142, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #f12711 0%, #f5af19 30%, #ff6b6b 70%, #ee5a52 100%)';
+                e.target.style.WebkitBackgroundClip = 'text';
+                e.target.style.WebkitTextFillColor = 'transparent';
+                e.target.style.transform = 'scale(1)';
+                e.target.style.textShadow = '0 4px 8px rgba(241, 39, 17, 0.3)';
+              }}
+            >
+              Randoman
+            </span>
+          </Link>
 
+          {/* Ultra-Enhanced Mobile Toggle */}
+          <button
+            className="navbar-toggler border-0 p-3"
+            type="button"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            style={{ 
+              background: 'linear-gradient(135deg, #f12711, #f5af19)',
+              borderRadius: '15px',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: '0 4px 15px rgba(241, 39, 17, 0.3)',
+              width: '55px',
+              height: '55px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'scale(1.15) rotate(5deg)';
+              e.target.style.boxShadow = '0 8px 25px rgba(241, 39, 17, 0.5)';
+              e.target.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'scale(1) rotate(0deg)';
+              e.target.style.boxShadow = '0 4px 15px rgba(241, 39, 17, 0.3)';
+              e.target.style.background = 'linear-gradient(135deg, #f12711, #f5af19)';
+            }}
+          >
+            <i className={`bi ${isCollapsed ? 'bi-list' : 'bi-x'} text-white`} style={{ fontSize: '1.5rem' }}></i>
+          </button>
 
+          {/* Premium Navigation Menu */}
+          <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
+            <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-2 align-items-lg-center">
+              {user ? (
+                <>
+                  {isAdmin ? (
+                    <>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/admindashboard" style={navLinkStyle}
+                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          <i className="bi bi-speedometer2" style={{ fontSize: '1.1rem' }}></i>
+                          <span>Admin Dashboard</span>
+                        </Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/postproblem" style={navLinkStyle}
+                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          <i className="bi bi-plus-circle-fill" style={{ fontSize: '1.1rem' }}></i>
+                          <span>Create Problem</span>
+                        </Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/test" style={navLinkStyle}
+                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          <i className="bi bi-gear-fill" style={{ fontSize: '1.1rem' }}></i>
+                          <span>Test Cases</span>
+                        </Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/adminproblems" style={navLinkStyle}
+                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          <i className="bi bi-collection-fill" style={{ fontSize: '1.1rem' }}></i>
+                          <span>Manage Problems</span>
+                        </Link>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      {/* Non-admin users can have additional nav items here if needed */}
+                    </>
+                  )}
 
-        <button
-          className="navbar-toggler "
-          style={{ backgroundColor: '#ba5114ff' }}
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-          aria-controls="navbarContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <i className="bi bi-list text-dark fs-4"></i>
-        </button>
-
-        <div className="collapse navbar-collapse" id="navbarContent">
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
-            {user ? (
-              <>
-                {isAdmin ? (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/admindashboard"
+                  {/* Ultra-Enhanced Action Buttons */}
+                  <li className="nav-item ms-lg-4">
+                    <div className="d-flex gap-3 align-items-center">
+                      {/* Premium Theme Toggle */}
+                      <button
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        className="btn btn-outline-light rounded-pill"
                         style={{
-                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: '600',
-                          transition: 'all 0.3s ease',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '2px solid rgba(255, 255, 255, 0.2)',
+                          backdropFilter: 'blur(15px)',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          width: '50px',
+                          height: '50px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
+                          e.target.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+                          e.target.style.transform = 'scale(1.15) rotate(10deg)';
+                          e.target.style.boxShadow = '0 8px 25px rgba(17, 153, 142, 0.5)';
+                          e.target.style.borderColor = 'rgba(17, 153, 142, 0.5)';
                         }}
                         onMouseLeave={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
-                        }}>
-                        <i className="bi bi-person-workspace me-1"></i> Dashboard
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/postproblem"
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                          e.target.style.transform = 'scale(1) rotate(0deg)';
+                          e.target.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        }}
+                      >
+                        <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'}`} 
+                           style={{ fontSize: '1.2rem' }}></i>
+                      </button>
+
+                      {/* Premium Logout Button */}
+                      <button
+                        onClick={handleLogout}
+                        className="btn rounded-pill px-5 py-3"
                         style={{
-                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: '600',
-                          transition: 'all 0.3s ease',
+                          background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #e74c3c 100%)',
+                          border: 'none',
+                          color: 'white',
+                          fontWeight: '700',
+                          fontSize: '1rem',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          boxShadow: '0 6px 20px rgba(238, 90, 82, 0.4)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
+                          e.target.style.background = 'linear-gradient(135deg, #f12711 0%, #f5af19 50%, #ff9a56 100%)';
+                          e.target.style.transform = 'translateY(-4px) scale(1.05)';
+                          e.target.style.boxShadow = '0 12px 30px rgba(241, 39, 17, 0.6)';
                         }}
                         onMouseLeave={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
-                        }}>
-                        <i className="bi bi-pencil-square me-1"></i> Post Problem
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/test"
-                        style={{
-                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: '600',
-                          transition: 'all 0.3s ease',
+                          e.target.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #e74c3c 100%)';
+                          e.target.style.transform = 'translateY(0) scale(1)';
+                          e.target.style.boxShadow = '0 6px 20px rgba(238, 90, 82, 0.4)';
                         }}
-                        onMouseEnter={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
-                        }}>
-                        <i className="bi bi-beaker"></i> Set_TC
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/adminproblems"
-                        style={{
-                          background: 'linear-gradient(to right, #11998e, #38ef7d)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: '600',
-                          transition: 'all 0.3s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
-                          e.target.style.WebkitBackgroundClip = 'text';
-                          e.target.style.WebkitTextFillColor = 'transparent';
-                        }}>
-                        <i className="bi bi-list-task me-1"></i> View Problems
-                      </Link>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="nav-item">
-                   
-                    </li>
-               
-
-
-                  
-
-                  </>
-                )}
+                      >
+                        <i className="bi bi-box-arrow-right me-2" style={{ fontSize: '1.1rem' }}></i>
+                        Logout
+                      </button>
+                    </div>
+                  </li>
+                </>
+              ) : (
                 <li className="nav-item">
-                  <button
-                    onClick={handleLogout}
+                  <Link 
+                    className="btn rounded-pill px-5 py-3"
+                    to="/login"
+                    style={{
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #92FE9D 100%)',
+                      border: 'none',
+                      color: 'white',
+                      fontWeight: '700',
+                      textDecoration: 'none',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: '0 6px 20px rgba(17, 153, 142, 0.4)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}
                     onMouseEnter={(e) => {
-                      e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
-                      e.target.style.color = 'white';
-                      e.target.style.border = 'none';
+                      e.target.style.background = 'linear-gradient(135deg, #f12711 0%, #f5af19 50%, #ff9a56 100%)';
+                      e.target.style.transform = 'translateY(-4px) scale(1.05)';
+                      e.target.style.boxShadow = '0 12px 30px rgba(241, 39, 17, 0.6)';
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.background = 'transparent';
-                      e.target.style.color = '#ffc107';
-                      e.target.style.border = '1px solid #ffc107';
-                    }}
-                    style={{
-                      background: 'transparent',
-                      color: '#ffc107',
-                      border: '1px solid #ffc107',
-                      padding: '8px 16px',
-                      borderRadius: '5px',
-                      fontWeight: '600',
-                      transition: 'all 0.3s ease',
+                      e.target.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #92FE9D 100%)';
+                      e.target.style.transform = 'translateY(0) scale(1)';
+                      e.target.style.boxShadow = '0 6px 20px rgba(17, 153, 142, 0.4)';
                     }}
                   >
-                    <i className="bi bi-box-arrow-right me-1"></i> Logout
-                  </button>
+                    <i className="bi bi-person-fill me-2" style={{ fontSize: '1.1rem' }}></i>
+                    Login
+                  </Link>
                 </li>
-          
-
-              </>
-            ) : (
-              
-              <li className="nav-item">
-                <Link className="nav-link text-white" to="/login">
-                 
-                </Link>
-              </li>
-            )}
-           
-
-          </ul>
+              )}
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* CSS for additional effects */}
+      <style jsx>{`
+        .navbar-brand:hover .logo-ring {
+          opacity: 1 !important;
+          animation: rotate 2s linear infinite;
+        }
+        
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        .nav-link:hover {
+          background: rgba(255, 255, 255, 0.05) !important;
+        }
+      `}</style>
+    </>
   );
 }
 
