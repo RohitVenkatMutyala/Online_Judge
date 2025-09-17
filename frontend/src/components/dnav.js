@@ -157,60 +157,7 @@ function Dnav() {
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
               {user ? (
                 <>
-                  {isAdmin ? (
-                    <>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/admindashboard" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
-                          <i className="bi bi-speedometer2"></i>
-                          <span>Admin Dashboard</span>
-                        </Link>
-                      </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/postproblem" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
-                          <i className="bi bi-plus-circle-fill"></i>
-                          <span>Create Problem</span>
-                        </Link>
-                      </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/test" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
-                          <i className="bi bi-gear-fill"></i>
-                          <span>Test Cases</span>
-                        </Link>
-                      </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/adminproblems" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
-                          <i className="bi bi-collection-fill"></i>
-                          <span>Manage Problems</span>
-                        </Link>
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li className="nav-item">
-                
-                      </li>
-                      <li className="nav-item">
-             
-                      </li>
-                      <li className="nav-item">
-                
-                      </li>
-                      <li className="nav-item">
-                  
-                      </li>
-                      <li className="nav-item">
-                    
-                      </li>
-                    </>
-                  )}
+                 
 
                   {/* Enhanced Action Buttons */}
                   <li className="nav-item ms-lg-3">
