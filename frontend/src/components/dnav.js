@@ -230,12 +230,12 @@ function Dnav() {
                           boxShadow: '0 2px 8px rgba(238, 90, 82, 0.3)'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.background = 'linear-gradient(135deg, #f12711, #f5af19)';
+                          e.target.style.background = 'linear-gradient(135deg,  #f12711, #f5af19)';
                           e.target.style.transform = 'translateY(-2px)';
                           e.target.style.boxShadow = '0 6px 20px rgba(241, 39, 17, 0.4)';
                         }}
                         onMouseLeave={(e) => {
-                          e.target.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a52)';
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)';
                           e.target.style.transform = 'translateY(0)';
                           e.target.style.boxShadow = '0 2px 8px rgba(238, 90, 82, 0.3)';
                         }}
