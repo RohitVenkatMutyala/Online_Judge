@@ -240,10 +240,38 @@ function Navbar() {
                   {/* Enhanced Action Buttons */}
                   <li className="nav-item ms-lg-3">
                     <div className="d-flex gap-2 align-items-center">
-                      {/* Theme Toggle */}
+                  
+
+                      {/* Logout Button */}
+                      <button
+                        onClick={handleLogout}
+                        className="btn rounded-3 px-4 py-2"
+                        style={{
+                          background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+                          border: 'none',
+                          color: 'white',
+                          fontWeight: '600',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          boxShadow: '0 2px 8px rgba(238, 90, 82, 0.3)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(135deg, #f12711, #f5af19)';
+                          e.target.style.transform = 'translateY(-2px)';
+                          e.target.style.boxShadow = '0 6px 20px rgba(241, 39, 17, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a52)';
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = '0 2px 8px rgba(238, 90, 82, 0.3)';
+                        }}
+                      >
+                        <i className="bi bi-box-arrow-right me-2"></i>
+                        Logout
+                      </button>
+                          {/* Theme Toggle */}
                       <button
                         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                        className="btn btn-outline-light rounded-pill"
+                        className="btn btn-outline-light rounded-3"
                         style={{
                           background: 'rgba(255, 255, 255, 0.1)',
                           border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -267,33 +295,6 @@ function Navbar() {
                         }}
                       >
                         <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                      </button>
-
-                      {/* Logout Button */}
-                      <button
-                        onClick={handleLogout}
-                        className="btn rounded-pill px-4 py-2"
-                        style={{
-                          background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
-                          border: 'none',
-                          color: 'white',
-                          fontWeight: '600',
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                          boxShadow: '0 2px 8px rgba(238, 90, 82, 0.3)'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.background = 'linear-gradient(135deg, #f12711, #f5af19)';
-                          e.target.style.transform = 'translateY(-2px)';
-                          e.target.style.boxShadow = '0 6px 20px rgba(241, 39, 17, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a52)';
-                          e.target.style.transform = 'translateY(0)';
-                          e.target.style.boxShadow = '0 2px 8px rgba(238, 90, 82, 0.3)';
-                        }}
-                      >
-                        <i className="bi bi-box-arrow-right me-2"></i>
-                        Logout
                       </button>
                     </div>
                   </li>
