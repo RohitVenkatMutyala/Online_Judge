@@ -103,72 +103,77 @@ const Problems = () => {
         </div>
 
         {/* Card layout for each problem */}
-        <div className="row g-4">
-          {filtered.map((q, index) => (
-            <div key={index} className="col-md-6 col-lg-4">
-              <div className="card shadow-sm position-relative h-100">
-                {/* Top-right status badge */}
-                <div
-                  className={`position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded-pill small ${q.status === 'Solved' ? 'bg-success' : 'bg-secondary'
-                    }`}
-                >
-                  {!q.tag?.includes("PYQ") && (
-                    <span>{q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}</span>
-                  )}
-                </div>
+       <div className="row g-4">
+  {filtered
+    .filter(q => !q.tag?.toLowerCase().includes("pyq")) // 🚀 exclude PYQ questions
+    .map((q, index) => (
+      <div key={index} className="col-md-6 col-lg-4">
+        <div className="card shadow-sm position-relative h-100">
+          {/* Top-right status badge */}
+          <div
+            className={`position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded-pill small ${q.status === 'Solved' ? 'bg-success' : 'bg-secondary'
+              }`}
+          >
+            <span>{q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}</span>
+          </div>
 
-                <div className="card-body d-flex flex-column justify-content-between">
-                  <div>
-                    <large className="text-muted"
-                      style={{
-                        background: "linear-gradient(to right, #ff416c, #ff4b2b)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent"
-                      }}
-                    ><strong>{`QID ('_') ${q.QID}`}</strong></large>
-                    <h5
-                      className="card-title mt-1"
-                      style={{
-                        background: "linear-gradient(to right,  #11998e, #38ef7d)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent"
-                      }}
-                    >
-                      {q.name}
-                    </h5>
+          <div className="card-body d-flex flex-column justify-content-between">
+            <div>
+              <large className="text-muted"
+                style={{
+                  background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent"
+                }}
+              >
+                <strong>{`QID ('_') ${q.QID}`}</strong>
+              </large>
+              <h5
+                className="card-title mt-1"
+                style={{
+                  background: "linear-gradient(to right,  #11998e, #38ef7d)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent"
+                }}
+              >
+                {q.name}
+              </h5>
 
-
-                    {/* Tags */}
-                    {q.tag && (
-                      <div className="d-flex flex-wrap mt-2">
-                        {q.tag.split(',').map((tag, idx) => (
-                          <span key={idx} className={getTagBadge(tag.trim())}>
-                            {tag.trim()}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="d-flex justify-content-between align-items-center mt-3">
-                    <span className={getDifficultyBadge(q.difficulty)}>
-                      {q.difficulty?.toUpperCase()}
+              {/* Tags */}
+              {q.tag && (
+                <div className="d-flex flex-wrap mt-2">
+                  {q.tag.split(',').map((tag, idx) => (
+                    <span key={idx} className={getTagBadge(tag.trim())}>
+                      {tag.trim()}
                     </span>
-                    <button className="btn btn-outline-primary rounded-pill" onClick={() => handleViewClick(q.QID)}> View &gt;</button>
-                    {!q.tag?.includes("PYQ") && (
-                      <button
-                        onClick={() => handleSolveClick(q.QID)}
-                        className="btn btn-outline-danger rounded-pill"
-                      >
-                        Solve &gt;
-                      </button>
-                    )}
-                  </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
-          ))}
+
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <span className={getDifficultyBadge(q.difficulty)}>
+                {q.difficulty?.toUpperCase()}
+              </span>
+              <button
+                className="btn btn-outline-primary rounded-pill"
+                onClick={() => handleViewClick(q.QID)}
+              >
+                View &gt;
+              </button>
+              <button
+                onClick={() => handleSolveClick(q.QID)}
+                className="btn btn-outline-danger rounded-pill"
+              >
+                Solve &gt;
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
+    ))}
+</div>
+
       </div>
     </>
   );
