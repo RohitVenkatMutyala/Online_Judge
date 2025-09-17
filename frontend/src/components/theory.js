@@ -110,15 +110,7 @@ const Theory = () => {
                         .map((q, index) => (
                             <div key={index} className="col-md-6 col-lg-4">
                                 <div className="card shadow-sm position-relative h-100">
-                                    {/* Top-right status badge */}
-                                    <div
-                                        className={`position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded-pill small ${q.status === 'Solved' ? 'bg-success' : 'bg-secondary'
-                                            }`}
-                                    >
-                                        {!q.tag?.includes("PYQ") && (
-                                            <span>{q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}</span>
-                                        )}
-                                    </div>
+                                    
 
                                     <div className="card-body d-flex flex-column justify-content-between">
                                         <div>
