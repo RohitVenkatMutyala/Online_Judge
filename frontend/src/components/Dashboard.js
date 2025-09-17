@@ -3,17 +3,21 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './sketchy.css';
-import Navbar from './navbar';
 import Dnav from './dnav';
+import { Tooltip } from 'bootstrap';
 
 function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
     const storedImage = localStorage.getItem("profileImage");
     if (storedImage) setProfileImage(storedImage);
+
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new Tooltip(el));
   }, []);
 
   const handleImageChange = (e) => {
@@ -41,17 +45,17 @@ function Dashboard() {
       <Dnav />
       <div className="container my-5">
         <div
-          className="dashboard-card shadow-lg rounded-4 p-4 d-flex flex-column align-items-center"
+          className="dashboard-card shadow-lg rounded-4 p-4 d-flex"
           style={{
-            background: 'rgba(28,28,30,0.85)',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(28,28,30,0.9)',
+            backdropFilter: 'blur(8px)',
             border: '1px solid rgba(255,255,255,0.1)',
-            maxWidth: '700px',
+            maxWidth: '900px',
             margin: '0 auto'
           }}
         >
           {/* Profile Section */}
-          <div className="profile-section text-center mb-4">
+          <div className="profile-section text-center me-4" style={{ minWidth: '180px' }}>
             <label htmlFor="profileUpload" style={{ cursor: "pointer" }}>
               <div
                 className="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm overflow-hidden mb-3"
@@ -75,50 +79,72 @@ function Dashboard() {
               onChange={handleImageChange}
               style={{ display: "none" }}
             />
-            <h4 className="text-white">{user.firstname} {user.lastname}</h4>
+            <h5 className="text-white">{user.firstname} {user.lastname}</h5>
             <p className="text-muted">{user.email}</p>
 
-            {/* Badge */}
+            {/* User Badge */}
             <span
-              className="badge rounded-pill d-flex align-items-center justify-content-center shadow-sm position-relative overflow-hidden mt-2"
+              className="badge d-flex align-items-center justify-content-center shadow-sm mt-2"
               style={{
-                background: 'linear-gradient(135deg, #f12711, #f5af19)',
+                background: '#11998e', // updated badge color
                 color: '#fff',
                 fontWeight: 500,
-                fontSize: '0.9rem',
-                padding: '0.5rem 2rem',
-                minWidth: '150px',
+                fontSize: '0.85rem',
+                padding: '0.4rem 1.5rem',
                 textAlign: 'center'
               }}
             >
               <span style={{ fontSize: "1rem", marginRight: "0.5rem" }}>⚫</span>
               User
-              <span
-                className="position-absolute top-0 start-0 w-100 h-100"
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  transform: 'rotate(-45deg)',
-                  pointerEvents: 'none'
-                }}
-              ></span>
             </span>
           </div>
 
           {/* Buttons Section */}
-          <div className="dashboard-buttons d-flex flex-wrap justify-content-center gap-3 mt-4 w-100">
-            <button onClick={() => navigate("/problems")} className="btn btn-gradient">
-              Solve Problems
-            </button>
-            <button onClick={() => navigate("/sub")} className="btn btn-gradient">
-              Submissions
-            </button>
-            <button onClick={() => navigate("/funda")} className="btn btn-gradient">
-              Fundamentals
-            </button>
-            <button onClick={() => navigate("/contexts")} className="btn btn-gradient">
-              Contexts
-            </button>
-            {/* Add more buttons here */}
+          <div className="buttons-section d-flex flex-column flex-grow-1">
+            <div className="d-flex flex-wrap gap-3 mb-3">
+              <button
+                onClick={() => navigate("/problems")}
+                className="btn btn-gradient position-relative"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Solve coding problems to practice"
+              >
+                <i className="bi bi-question-circle me-2 fs-5"></i>
+                Solve Problems
+              </button>
+              <button
+                onClick={() => navigate("/sub")}
+                className="btn btn-gradient position-relative"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Check your previous submissions"
+              >
+                <i className="bi bi-check-circle me-2 fs-5"></i>
+                Submissions
+              </button>
+            </div>
+            <div className="d-flex flex-wrap gap-3">
+              <button
+                onClick={() => navigate("/funda")}
+                className="btn btn-gradient position-relative"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Learn the fundamental concepts"
+              >
+                <i className="bi bi-book me-2 fs-5"></i>
+                Fundamentals
+              </button>
+              <button
+                onClick={() => navigate("/contexts")}
+                className="btn btn-gradient position-relative"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Understand the contexts and examples"
+              >
+                <i className="bi bi-collection me-2 fs-5"></i>
+                Contexts
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -129,21 +155,17 @@ function Dashboard() {
           color: #fff;
           font-weight: 500;
           border: none;
-          padding: 0.6rem 1.5rem;
-          border-radius: 50px;
+          padding: 0.5rem 1.2rem;
+          border-radius: 8px; /* reduced border-radius */
           transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
         }
         .btn-gradient:hover {
           background: linear-gradient(to right, #11998e, #38ef7d);
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
         }
-        .btn-gradient:active {
-          transform: translateY(1px);
-          box-shadow: none;
-        }
-        .dashboard-card h4, .dashboard-card p {
-          margin: 0;
+        .btn-gradient i {
+          pointer-events: none;
         }
       `}</style>
     </>
