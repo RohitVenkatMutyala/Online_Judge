@@ -88,7 +88,7 @@ const Theory = () => {
             {/* Custom Styles */}
             <style jsx>{`
                 .theory-hero {
-                    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                    background: linear-gradient(135deg, #1C1F22 0%, #000000 100%);
                     position: relative;
                     overflow: hidden;
                     min-height: 200px;
@@ -382,7 +382,7 @@ const Theory = () => {
 
             {/* Hero Section */}
             <div className="theory-hero d-flex align-items-center">
-                
+                <div className="container theory-hero-content">
                     <div className="row justify-content-center">
                         <div className="col-lg-8">
                            
@@ -391,13 +391,13 @@ const Theory = () => {
                                 <input
                                     type="text"
                                     className="form-control search-input"
-                                    placeholder="🔍 Search by tags "
+                                    placeholder="🔍 Search by tags  "
                                     value={filterTag}
                                     onChange={handleFilterChange}
                                 />
                             </div>
                         </div>
-                    
+                    </div>
                 </div>
             </div>
 
