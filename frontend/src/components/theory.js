@@ -115,7 +115,9 @@ const Theory = () => {
                                         className={`position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded-pill small ${q.status === 'Solved' ? 'bg-success' : 'bg-secondary'
                                             }`}
                                     >
-                                        <span>{q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}</span>
+                                        {!q.tag?.includes("PYQ") && (
+                                            <span>{q.status === 'Solved' ? 'Solved ✅' : 'Solved ❌'}</span>
+                                        )}
                                     </div>
 
                                     <div className="card-body d-flex flex-column justify-content-between">
