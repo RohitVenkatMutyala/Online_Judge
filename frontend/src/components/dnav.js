@@ -224,38 +224,7 @@ function Dnav() {
                     <i className="bi bi-box-arrow-right me-1"></i> Logout
                   </button>
                 </li>
-                 {/* Theme Toggle */}
-            <li className="nav-item d-flex align-items-center ms-2">
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
-                  e.target.style.color = 'white';
-                  e.target.style.border = 'none';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = '#f8f9fa'; // Bootstrap light
-                  e.target.style.border = '1px solid #f8f9fa';
-                }}
-                title="Toggle theme"
-                style={{
-                  background: 'transparent',
-                  color: '#f8f9fa',
-                  border: '1px solid #f8f9fa',
-                  padding: '6px 12px',
-                  borderRadius: '5px',
-                  transition: 'all 0.3s ease',
-                  fontSize: '1rem',
-                }}
-              >
-                {theme === 'dark' ? (
-                  <i className="bi bi-sun-fill"></i>
-                ) : (
-                  <i className="bi bi-moon-stars-fill"></i>
-                )}
-              </button>
-            </li>
+          
 
               </>
             ) : (
