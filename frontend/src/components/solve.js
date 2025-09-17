@@ -372,10 +372,11 @@ int main() {
             <div className="problem-card" style={{ height: 'calc(100vh - 100px)', overflowY: 'auto' }}>
               {/* FIX: Removed `bg-white` class to make it theme-sensitive */}
               <div className="card-header border-0 p-4 pb-0">
-                <h4 className="gradient-text-secondary fw-bold mb-4 display-6">
+                
+                <div className="info-section rounded-3 p-4 mb-4">
+                  <h4 className="gradient-text-secondary fw-bold mb-4 display-6">
                   {problem.name}
                 </h4>
-                <div className="info-section rounded-3 p-4 mb-4">
                   <div className="row align-items-center">
                     <div className="col-md-6 mb-3 mb-md-0">
                       <div className="d-flex align-items-center">
@@ -471,7 +472,7 @@ int main() {
               <div className="card-header bg-dark text-white fw-semibold rounded-top">Code Editor</div>
               <div className="card-body p-0">
                 <Editor
-                  height="650px"
+                  height="470px"
                   language={
                     language === 'cpp' ? 'cpp' :
                       language === 'py' ? 'python' : 'java'
