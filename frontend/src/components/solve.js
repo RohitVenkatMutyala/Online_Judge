@@ -385,7 +385,7 @@ int main() {
                         </span>
                       </div>
                     </div>
-            
+
                     <div className="col-md-6">
                       {problem.tag && (
                         <div className="d-flex align-items-center flex-wrap">
@@ -400,7 +400,7 @@ int main() {
                         </div>
                       )}
                     </div>
-                            <div className="col-md-6 mb-3 mb-md-0">
+                    <div className="col-md-6 mb-3 mb-md-0">
                       <div className="d-flex align-items-center">
                         <span className="text-muted fw-medium me-3">QID:</span>
                         {/* Use the new, neutral badge class here */}
@@ -432,18 +432,42 @@ int main() {
 
           {/* ===== Unchanged Editor and Tab Section START ===== */}
           <div className="col-lg-6">
-            <div className="mb-3">
-              <label htmlFor="languageSelect" className="form-label fw-bold">Select Language:</label>
-              <select
-                id="languageSelect"
-                className="form-select"
-                value={language}
-                onChange={handleLanguageChange}
-              >
-                <option value="cpp">C++</option>
-                <option value="py">Python</option>
-                <option value="java">Java</option>
-              </select>
+            <div className="card shadow-sm mb-3">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-center">
+                  <h6 className="card-title mb-0 fw-bold">
+                    <i className="bi bi-code-slash me-2"></i>Select Language:
+                  </h6>
+                  <div className="btn-group" role="group" aria-label="Language selector">
+                    {/* C++ Button */}
+                    <button
+                      type="button"
+                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'cpp' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => handleLanguageChange({ target: { value: 'cpp' } })}
+                    >
+                      <i className="bi bi-motherboard-fill"></i> C++
+                    </button>
+
+                    {/* Python Button */}
+                    <button
+                      type="button"
+                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'py' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => handleLanguageChange({ target: { value: 'py' } })}
+                    >
+                      <i className="bi bi-braces"></i> Python
+                    </button>
+
+                    {/* Java Button */}
+                    <button
+                      type="button"
+                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'java' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => handleLanguageChange({ target: { value: 'java' } })}
+                    >
+                      <i className="bi bi-cup-hot-fill"></i> Java
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top">Code Editor</div>
