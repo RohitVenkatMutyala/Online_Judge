@@ -2,32 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './sketchy.css'; // assuming it styles the book effect
+import './sketchy.css';
 import Navbar from './navbar';
 
 function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [pageIndex, setPageIndex] = useState(0);
 
   const [profileImage, setProfileImage] = useState(null);
 
-  // ✅ Load stored image when component mounts
+  // ✅ Load stored image
   useEffect(() => {
-    const storedImage = localStorage.getItem("profileImage");
+    const storedImage = localStorage.getItem('profileImage');
     if (storedImage) {
       setProfileImage(storedImage);
     }
   }, []);
 
-  // ✅ Handle new image upload
+  // ✅ Handle upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
-        localStorage.setItem("profileImage", reader.result);
+        localStorage.setItem('profileImage', reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -51,24 +51,24 @@ function Dashboard() {
     width: '100%',
   };
 
-  // ✅ Page with profile image upload + user info
+  // ✅ Professional card-based layout
   const pages = [
-    <div key="user" className="book-page text-center">
-      {/* Profile Image Upload */}
+    <div key="user" className="text-center p-4">
+      {/* Profile Image */}
       <div className="d-flex justify-content-center mb-3">
-        <label htmlFor="profileUpload" style={{ cursor: "pointer" }}>
+        <label htmlFor="profileUpload" style={{ cursor: 'pointer' }}>
           <div
             className="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm overflow-hidden"
-            style={{ width: "120px", height: "120px" }}
+            style={{ width: '120px', height: '120px' }}
           >
             {profileImage ? (
               <img
                 src={profileImage}
                 alt="Profile"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
-              <span style={{ fontSize: "2rem" }}>👤</span>
+              <span style={{ fontSize: '2rem' }}>👤</span>
             )}
           </div>
         </label>
@@ -77,18 +77,19 @@ function Dashboard() {
           id="profileUpload"
           accept="image/*"
           onChange={handleImageChange}
-          style={{ display: "none" }}
+          style={{ display: 'none' }}
         />
       </div>
 
       {/* User Info */}
-      <h6>👤 User</h6>
-      <h4>{user.firstname} {user.lastname}</h4>
-      <p>{user.email}</p>
+      <h4 className="fw-bold">{user.firstname} {user.lastname}</h4>
+      <p className="text-muted">{user.email}</p>
 
       {/* Badge */}
       <div className="mt-3">
-        <span className="badge bg-secondary">Normal User</span>
+        <span className="badge bg-gradient bg-info px-3 py-2 shadow-sm">
+          🌟 Verified Learner
+        </span>
       </div>
     </div>
   ];
@@ -98,19 +99,21 @@ function Dashboard() {
       <Navbar />
       <div className="container my-5 d-flex justify-content-center align-items-center">
         <div
-          className="book shadow-lg p-4 rounded-4"
+          className="shadow-lg p-4 rounded-4 w-100"
           style={{
-            background: 'rgba(28,28,30,0.85)',
+            background: 'rgba(28,28,30,0.9)',
             backdropFilter: 'blur(10px)',
-            maxWidth: '600px',
-            width: '100%',
+            maxWidth: '500px',
             border: '1px solid rgba(255,255,255,0.1)',
           }}
         >
-          <div className="book-inner animate-page">
+          {/* Render Current Page */}
+          <div className="animate-page">
             {pages[pageIndex]}
           </div>
-          <div className="book-controls mt-4 d-flex justify-content-between align-items-center">
+
+          {/* Controls */}
+          <div className="mt-4 d-flex justify-content-between align-items-center">
             <button
               className="btn"
               style={{
