@@ -17,6 +17,7 @@ import { useAuth } from "../context/AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./navbar";
 import axios from "axios";
+import { Tooltip } from "bootstrap";
 
 const getTodayDate = () => {
   const today = new Date();
@@ -39,6 +40,10 @@ const Submission = () => {
   const helpResponsesRef = collection(db, "helpResponses");
 
   // 🔽 Fetch daily help count from Firestore
+  useEffect(() => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new Tooltip(el));
+  }, []);
   useEffect(() => {
     const fetchHelpCount = async () => {
       if (!user?._id) return;
@@ -206,6 +211,7 @@ const Submission = () => {
                           title="You can use Help only 20 times a day. It resets every 24 hours."
                         ></i>
                         <span>Help Used: <strong>{helpCount}/20</strong></span>
+
                       </div>
                     </div>
 
