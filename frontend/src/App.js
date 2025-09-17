@@ -18,6 +18,7 @@ import { ThemeProvider } from './context/ThemeContext'; // you'll create this fi
 import Submission from './components/submissions';
 import Contexts from './components/context';
 import Userview from './components/userview';
+import Theory from './components/theory';
 
 function App() {
   return (
@@ -77,6 +78,15 @@ function App() {
                 <>
                   <Helmet><title>Admin Dashboard - Randoman</title></Helmet>
                   <ADashboard />
+                </>
+              }
+            />
+             <Route
+              path="/funda"
+              element={
+                <>
+                  <Helmet><title>Fundamentals - Randoman</title></Helmet>
+                  <Theory />
                 </>
               }
             />

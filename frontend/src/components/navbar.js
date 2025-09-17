@@ -236,6 +236,29 @@ function Navbar() {
                     >
                       <i className="bi bi-journal-check me-1"></i> Problems
                     </Link>
+                    <Link
+                      className="nav-link text-white d-flex align-items-center gap-2"
+                      to="/funda"
+                      style={{
+                        background: 'linear-gradient(to right, #11998e, #38ef7d)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'linear-gradient(to right, #f12711, #f5af19)';
+                        e.target.style.WebkitBackgroundClip = 'text';
+                        e.target.style.WebkitTextFillColor = 'transparent';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'linear-gradient(to right, #11998e, #38ef7d)';
+                        e.target.style.WebkitBackgroundClip = 'text';
+                        e.target.style.WebkitTextFillColor = 'transparent';
+                      }}
+                    >
+                      <i className="bi bi-journal-check me-1"></i> Fundamentals
+                    </Link>
 
                     <Link
                       className="nav-link text-white d-flex align-items-center gap-2"
