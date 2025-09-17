@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { db } from "../firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import ReactMarkdown from "react-markdown";
+
 const Solve = () => {
   const API_URL = process.env.REACT_APP_SERVER_API;
   const API_COM = process.env.REACT_APP_COMPILER_API;
@@ -18,7 +19,6 @@ const Solve = () => {
   const [Solved, setSolved] = useState('');
   const [input, setInput] = useState('');
   const { theme } = useTheme();
-
 
   const [code, setCode] = useState(`#include <iostream>
 
@@ -35,7 +35,6 @@ int main() {
   const [outputtest, setOutputTest] = useState('');
   const [activeTab, setActiveTab] = useState('input');
   const [TotalTime, setTime] = useState();
-
 
   // Load code, language, input from localStorage
   useEffect(() => {
@@ -58,8 +57,6 @@ int main() {
     fetchUserData();
   }, [QID, user]);
 
-
-  // console.log(user._id);
   // Fetch problem
   useEffect(() => {
     const fetchProblem = async () => {
@@ -72,6 +69,7 @@ int main() {
     };
     fetchProblem();
   }, [QID]);
+
   const saveToFirebase = async (newData) => {
     if (user && QID) {
       try {
@@ -97,10 +95,7 @@ int main() {
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setLanguage(newLang);
-
-
     saveToFirebase({ language: newLang });
-
   };
 
   const handleinput = (e) => {
@@ -108,7 +103,6 @@ int main() {
     setInput(val);
     saveToFirebase({ input: val });
   };
-
 
   const handleRun = async () => {
     setIsRunning(true);
@@ -132,6 +126,7 @@ int main() {
       setActiveTab('output');
     }
   };
+
   const handlesubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -158,13 +153,12 @@ int main() {
           expectedOutput: outval,
           id,
           QID,
-
         });
 
         const data = compilerresponse.data;
         console.log(data);
         console.log("Passed:", data.passed, "Total:", data.total);
-        console.log("TotalTime:", data.totalTimeMs);  // ✅ Matches backend key
+        console.log("TotalTime:", data.totalTimeMs);
 
         setTime(data.totalTimeMs);
         console.log(Solved);
@@ -177,19 +171,13 @@ int main() {
         }
         if (data.passed === data.total) {
           const solvedStatus = "Solved";
-
-          // Update local React state (optional, for UI)
           setSolved(solvedStatus);
-
-          // Use local value in API call
-
           await axios.post(`${API_URL}/rd`, {
-            status: solvedStatus, // ✅ use correct key name too
+            status: solvedStatus,
             QID,
             id,
           });
         }
-
       } else {
         setOutput("Test case data missing.");
         setActiveTab('output');
@@ -207,313 +195,627 @@ int main() {
     }
   };
 
-
   if (!problem) {
     return (
-      <div className="container mt-5">
-        <div className="alert alert-warning text-center d-flex align-items-center justify-content-center gap-2">
-          <div className="spinner-border text-warning" role="status" style={{ width: "1.5rem", height: "1.5rem" }}>
-            <span className="visually-hidden">Loading...</span>
+      <>
+        <Navbar />
+        <div className="container mt-5">
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">Loading problem...</p>
           </div>
-          <span>Loading...</span>
         </div>
-
-      </div>
+        
+        <style jsx>{`
+          .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+          }
+          
+          .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 0.3rem solid rgba(17, 153, 142, 0.2);
+            border-top: 0.3rem solid #11998e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          
+          .loading-text {
+            color: #11998e;
+            font-weight: 600;
+            font-size: 1.1rem;
+          }
+        `}</style>
+      </>
     );
   }
 
   if (!user || user.role === 'admin') {
     return (
-      <div className="container mt-5">
-        <div className="alert alert-danger text-center">
-          {user ? 'Admins cannot solve problems.' : 'Unauthorized'}
+      <>
+        <Navbar />
+        <div className="container mt-5">
+          <div className="alert alert-danger text-center shadow-sm border-0 rounded-4">
+            {user ? 'Admins cannot solve problems.' : 'Unauthorized'}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
       <Navbar />
-      <div className="container-fluid px-4 mt-4">
-        <div className="row g-4">
-          {/* Problem Section */}
-          <div className="col-lg-6">
-            <div className="card shadow border-0 rounded-3">
-              <div className="card-body">
-                <h4 className="text-muted">{`QID ('_') ${problem.QID}`}</h4>
-                <h4 className="mb-3 fw-semibold text-primary">{problem.name}</h4>
-                <p>
-                  <span className="badge text-white me-2" style={{ backgroundColor: '#a259ff' }}>
-                    {problem.tag}
-                  </span>
-
-                  <span className="badge text-dark me-2" style={{ backgroundColor: '#ffb000' }}>
-                    {problem.difficulty}
-                  </span>
-
-
-                </p>
-                <hr />
-                <div className="fs-6 text-body" style={{ whiteSpace: 'pre-wrap' }}>
-                  <ReactMarkdown>
-                    {problem.description}
-                  </ReactMarkdown>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          {/* Editor and Tab Section */}
-          <div className="col-lg-6">
-            {/* Language Select */}
-            <div className="mb-3">
-              <label htmlFor="languageSelect" className="form-label fw-bold">Select Language:</label>
-              <select
-                id="languageSelect"
-                className="form-select"
-                value={language}
-                onChange={handleLanguageChange}
-              >
-                <option value="cpp">C++</option>
-                <option value="py">Python</option>
-                <option value="java">Java</option>
-              </select>
-            </div>
-
-            {/* Editor */}
-            <div className="card shadow border-0 mb-3">
-              <div className="card-header bg-dark text-white fw-semibold rounded-top">Code Editor</div>
-              <div className="card-body p-0">
-                <Editor
-                  height="460px"
-                  language={
-                    language === 'cpp' ? 'cpp' :
-                      language === 'py' ? 'python' :
-                        language === 'java' ? 'java' : 'cpp'
-                  }
-                  value={code}
-                  theme="vs-dark"
-                  onChange={handleCodeChange}
-                  options={{
-                    fontSize: 14,
-                    minimap: { enabled: false },
-                    tabSize: 2,
-                    automaticLayout: true,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <ul className="nav nav-tabs rounded-top">
-              <li className="nav-item">
-                <button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} onClick={() => setActiveTab('input')}>
-                  Input
-                </button>
-              </li>
-              <li className="nav-item">
-                <button className={`nav-link ${activeTab === 'output' ? 'active' : ''}`} onClick={() => setActiveTab('output')}>
-                  Output
-                </button>
-              </li>
-              <li className="nav-item">
-                <button className={`nav-link ${activeTab === 'verdict' ? 'active' : ''}`} onClick={() => setActiveTab('verdict')}>
-                  Verdict
-                </button>
-              </li>
-            </ul>
-
-            {/* Tab Contents */}
-            <div className={`tab-content border border-top-0 p-3 rounded-bottom bg-${theme === 'dark' ? 'dark' : 'light'} text-${theme === 'dark' ? 'light' : 'dark'}`} style={{ minHeight: '180px' }}>
-
-              {activeTab === 'input' && (
-
-
-                <div className="tab-pane fade show active">
-                  <label
-                    htmlFor="inputArea"
-                    className="form-label fw-semibold"
-                    style={{
-                      background: 'linear-gradient(to right, #f12711, #f5af19)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    Custom Input:
-                  </label>
-
-                  <textarea
-                    id="inputArea"
-                    className="form-control mb-3 text-body bg-body border border-secondary"
-                    style={{ resize: 'vertical', minHeight: '120px' }}
-                    rows="4"
-                    placeholder="Enter custom input (if required)..."
-                    value={input || ''}
-                    onChange={handleinput}
-                  />
-
-                  <div className="d-flex gap-2">
-                    <button
-                      className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-1"
-                      onClick={handleRun}
-                      disabled={isRunning}
-                    >
-                      {isRunning ? (
-                        <>
-                          <div className="spinner-border spinner-border-sm text-primary" role="status"></div>
-                          Running...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-play-fill"></i> Run Code
-                        </>
-                      )}
-                    </button>
-
-                    <button
-                      className="btn btn-outline-success w-50 d-flex align-items-center justify-content-center gap-1"
-                      onClick={handlesubmit}
-
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="spinner-border spinner-border-sm text-success" role="status"></div>
-                          Submitting...
-                        </>
-                      ) : (
-
-                        <>
-                          <i className="bi bi-rocket-takeoff-fill"></i> Submit Code
-                        </>
-                      )}
-                    </button>
+      
+      {/* Enhanced Styles */}
+      <style jsx>{`
+        .solve-container {
+          background: linear-gradient(135deg, rgba(17, 153, 142, 0.02), rgba(56, 239, 125, 0.02));
+          min-height: calc(100vh - 80px);
+        }
+        
+        .problem-card {
+          border: none;
+          border-radius: 20px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+          backdrop-filter: blur(10px);
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .problem-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 5px;
+          background: linear-gradient(90deg, #11998e, #38ef7d);
+        }
+        
+        .qid-text {
+          background: linear-gradient(135deg, #ff416c, #ff4b2b);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 700;
+        }
+        
+        .problem-title {
+          background: linear-gradient(135deg, #11998e, #38ef7d);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 700;
+        }
+        
+        .problem-badge {
+          padding: 0.5rem 1rem;
+          border-radius: 50px;
+          font-weight: 600;
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .tag-badge {
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          color: white;
+        }
+        
+        .difficulty-badge {
+          background: linear-gradient(135deg, #ff9500, #ffb400);
+          color: white;
+        }
+        
+        .editor-container {
+          border: none;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .language-select {
+          background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+          border: 2px solid transparent;
+          background-image: linear-gradient(white, white), linear-gradient(135deg, #11998e, #38ef7d);
+          background-origin: border-box;
+          background-clip: content-box, border-box;
+          border-radius: 12px;
+          padding: 0.75rem;
+          font-weight: 600;
+          color: #11998e;
+        }
+        
+        .language-select:focus {
+          outline: none;
+          box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.2);
+        }
+        
+        .editor-header {
+          background: linear-gradient(135deg, #2d3748, #4a5568);
+          color: white;
+          padding: 1rem;
+          font-weight: 600;
+          border-radius: 20px 20px 0 0;
+        }
+        
+        .custom-tabs {
+          border: none;
+          background: transparent;
+          border-radius: 16px 16px 0 0;
+          overflow: hidden;
+        }
+        
+        .custom-tab {
+          background: rgba(17, 153, 142, 0.1);
+          border: none;
+          color: #11998e;
+          padding: 1rem 1.5rem;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          border-radius: 16px 16px 0 0;
+          margin-right: 2px;
+        }
+        
+        .custom-tab.active {
+          background: linear-gradient(135deg, #11998e, #38ef7d);
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+        }
+        
+        .custom-tab:hover {
+          background: linear-gradient(135deg, rgba(17, 153, 142, 0.2), rgba(56, 239, 125, 0.2));
+        }
+        
+        .tab-content-container {
+          border-radius: 0 16px 16px 16px;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+          border: 2px solid rgba(17, 153, 142, 0.1);
+          min-height: 200px;
+        }
+        
+        .input-label {
+          background: linear-gradient(135deg, #ff416c, #ff4b2b);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 700;
+          font-size: 1rem;
+        }
+        
+        .custom-textarea {
+          border: 2px solid rgba(17, 153, 142, 0.2);
+          border-radius: 12px;
+          padding: 1rem;
+          transition: all 0.3s ease;
+          resize: vertical;
+          min-height: 120px;
+        }
+        
+        .custom-textarea:focus {
+          outline: none;
+          border-color: #11998e;
+          box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.1);
+        }
+        
+        .btn-run {
+          background: linear-gradient(135deg, #11998e, #38ef7d);
+          border: none;
+          color: white;
+          padding: 0.8rem 2rem;
+          border-radius: 50px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+        
+        .btn-run:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+          color: white;
+        }
+        
+        .btn-run:disabled {
+          opacity: 0.7;
+          transform: none;
+        }
+        
+        .btn-submit {
+          background: linear-gradient(135deg, #ff416c, #ff4b2b);
+          border: none;
+          color: white;
+          padding: 0.8rem 2rem;
+          border-radius: 50px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          box-shadow: 0 4px 15px rgba(255, 65, 108, 0.3);
+        }
+        
+        .btn-submit:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(255, 65, 108, 0.4);
+          color: white;
+        }
+        
+        .btn-submit:disabled {
+          opacity: 0.7;
+          transform: none;
+        }
+        
+        .output-card {
+          border: none;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .output-header {
+          background: linear-gradient(135deg, #ff416c, #ff4b2b);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          padding: 1rem;
+          font-weight: 700;
+          text-align: center;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .verdict-card {
+          border: none;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .verdict-header {
+          background: linear-gradient(135deg, #ff416c, #ff4b2b);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          padding: 1rem;
+          font-weight: 700;
+          text-align: center;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .time-badge {
+          background: linear-gradient(135deg, #2d3748, #4a5568);
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 50px;
+          font-weight: 600;
+          display: inline-block;
+        }
+        
+        .performance-quote {
+          background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+          border-left: 4px solid #ffc107;
+          padding: 1rem;
+          border-radius: 12px;
+          color: #f57c00;
+          font-weight: 600;
+          font-style: italic;
+        }
+        
+        .test-case-card {
+          border: 2px solid rgba(17, 153, 142, 0.2);
+          border-radius: 12px;
+          padding: 1rem;
+          transition: all 0.3s ease;
+          min-width: 140px;
+        }
+        
+        .test-case-card.passed {
+          border-color: #38a169;
+          background: rgba(56, 161, 105, 0.1);
+        }
+        
+        .test-case-card.failed {
+          border-color: #e53e3e;
+          background: rgba(229, 62, 62, 0.1);
+        }
+        
+        .test-case-title {
+          background: linear-gradient(135deg, #11998e, #38ef7d);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 700;
+        }
+        
+        /* Dark theme styles */
+        [data-bs-theme="dark"] .problem-card {
+          background: linear-gradient(145deg, rgba(26, 32, 44, 0.95), rgba(45, 55, 72, 0.9));
+        }
+        
+        [data-bs-theme="dark"] .tab-content-container {
+          background: #1a202c;
+          color: #e2e8f0;
+          border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-bs-theme="dark"] .custom-textarea {
+          background: #2d3748;
+          color: #e2e8f0;
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        [data-bs-theme="dark"] .output-card,
+        [data-bs-theme="dark"] .verdict-card {
+          background: #1a202c;
+          color: #e2e8f0;
+        }
+      `}</style>
+      
+      <div className="solve-container">
+        <div className="container-fluid px-4 py-4">
+          <div className="row g-4">
+            {/* Problem Section */}
+            <div className="col-lg-6">
+              <div className="problem-card">
+                <div className="card-body p-4">
+                  <div className="qid-text mb-2">{`QID ('_') ${problem.QID}`}</div>
+                  <h2 className="problem-title mb-3">{problem.name}</h2>
+                  
+                  <div className="mb-4">
+                    <span className="problem-badge tag-badge me-2">
+                      {problem.tag}
+                    </span>
+                    <span className="problem-badge difficulty-badge">
+                      {problem.difficulty}
+                    </span>
                   </div>
-
+                  
+                  <hr className="my-4" />
+                  
+                  <div className="fs-6 text-body" style={{ whiteSpace: 'pre-wrap' }}>
+                    <ReactMarkdown>
+                      {problem.description}
+                    </ReactMarkdown>
+                  </div>
                 </div>
-              )}
+              </div>
+            </div>
 
-              {activeTab === 'output' && (
-                <div className="tab-pane fade show active">
-                  {output ? (
-                    <div className={`card shadow-sm border-0 bg-${theme === 'dark' ? 'dark' : 'white'} text-${theme === 'dark' ? 'light' : 'dark'}`}>
+            {/* Editor and Tab Section */}
+            <div className="col-lg-6">
+              {/* Language Select */}
+              <div className="mb-3">
+                <label htmlFor="languageSelect" className="form-label fw-bold mb-2">Select Language:</label>
+                <select
+                  id="languageSelect"
+                  className="form-select language-select"
+                  value={language}
+                  onChange={handleLanguageChange}
+                >
+                  <option value="cpp">C++</option>
+                  <option value="py">Python</option>
+                  <option value="java">Java</option>
+                </select>
+              </div>
 
-                      <div
-                        className="card-header text-center fw-bold"
-                        style={{
-                          background: 'linear-gradient(to right, #f12711, #f5af19)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontSize: '1.25rem'
-                        }}
+              {/* Editor */}
+              <div className="editor-container mb-3">
+                <div className="editor-header">
+                  💻 Code Editor
+                </div>
+                <div className="p-0">
+                  <Editor
+                    height="460px"
+                    language={
+                      language === 'cpp' ? 'cpp' :
+                      language === 'py' ? 'python' :
+                      language === 'java' ? 'java' : 'cpp'
+                    }
+                    value={code}
+                    theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
+                    onChange={handleCodeChange}
+                    options={{
+                      fontSize: 14,
+                      minimap: { enabled: false },
+                      tabSize: 2,
+                      automaticLayout: true,
+                      fontFamily: 'Fira Code, Monaco, Consolas, monospace',
+                      lineNumbers: 'on',
+                      scrollBeyondLastLine: false,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Custom Tabs */}
+              <ul className="nav custom-tabs">
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link custom-tab ${activeTab === 'input' ? 'active' : ''}`} 
+                    onClick={() => setActiveTab('input')}
+                  >
+                    📝 Input
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link custom-tab ${activeTab === 'output' ? 'active' : ''}`} 
+                    onClick={() => setActiveTab('output')}
+                  >
+                    📊 Output
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link custom-tab ${activeTab === 'verdict' ? 'active' : ''}`} 
+                    onClick={() => setActiveTab('verdict')}
+                  >
+                    🏆 Verdict
+                  </button>
+                </li>
+              </ul>
+
+              {/* Tab Contents */}
+              <div className={`tab-content-container p-4`}>
+                {activeTab === 'input' && (
+                  <div className="tab-pane fade show active">
+                    <label htmlFor="inputArea" className="form-label input-label mb-3">
+                      Custom Input:
+                    </label>
+
+                    <textarea
+                      id="inputArea"
+                      className="form-control custom-textarea mb-4"
+                      placeholder="Enter custom input (if required)..."
+                      value={input || ''}
+                      onChange={handleinput}
+                    />
+
+                    <div className="d-flex gap-3">
+                      <button
+                        className="btn-run flex-fill d-flex align-items-center justify-content-center gap-2"
+                        onClick={handleRun}
+                        disabled={isRunning}
                       >
-                        Output
-                      </div>
+                        {isRunning ? (
+                          <>
+                            <div className="spinner-border spinner-border-sm" role="status"></div>
+                            Running...
+                          </>
+                        ) : (
+                          <>
+                            ▶️ Run Code
+                          </>
+                        )}
+                      </button>
 
+                      <button
+                        className="btn-submit flex-fill d-flex align-items-center justify-content-center gap-2"
+                        onClick={handlesubmit}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="spinner-border spinner-border-sm" role="status"></div>
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            🚀 Submit Code
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'output' && (
+                  <div className="tab-pane fade show active">
+                    {output ? (
+                      <div className="output-card">
+                        <div className="output-header">
+                          📊 Output
+                        </div>
+                        <div className="card-body">
+                          <pre className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>{output}</pre>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-5">
+                        <div className="mb-3" style={{ fontSize: '3rem', opacity: 0.3 }}>💻</div>
+                        <p className="text-muted">Run code to see output here</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'verdict' && (
+                  <div className="tab-pane fade show active">
+                    <div className="verdict-card">
+                      <div className="verdict-header">
+                        🏆 Verdict
+                      </div>
 
                       <div className="card-body">
-                        <pre className="mb-0">{output}</pre>
+                        {verdicts.length === 0 ? (
+                          <div className="text-center py-5">
+                            <div className="mb-3" style={{ fontSize: '3rem', opacity: 0.3 }}>⚖️</div>
+                            <p className="text-muted">Submit code to see verdict here</p>
+                          </div>
+                        ) : (
+                          <>
+                            {/* Time & Performance */}
+                            <div className="mb-4">
+                              <div className="mb-3">
+                                <span className="me-2">⏱️ Total Time:</span>
+                                <span className="time-badge">
+                                  {typeof TotalTime === "number" ? `${TotalTime}ms` : "N/A"}
+                                </span>
+                              </div>
+
+                              <div className="performance-quote">
+                                {(() => {
+                                  if (typeof TotalTime !== "number") return "⏰ Looks like something went wrong.";
+                                  if (TotalTime <= 1000 && Solved === "Solved") return "🧠 Beats 100% of submissions. Genius alert!";
+                                  if (TotalTime <= 2000 && Solved === "Solved") return "🚀 Solid run! You've outperformed most developers.";
+                                  if (TotalTime <= 4000 && Solved === "Solved") return "🛠️ Good job! There's still room for optimization.";
+                                  return "Keep practicing to improve your performance!";
+                                })()}
+                              </div>
+                            </div>
+
+                            {/* Test Cases */}
+                            <div className="d-flex flex-wrap gap-3">
+                              {verdicts.map((v, idx) => (
+                                <div
+                                  key={idx}
+                                  className={`test-case-card ${v.verdict.includes("Passed") ? 'passed' : 'failed'}`}
+                                >
+                                  <div className="test-case-title mb-2">Test Case {v.testCase}</div>
+                                  <div className={v.verdict.includes("Passed") ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                    {v.verdict}
+                                  </div>
+
+                                  {!v.verdict.includes("Passed") && (
+                                    <div className="mt-3 text-start small">
+                                      <div className="mb-2">
+                                        <strong>Expected:</strong>
+                                        <pre className="mt-1 p-2 bg-light rounded">{v.expected}</pre>
+                                      </div>
+                                      <div>
+                                        <strong>Actual:</strong>
+                                        <pre className="mt-1 p-2 bg-light rounded">{v.actual}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <p className="text-muted">Run code to see output.</p>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'verdict' && (
-                <div className="tab-pane fade show active">
-                  <div className="card shadow-sm border-0">
-                    <div
-                      className="card-header text-center fw-bold"
-                      style={{
-                        background: 'linear-gradient(to right, #f12711, #f5af19)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontSize: '1.25rem'
-                      }}
-                    >
-                      Verdict
-                    </div>
-
-                    <div className="card-body">
-                      {verdicts.length === 0 ? (
-                        <p className="text-muted">Verdict will appear here.</p>
-                      ) : (
-                        <>
-                          {/* Total Time Display */}
-                          {/* Time & Quote Section */}
-
-                          <div className="mb-3">
-                            <div className="alert alert-secondary d-inline-block fw-semibold">
-                              ⏱️ Total Time Taken:{" "}
-                              <span className="badge bg-dark">
-                                {typeof TotalTime === "number"
-                                  ? `${TotalTime}ms`
-                                  : "N/A"}
-                              </span>
-                            </div>
-
-
-                            <div className="mt-2 fw-medium text-warning">
-                              {(() => {
-                                if (typeof TotalTime !== "number") return "⏰ Looks like something went wrong.";
-                                if (TotalTime <= 1000 && Solved === "Solved") return "🧠 Beats 100% of submissions. Genius alert!";
-                                if (TotalTime <= 2000 && Solved === "Solved") return "🚀 Solid run! You've outperformed most developers.";
-                                if (TotalTime <= 4000 && Solved === "Solved") return "🛠️ Good job! There's still room for optimization.";
-
-                              })()}
-                            </div>
-                          </div>
-
-
-                          {/* Verdict List */}
-                          <div className="d-flex flex-wrap gap-3">
-                            {verdicts.map((v, idx) => (
-                              <div
-                                key={idx}
-                                className="border rounded p-2 bg-light text-center"
-                                style={{ minWidth: '130px' }}
-                              >
-                                <strong style={{ color: 'yellowgreen' }}>Test Case {v.testCase}</strong>
-                                <div
-                                  className={
-                                    v.verdict.includes("Passed")
-                                      ? "text-success"
-                                      : "text-danger fw-bold"
-                                  }
-                                >
-                                  {v.verdict}
-                                </div>
-
-                                {!v.verdict.includes("Passed") && (
-                                  <div className="mt-2 text-start small">
-                                    <div>
-                                      <strong style={{ color: 'black' }}>Expected:</strong> <pre style={{ color: 'black' }}>{v.expected}</pre>
-                                    </div>
-                                    <div>
-                                      <strong style={{ color: 'black' }}>Actual:</strong> <pre style={{ color: 'black' }}>{v.actual}</pre>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
                   </div>
-                </div>
-              )}
-
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </>
-
   );
 };
 
