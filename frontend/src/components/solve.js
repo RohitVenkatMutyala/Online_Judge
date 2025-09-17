@@ -385,15 +385,7 @@ int main() {
                         </span>
                       </div>
                     </div>
-                    <div className="col-md-6 mb-3 mb-md-0">
-                      <div className="d-flex align-items-center">
-                        <span className="text-muted fw-medium me-3">QID:</span>
-                        {/* Use the new, neutral badge class here */}
-                        <span className="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill px-3">
-                          {problem.QID}
-                        </span>
-                      </div>
-                    </div>
+            
                     <div className="col-md-6">
                       {problem.tag && (
                         <div className="d-flex align-items-center flex-wrap">
@@ -407,6 +399,15 @@ int main() {
                           </div>
                         </div>
                       )}
+                    </div>
+                            <div className="col-md-6 mb-3 mb-md-0">
+                      <div className="d-flex align-items-center">
+                        <span className="text-muted fw-medium me-3">QID:</span>
+                        {/* Use the new, neutral badge class here */}
+                        <span className="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill px-3">
+                          {problem.QID}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
