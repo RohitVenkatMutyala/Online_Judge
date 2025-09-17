@@ -481,9 +481,7 @@ const Tview = () => {
                                         <h1 className="gradient-text-secondary fw-bold mb-4 display-5">
                                             {problem.name}
                                         </h1>
-                                        <p class="lead text-body-secondary mb-0">
-                                            Learn and master the concepts step by step
-                                        </p>
+                                       
                                     </div>
                                 </div>
 

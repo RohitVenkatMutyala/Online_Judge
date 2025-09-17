@@ -452,16 +452,7 @@ const Theory = () => {
                                         {q.name}
                                     </h2>
 
-                                    {/* Tags */}
-                                    {q.tag && (
-                                        <div className="tag-container">
-                                            {q.tag.split(',').map((tag, idx) => (
-                                                <span key={idx} className="tag-pill">
-                                                    {tag.trim()}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
+                                  
 
                                     <div className="d-flex justify-content-between align-items-center action-buttons">
                                         <div className="d-flex gap-2">
