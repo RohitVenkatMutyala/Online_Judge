@@ -473,7 +473,7 @@ const Tview = () => {
                         <div className="col-lg-10 col-xl-8">
                             <div className="tutorial-card">
                                 {/* Tutorial Header */}
-                                <div className="card-header bg-white border-0 p-5 pb-0">
+                                <div className="card-header bg-black border-0 p-5 pb-0">
                                     <div className="text-center mb-4">
                                         <div className="mb-3">
                                             <span className="fs-1">📖</span>
