@@ -140,7 +140,7 @@ const Theory = () => {
                                                 <div className="d-flex flex-wrap mt-2">
                                                     {q.tag.split(',').map((tag, idx) => (
                                                         <span key={idx} className={getTagBadge(tag.trim())}>
-                                                            {tag.trim()}
+                                                            
                                                         </span>
                                                     ))}
                                                 </div>
