@@ -102,14 +102,16 @@ function Dnav() {
                   </filter>
                 </defs>
                 <circle cx="50" cy="50" r="40" fill="url(#logoGrad1)" opacity="0.95" filter="url(#glow)"/>
-                <path
-                  d="M50 18 L68 48 L32 48 Z"
-                  fill="url(#logoGrad2)"
-                  stroke="#fff"
-                  strokeWidth="2.5"
+                {/* This is the new inner circle */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="20"
+                  fill="none"
+                  stroke="url(#logoGrad2)"
+                  strokeWidth="5"
                   filter="url(#glow)"
                 />
-                <circle cx="50" cy="68" r="7" fill="#fff" opacity="0.9" filter="url(#glow)"/>
               </svg>
 
               {/* Animated Ring Effect */}
