@@ -177,9 +177,9 @@ const Submission = () => {
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent"
                     }}>
-                  My Code Submissions
+                 Submissions
                 </h2>
-                <p className="text-muted mb-0">
+                <p className="text-muted mb-0 fs-4">
                   Welcome back, <span className="text-warning fw-semibold">{user?.firstname} {user?.lastname}</span>
                 </p>
               </div>
