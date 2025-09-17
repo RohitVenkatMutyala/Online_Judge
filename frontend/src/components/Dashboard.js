@@ -1,23 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './sketchy.css';
-import Navbar from './navbar';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./sketchy.css";
+import Navbar from "./navbar";
 
 function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [pageIndex, setPageIndex] = useState(0);
 
   const [profileImage, setProfileImage] = useState(null);
 
   // ✅ Load stored image
   useEffect(() => {
-    const storedImage = localStorage.getItem('profileImage');
-    if (storedImage) {
-      setProfileImage(storedImage);
-    }
+    const storedImage = localStorage.getItem("profileImage");
+    if (storedImage) setProfileImage(storedImage);
   }, []);
 
   // ✅ Handle upload
@@ -27,124 +24,109 @@ function Dashboard() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
-        localStorage.setItem('profileImage', reader.result);
+        localStorage.setItem("profileImage", reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  if (!user || user.role === 'admin') {
+  if (!user || user.role === "admin") {
     return (
       <div className="container mt-5">
-        <div className="alert alert-danger text-center">You are not logged in.</div>
+        <div className="alert alert-danger text-center">
+          You are not logged in.
+        </div>
       </div>
     );
   }
 
-  const buttonStyle = {
-    border: 'none',
-    color: 'white',
-    padding: '10px',
-    borderRadius: '8px',
-    fontWeight: '600',
-    transition: 'all 0.3s ease-in-out',
-    width: '100%',
-  };
-
-  // ✅ Professional card-based layout
-  const pages = [
-    <div key="user" className="text-center p-4">
-      {/* Profile Image */}
-      <div className="d-flex justify-content-center mb-3">
-        <label htmlFor="profileUpload" style={{ cursor: 'pointer' }}>
-          <div
-            className="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm overflow-hidden"
-            style={{ width: '120px', height: '120px' }}
-          >
-            {profileImage ? (
-              <img
-                src={profileImage}
-                alt="Profile"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <span style={{ fontSize: '2rem' }}>👤</span>
-            )}
-          </div>
-        </label>
-        <input
-          type="file"
-          id="profileUpload"
-          accept="image/*"
-          onChange={handleImageChange}
-          style={{ display: 'none' }}
-        />
-      </div>
-
-      {/* User Info */}
-      <h4 className="fw-bold">{user.firstname} {user.lastname}</h4>
-      <p className="text-muted">{user.email}</p>
-
-      {/* Badge */}
-      <div className="mt-3">
-        <span className="badge bg-gradient bg-info px-3 py-2 shadow-sm">
-          🌟 Verified Learner
-        </span>
-      </div>
-    </div>
-  ];
-
   return (
     <>
       <Navbar />
-      <div className="container my-5 d-flex justify-content-center align-items-center">
-        <div
-          className="shadow-lg p-4 rounded-4 w-100"
-          style={{
-            background: 'rgba(28,28,30,0.9)',
-            backdropFilter: 'blur(10px)',
-            maxWidth: '500px',
-            border: '1px solid rgba(255,255,255,0.1)',
-          }}
-        >
-          {/* Render Current Page */}
-          <div className="animate-page">
-            {pages[pageIndex]}
+      <div className="container my-5">
+        <div className="row g-4">
+          {/* Profile Card */}
+          <div className="col-md-4">
+            <div className="card shadow-lg border-0 rounded-4 text-center p-4">
+              <label htmlFor="profileUpload" style={{ cursor: "pointer" }}>
+                <div
+                  className="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm overflow-hidden mx-auto mb-3"
+                  style={{ width: "120px", height: "120px" }}
+                >
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt="Profile"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: "2rem" }}>👤</span>
+                  )}
+                </div>
+              </label>
+              <input
+                type="file"
+                id="profileUpload"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{ display: "none" }}
+              />
+
+              <h4 className="fw-bold">{user.firstname} {user.lastname}</h4>
+              <p className="text-muted">{user.email}</p>
+
+              {/* Badge */}
+              <span className="badge bg-gradient bg-info px-3 py-2 shadow-sm">
+                🎖️ Pro Learner
+              </span>
+            </div>
           </div>
 
-          {/* Controls */}
-          <div className="mt-4 d-flex justify-content-between align-items-center">
-            <button
-              className="btn"
-              style={{
-                ...buttonStyle,
-                background: 'linear-gradient(to right, #bdc3c7, #2c3e50)',
-                width: 'auto',
-                padding: '6px 12px',
-              }}
-              onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
-              disabled={pageIndex === 0}
-            >
-              ◀️ Previous
-            </button>
+          {/* Stats / Features */}
+          <div className="col-md-8">
+            <div className="row g-4">
+              {/* Example Feature 1 */}
+              <div className="col-md-6">
+                <div className="card shadow-sm border-0 rounded-4 p-3 text-center">
+                  <h6 className="fw-bold">Daily Quota</h6>
+                  <p className="text-muted">Placeholder — e.g. 3 left</p>
+                  <button className="btn btn-sm btn-success">
+                    Use Help
+                  </button>
+                </div>
+              </div>
 
-            <span className="text-light fw-semibold">
-              Page {pageIndex + 1} of {pages.length}
-            </span>
+              {/* Example Feature 2 */}
+              <div className="col-md-6">
+                <div className="card shadow-sm border-0 rounded-4 p-3 text-center">
+                  <h6 className="fw-bold">Achievements</h6>
+                  <p className="text-muted">Badges, milestones here</p>
+                  <button className="btn btn-sm btn-primary">
+                    View All
+                  </button>
+                </div>
+              </div>
 
-            <button
-              className="btn"
-              style={{
-                ...buttonStyle,
-                background: 'linear-gradient(to right, #00b09b, #96c93d)',
-                width: 'auto',
-                padding: '6px 12px',
-              }}
-              onClick={() => setPageIndex(prev => Math.min(pages.length - 1, prev + 1))}
-              disabled={pageIndex === pages.length - 1}
-            >
-              Next ▶️
-            </button>
+              {/* Example Feature 3 */}
+              <div className="col-md-6">
+                <div className="card shadow-sm border-0 rounded-4 p-3 text-center">
+                  <h6 className="fw-bold">Rank</h6>
+                  <p className="text-muted">Placeholder Rank</p>
+                </div>
+              </div>
+
+              {/* Example Feature 4 */}
+              <div className="col-md-6">
+                <div className="card shadow-sm border-0 rounded-4 p-3 text-center">
+                  <h6 className="fw-bold">Points</h6>
+                  <p className="text-muted">Placeholder Points</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
