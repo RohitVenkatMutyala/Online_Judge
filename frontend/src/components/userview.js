@@ -208,7 +208,6 @@ const Userview = () => {
         .markdown-content h4,
         .markdown-content h5,
         .markdown-content h6 {
-          color: #2d3748;
           font-weight: 600;
           margin-top: 2rem;
           margin-bottom: 1rem;
@@ -216,16 +215,13 @@ const Userview = () => {
         
         .markdown-content p {
           margin-bottom: 1.5rem;
-          color: #4a5568;
         }
         
         .markdown-content code {
-          background: linear-gradient(135deg, #f7fafc, #edf2f7);
           padding: 0.25rem 0.5rem;
           border-radius: 6px;
           font-size: 0.9em;
           color: #e53e3e;
-          border: 1px solid #e2e8f0;
         }
         
         .markdown-content pre {
@@ -253,16 +249,83 @@ const Userview = () => {
         
         .markdown-content li {
           margin-bottom: 0.5rem;
-          color: #4a5568;
         }
         
         .markdown-content blockquote {
           border-left: 4px solid #11998e;
-          background: linear-gradient(135deg, #f0fff4, #e6fffa);
           padding: 1rem 1.5rem;
           margin: 1.5rem 0;
           border-radius: 8px;
+        }
+        
+        /* Light theme styles */
+        [data-bs-theme="light"] .markdown-content h1,
+        [data-bs-theme="light"] .markdown-content h2,
+        [data-bs-theme="light"] .markdown-content h3,
+        [data-bs-theme="light"] .markdown-content h4,
+        [data-bs-theme="light"] .markdown-content h5,
+        [data-bs-theme="light"] .markdown-content h6 {
           color: #2d3748;
+        }
+        
+        [data-bs-theme="light"] .markdown-content p,
+        [data-bs-theme="light"] .markdown-content li {
+          color: #4a5568;
+        }
+        
+        [data-bs-theme="light"] .markdown-content code {
+          background: linear-gradient(135deg, #f7fafc, #edf2f7);
+          border: 1px solid #e2e8f0;
+        }
+        
+        [data-bs-theme="light"] .markdown-content blockquote {
+          background: linear-gradient(135deg, #f0fff4, #e6fffa);
+          color: #2d3748;
+        }
+        
+        [data-bs-theme="light"] .info-section {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+          border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Dark theme styles */
+        [data-bs-theme="dark"] .markdown-content h1,
+        [data-bs-theme="dark"] .markdown-content h2,
+        [data-bs-theme="dark"] .markdown-content h3,
+        [data-bs-theme="dark"] .markdown-content h4,
+        [data-bs-theme="dark"] .markdown-content h5,
+        [data-bs-theme="dark"] .markdown-content h6 {
+          color: #e2e8f0;
+        }
+        
+        [data-bs-theme="dark"] .markdown-content p,
+        [data-bs-theme="dark"] .markdown-content li {
+          color: #a0aec0;
+        }
+        
+        [data-bs-theme="dark"] .markdown-content code {
+          background: linear-gradient(135deg, #2d3748, #4a5568);
+          border: 1px solid #4a5568;
+          color: #fbb6ce;
+        }
+        
+        [data-bs-theme="dark"] .markdown-content blockquote {
+          background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+          color: #e2e8f0;
+        }
+        
+        [data-bs-theme="dark"] .info-section {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+          border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        [data-bs-theme="dark"] .problem-card {
+          background: #1a202c;
+        }
+        
+        [data-bs-theme="dark"] .card-header,
+        [data-bs-theme="dark"] .card-footer {
+          background: #1a202c !important;
         }
         
         .info-section {

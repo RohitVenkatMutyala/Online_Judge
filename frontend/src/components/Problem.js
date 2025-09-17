@@ -138,7 +138,6 @@ const Problems = () => {
         .problem-card {
           transition: all 0.3s ease;
           border: none;
-          background: #fff;
           position: relative;
           overflow: hidden;
         }
@@ -156,6 +155,24 @@ const Problems = () => {
         .problem-card:hover {
           transform: translateY(-8px);
           box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Light theme styles */
+        [data-bs-theme="light"] .problem-card {
+          background: #fff;
+        }
+        
+        [data-bs-theme="light"] .problem-card:hover {
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Dark theme styles */
+        [data-bs-theme="dark"] .problem-card {
+          background: #1a202c;
+        }
+        
+        [data-bs-theme="dark"] .problem-card:hover {
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
         }
         
         .gradient-text-primary {
@@ -258,7 +275,7 @@ const Problems = () => {
                     className="progress-bar"
                     style={{
                       width: `${totalCount > 0 ? (solvedCount / totalCount) * 100 : 0}%`,
-                      background: 'linear-gradient(to right,  #f12711, #f5af19)'
+                      background: 'linear-gradient(to right, #f12711, #f5af19)'
                     }}
                   ></div>
                 </div>
