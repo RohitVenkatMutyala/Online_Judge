@@ -80,7 +80,7 @@ const Userview = () => {
   return (
     <>
       <Navbar />
-      
+
       {/* Custom Styles */}
       <style jsx>{`
         .hero-gradient {
@@ -367,10 +367,10 @@ const Userview = () => {
                 <div className="card-header bg-white border-0 p-4 pb-0">
                   <div className="row align-items-start">
                     <div className="col-12">
-                      <h1 className="gradient-text-secondary fw-bold mb-4 display-6">
+                      <h4 className="gradient-text-secondary fw-bold mb-4">
                         {problem.name}
-                      </h1>
-                      
+                      </h4>
+
                       {/* Problem Meta Info */}
                       <div className="info-section rounded-3 p-4 mb-4">
                         <div className="row align-items-center">
@@ -409,7 +409,7 @@ const Userview = () => {
                       📝 Problem Description
                     </h4>
                   </div>
-                  
+
                   <div className="markdown-content">
                     <ReactMarkdown>
                       {problem.description}
@@ -420,13 +420,8 @@ const Userview = () => {
                 {/* Action Buttons */}
                 <div className="card-footer bg-white border-0 p-4">
                   <div className="d-flex gap-3 justify-content-center">
-                    <button 
-                      onClick={handleBackClick}
-                      className="btn btn-outline-gradient rounded-pill px-4 py-3"
-                    >
-                      Back to Problems
-                    </button>
-                    <button 
+                
+                    <button
                       onClick={handleSolveClick}
                       className="btn btn-gradient-primary rounded-pill px-5 py-3 fw-semibold"
                     >
