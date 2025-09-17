@@ -126,7 +126,7 @@ const Problems = () => {
                   WebkitTextFillColor: "transparent"
                 }}
               >
-                <strong>{`QID ('_') ${q.QID}`}</strong>
+                <strong>{`${q.QID}`}</strong>
               </large>
               <h5
                 className="card-title mt-1"
