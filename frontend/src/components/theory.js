@@ -385,24 +385,7 @@ const Theory = () => {
                 <div className="container theory-hero-content">
                     <div className="row justify-content-center">
                         <div className="col-lg-8">
-                            <div className="text-center text-white mb-4">
-                                <h1 className="display-4 fw-bold mb-3">
-                                    📚 Theory & Tutorials
-                                </h1>
-                                <p className="lead mb-4">
-                                    Master concepts with our comprehensive learning materials
-                                </p>
-                                <div className="d-flex justify-content-center gap-4 mb-4">
-                                    <div className="stats-badge">
-                                        <div className="fw-bold fs-4">{problems.length}</div>
-                                        <div className="small">Total Topics</div>
-                                    </div>
-                                    <div className="stats-badge">
-                                        <div className="fw-bold fs-4">{pyqProblems.length}</div>
-                                        <div className="small">PYQ Available</div>
-                                    </div>
-                                </div>
-                            </div>
+                           
                             
                             <div className="search-container">
                                 <input
