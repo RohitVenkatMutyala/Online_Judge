@@ -220,9 +220,9 @@ function Dnav() {
                       {/* Logout Button */}
                       <button
                         onClick={handleLogout}
-                        className="btn rounded-pill px-4 py-2"
+                        className="btn rounded-3 px-4 py-2"
                         style={{
-                          background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+                         
                           border: 'none',
                           color: 'white',
                           fontWeight: '600',
