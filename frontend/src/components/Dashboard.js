@@ -101,7 +101,7 @@ function Dashboard() {
           }}
         >
           <i className="bi bi-person-fill me-2"></i>
-          User
+           User
           <span
             className="position-absolute top-0 start-0 w-100 h-100"
             style={{
