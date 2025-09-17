@@ -129,7 +129,8 @@ const Theory = () => {
                                                     WebkitTextFillColor: "transparent"
                                                 }}
                                             >
-                                                <strong>{`QID ('_') ${q.QID}`}</strong>
+                                                 {!q.tag?.includes("PYQ") && (
+                                                <strong>{`QID ('_') ${q.QID}`}</strong>)}
                                             </large>
                                             <h5
                                                 className="card-title mt-1"
@@ -155,9 +156,10 @@ const Theory = () => {
                                         </div>
 
                                         <div className="d-flex justify-content-between align-items-center mt-3">
+                                           {!q.tag?.includes("PYQ") && (
                                             <span className={getDifficultyBadge(q.difficulty)}>
                                                 {q.difficulty?.toUpperCase()}
-                                            </span>
+                                            </span>)}
                                             <button className="btn btn-outline-primary rounded-pill" onClick={() => handleViewClick(q.QID)}> View &gt;</button>
                                             {!q.tag?.includes("PYQ") && (
                                                 <button
