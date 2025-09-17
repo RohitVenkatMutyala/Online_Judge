@@ -104,7 +104,8 @@ const Problems = () => {
 
         {/* Card layout for each problem */}
         <div className="row g-4">
-          {filtered.map((q, index) => (
+          {filtered.filter(q => q.tag?.toLowerCase().includes("pyq"))
+          .map((q, index) => (
             <div key={index} className="col-md-6 col-lg-4">
               <div className="card shadow-sm position-relative h-100">
                 {/* Top-right status badge */}
