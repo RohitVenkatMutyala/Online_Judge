@@ -334,34 +334,7 @@ const Userview = () => {
         }
       `}</style>
 
-      {/* Hero Section */}
-      <div className="hero-gradient py-4">
-        <div className="container position-relative">
-          <div className="d-flex align-items-center justify-content-between text-white">
-            <div className="d-flex align-items-center">
-              <button 
-                onClick={handleBackClick}
-                className="btn btn-outline-light rounded-pill me-3 px-3 py-2"
-              >
-                ← Back to Problems
-              </button>
-              <div>
-                <span className="badge bg-light text-dark rounded-pill px-3 py-2 me-2">
-                  QID {QID}
-                </span>
-              </div>
-            </div>
-            {!loading && problem && (
-              <button 
-                onClick={handleSolveClick}
-                className="btn btn-light rounded-pill px-4 py-2 fw-semibold"
-              >
-                🚀 Start Solving
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+
 
       <div className="container py-5">
         {/* Loading State */}
@@ -451,7 +424,7 @@ const Userview = () => {
                       onClick={handleBackClick}
                       className="btn btn-outline-gradient rounded-pill px-4 py-3"
                     >
-                      ← Back to Problems
+                      Back to Problems
                     </button>
                     <button 
                       onClick={handleSolveClick}
