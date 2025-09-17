@@ -83,7 +83,7 @@ const Submission = () => {
           ...doc.data()
         }));
         setSubmissions(data);
-        
+
         const helps = {};
         for (const submission of data) {
           const helpId = `${user._id}_${submission.docId}`;
@@ -148,10 +148,10 @@ const Submission = () => {
   };
 
   const getVerdictBadge = (verdict) => {
-    const badgeClass = verdict === "Passed" 
-      ? "badge bg-success" 
-      : verdict === "Failed" 
-        ? "badge bg-danger" 
+    const badgeClass = verdict === "Passed"
+      ? "badge bg-success"
+      : verdict === "Failed"
+        ? "badge bg-danger"
         : "badge bg-secondary";
     return <span className={badgeClass}>{verdict}</span>;
   };
@@ -171,13 +171,13 @@ const Submission = () => {
             <div className="bg-dark rounded-4 p-4 shadow-lg">
               {/* Header Section */}
               <div className="text-center mb-4">
-                <h2 className="fw-bold mb-3" 
-                    style={{
-                      background:  "linear-gradient(to right, #ff416c, #ff4b2b)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent"
-                    }}>
-                 Submissions
+                <h2 className="fw-bold mb-3"
+                  style={{
+                    background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent"
+                  }}>
+                  Submissions
                 </h2>
                 <p className="text-muted mb-0 fs-4">
                   Welcome back, <span className="text-warning fw-semibold">{user?.firstname} {user?.lastname}</span>
@@ -185,10 +185,10 @@ const Submission = () => {
               </div>
 
               {/* Stats Card */}
-              <div className="card border-0 mb-4" 
-                   style={{
-                     background:  "linear-gradient(to right, #ff416c, #ff4b2b)",
-                   }}>
+              <div className="card border-0 mb-4"
+                style={{
+                  background: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                }}>
                 <div className="card-body py-3">
                   <div className="row align-items-center text-white">
                     <div className="col-md-6">
@@ -199,10 +199,16 @@ const Submission = () => {
                     </div>
                     <div className="col-md-6 text-md-end">
                       <div className="d-flex align-items-center justify-content-md-end">
-                        <i className="bi bi-question-circle me-2 fs-5"></i>
+                        <i
+                          className="bi bi-question-circle me-2 fs-5"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="You can use Help only 20 times a day. It resets every 24 hours."
+                        ></i>
                         <span>Help Used: <strong>{helpCount}/20</strong></span>
                       </div>
                     </div>
+
                   </div>
                 </div>
               </div>
@@ -241,10 +247,10 @@ const Submission = () => {
                   {filtered.map((submission, index) => (
                     <div key={index} className="card bg-dark border-secondary mb-3 shadow-sm">
                       {/* Card Header */}
-                      <div className="card-header bg-gradient border-0 p-3" 
-                           style={{
-                             background: "linear-gradient(90deg, #2c3e50 0%, #34495e 100%)"
-                           }}>
+                      <div className="card-header bg-gradient border-0 p-3"
+                        style={{
+                          background: "linear-gradient(90deg, #2c3e50 0%, #34495e 100%)"
+                        }}>
                         <div className="row align-items-center">
                           {/* Left side - Problem info */}
                           <div className="col-lg-6">
@@ -258,7 +264,7 @@ const Submission = () => {
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Right side - Timestamp and actions */}
                           <div className="col-lg-6">
                             <div className="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
@@ -266,7 +272,7 @@ const Submission = () => {
                                 <i className="bi bi-clock me-1"></i>
                                 {new Date(submission.submittedAt).toLocaleString()}
                               </small>
-                              
+
                               {/* Action Buttons */}
                               <div className="btn-group btn-group-sm" role="group">
                                 <button
@@ -277,7 +283,7 @@ const Submission = () => {
                                   <i className="bi bi-code-slash me-1"></i>
                                   {expanded === index ? "Hide" : "Code"}
                                 </button>
-                                
+
                                 {helpResponses[submission.docId] && (
                                   <button
                                     className="btn btn-outline-info"
@@ -294,7 +300,7 @@ const Submission = () => {
                                     Previous
                                   </button>
                                 )}
-                                
+
                                 <button
                                   className="btn btn-outline-warning"
                                   disabled={loadingHelp[index] || helpCount >= 20}
@@ -313,7 +319,7 @@ const Submission = () => {
                                     </>
                                   )}
                                 </button>
-                                
+
                                 {helpResponses[index] && !loadingHelp[index] && (
                                   <button
                                     className="btn btn-outline-success"
@@ -339,11 +345,11 @@ const Submission = () => {
                                 <i className="bi bi-file-code me-1"></i>
                                 {submission.language} Code
                               </small>
-                             
+
                             </div>
-                            <pre 
-                              className="p-3 m-0 text-white overflow-auto" 
-                              style={{ 
+                            <pre
+                              className="p-3 m-0 text-white overflow-auto"
+                              style={{
                                 maxHeight: '400px',
                                 cursor: 'pointer',
                                 fontSize: '0.9rem',
@@ -362,7 +368,7 @@ const Submission = () => {
                         <div className="card-body border-top">
                           <div className="bg-light rounded p-3">
                             <div className="d-flex align-items-center mb-3">
-                             
+
                               <h6 className="mb-0 text-dark fw-semibold">Catch The Logic ('_')</h6>
                             </div>
                             <div className="text-dark">
