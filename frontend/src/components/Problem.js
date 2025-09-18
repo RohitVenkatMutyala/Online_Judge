@@ -288,6 +288,33 @@ const Problems = () => {
   color: var(--bs-secondary-color);
   opacity: 1;
 }
+  .search-input {
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 50rem; /* pill */
+  background-clip: padding-box, border-box;
+  background-origin: border-box;
+  background-image: 
+    linear-gradient(var(--bs-body-bg), var(--bs-body-bg)), /* inner fill */
+    linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);   /* shining border */
+  transition: all 0.3s ease;
+  color: var(--bs-body-color);
+}
+
+/* Placeholder adapts */
+.search-input::placeholder {
+  color: var(--bs-secondary-color);
+  opacity: 1;
+}
+
+/* On focus → stronger glowing effect */
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.6),
+              0 0 20px rgba(139, 92, 246, 0.6),
+              0 0 24px rgba(239, 68, 68, 0.5);
+}
+
 
           
       `}</style>
