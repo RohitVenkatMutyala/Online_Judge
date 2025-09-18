@@ -6,79 +6,79 @@ import Navbar from './navbar';
 import ReactMarkdown from "react-markdown";
 
 const Tview = () => {
-    const API_URL = process.env.REACT_APP_SERVER_API;
-    const { QID } = useParams();
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [problem, setProblem] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+  const API_URL = process.env.REACT_APP_SERVER_API;
+  const { QID } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [problem, setProblem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        const fetchProblem = async () => {
-            try {
-                setLoading(true);
-                const res = await axios.get(`${API_URL}/problem/${QID}`);
-                setProblem(res.data.problem);
-                setError('');
-            } catch (err) {
-                setError('Failed to load tutorial. Please try again.');
-                console.error('Error loading problem');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProblem();
-    }, [QID, API_URL]);
-
-    const getDifficultyBadge = (difficulty) => {
-        switch (difficulty?.toLowerCase()) {
-            case 'easy':
-                return 'badge bg-success-subtle border border-success text-success px-4 py-2 rounded-pill fw-semibold fs-6';
-            case 'medium':
-                return 'badge bg-warning-subtle border border-warning text-warning px-4 py-2 rounded-pill fw-semibold fs-6';
-            case 'hard':
-                return 'badge bg-danger-subtle border border-danger text-danger px-4 py-2 rounded-pill fw-semibold fs-6';
-            case 'basic':
-                return 'badge bg-secondary-subtle border border-secondary text-secondary px-4 py-2 rounded-pill fw-semibold fs-6';
-            default:
-                return 'badge bg-light px-4 py-2 rounded-pill fw-semibold fs-6';
-        }
+  useEffect(() => {
+    const fetchProblem = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_URL}/problem/${QID}`);
+        setProblem(res.data.problem);
+        setError('');
+      } catch (err) {
+        setError('Failed to load tutorial. Please try again.');
+        console.error('Error loading problem');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const getTagBadge = (tag) => 'badge text-light px-3 py-2 rounded-pill fw-medium me-2 mb-2';
+    fetchProblem();
+  }, [QID, API_URL]);
 
-    const handleBackClick = () => {
-        navigate(-1); // Go back to previous page
-    };
-
-    if (!user) {
-        return (
-            <div className="d-flex align-items-center justify-content-center min-vh-100">
-                <div className="alert alert-danger shadow-lg border-0 rounded-4 px-4 py-3">
-                    <h5 className="mb-0">⚠️ Unauthorized Access</h5>
-                </div>
-            </div>
-        );
+  const getDifficultyBadge = (difficulty) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'easy':
+        return 'badge bg-success-subtle border border-success text-success px-4 py-2 rounded-pill fw-semibold fs-6';
+      case 'medium':
+        return 'badge bg-warning-subtle border border-warning text-warning px-4 py-2 rounded-pill fw-semibold fs-6';
+      case 'hard':
+        return 'badge bg-danger-subtle border border-danger text-danger px-4 py-2 rounded-pill fw-semibold fs-6';
+      case 'basic':
+        return 'badge bg-secondary-subtle border border-secondary text-secondary px-4 py-2 rounded-pill fw-semibold fs-6';
+      default:
+        return 'badge bg-light px-4 py-2 rounded-pill fw-semibold fs-6';
     }
+  };
 
-    if (user.role === 'admin') {
-        return (
-            <div className="container mt-5">
-                <div className="alert alert-danger text-center shadow-lg border-0 rounded-4">
-                    <h5 className="mb-0">🔒 You are not logged in.</h5>
-                </div>
-            </div>
-        );
-    }
+  const getTagBadge = (tag) => 'badge text-light px-3 py-2 rounded-pill fw-medium me-2 mb-2';
 
+  const handleBackClick = () => {
+    navigate(-1); // Go back to previous page
+  };
+
+  if (!user) {
     return (
-        <>
-            <Navbar />
+      <div className="d-flex align-items-center justify-content-center min-vh-100">
+        <div className="alert alert-danger shadow-lg border-0 rounded-4 px-4 py-3">
+          <h5 className="mb-0">⚠️ Unauthorized Access</h5>
+        </div>
+      </div>
+    );
+  }
 
-            {/* Custom Styles */}
-            <style jsx>{`
+  if (user.role === 'admin') {
+    return (
+      <div className="container mt-5">
+        <div className="alert alert-danger text-center shadow-lg border-0 rounded-4">
+          <h5 className="mb-0">🔒 You are not logged in.</h5>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+
+      {/* Custom Styles */}
+      <style jsx>{`
         .hero-gradient {
           background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
           position: relative;
@@ -437,71 +437,85 @@ const Tview = () => {
           width: 0%;
           transition: width 0.1s ease;
         }
+          
+.bg-gradient-custom {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+}
+
+/* Gradient text (already in your project, but here for clarity) */
+.gradient-text-secondary {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
       `}</style>
 
-            {/* Reading Progress Bar */}
-            <div className="reading-progress">
-                <div className="reading-progress-bar" id="progressBar"></div>
+      {/* Reading Progress Bar */}
+      <div className="reading-progress">
+        <div className="reading-progress-bar" id="progressBar"></div>
+      </div>
+
+
+      <div className="container py-5">
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-5">
+            <div className="loading-spinner rounded-circle mx-auto mb-3"></div>
+            <p className="text-muted fs-5">Loading tutorial content...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="alert alert-danger border-0 rounded-4 shadow-sm mb-4">
+            <div className="d-flex align-items-center">
+              <span className="me-3 fs-4">⚠️</span>
+              <div>
+                <h6 className="mb-1">Error Loading Tutorial</h6>
+                <small>{error}</small>
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* Tutorial Content */}
+        {!loading && !error && problem && (
+          <div className="row justify-content-center">
+            <div className="col-lg-10 col-xl-8">
+              <div className="tutorial-card">
+                {/* Tutorial Header */}
+                <div className="card-header border-0 p-5 pb-0 bg-gradient-custom text-white rounded-top-4">
+                  <div className="text-center mb-4">
+                    <h1 className="fw-bold mb-3 display-5 gradient-text-secondary">
+                      {problem.name}
+                    </h1>
+                    <p className="lead text-light opacity-75">
+                      Solve and practice coding challenges with style 🚀
+                    </p>
+                  </div>
+                </div>
 
 
-            <div className="container py-5">
-                {/* Loading State */}
-                {loading && (
-                    <div className="text-center py-5">
-                        <div className="loading-spinner rounded-circle mx-auto mb-3"></div>
-                        <p className="text-muted fs-5">Loading tutorial content...</p>
-                    </div>
-                )}
-
-                {/* Error State */}
-                {error && (
-                    <div className="alert alert-danger border-0 rounded-4 shadow-sm mb-4">
-                        <div className="d-flex align-items-center">
-                            <span className="me-3 fs-4">⚠️</span>
-                            <div>
-                                <h6 className="mb-1">Error Loading Tutorial</h6>
-                                <small>{error}</small>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Tutorial Content */}
-                {!loading && !error && problem && (
-                    <div className="row justify-content-center">
-                        <div className="col-lg-10 col-xl-8">
-                            <div className="tutorial-card">
-                                {/* Tutorial Header */}
-                                <div className="card-header bg-black border-0 p-5 pb-0">
-                                    <div className="text-center mb-4">
-                                      
-                                        <h1 className="gradient-text-secondary fw-bold mb-4 display-5">
-                                            {problem.name}
-                                        </h1>
-                                       
-                                    </div>
-                                </div>
-
-                                {/* Tutorial Body */}
-                                <div className="card-body p-5">
-                                    <div className="tutorial-content">
-                                        <ReactMarkdown>
-                                            {problem.description}
-                                        </ReactMarkdown>
-                                    </div>
-                                </div>
+                {/* Tutorial Body */}
+                <div className="card-body p-5">
+                  <div className="tutorial-content">
+                    <ReactMarkdown>
+                      {problem.description}
+                    </ReactMarkdown>
+                  </div>
+                </div>
 
 
-                            </div>
-                        </div>
-                    </div>
-                )}
+              </div>
             </div>
+          </div>
+        )}
+      </div>
 
-            {/* Scroll Progress Script */}
-            <script dangerouslySetInnerHTML={{
-                __html: `
+      {/* Scroll Progress Script */}
+      <script dangerouslySetInnerHTML={{
+        __html: `
           window.addEventListener('scroll', function() {
             const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -512,9 +526,9 @@ const Tview = () => {
             }
           });
         `
-            }} />
-        </>
-    );
+      }} />
+    </>
+  );
 };
 
 export default Tview;
