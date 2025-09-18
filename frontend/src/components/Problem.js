@@ -258,6 +258,38 @@ const Problems = () => {
         .status-unsolved {
           background: linear-gradient(135deg, #ff6b6b, #ee5a52);
         }
+          /* Base search input */
+.search-input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease;
+}
+
+/* Light mode look */
+[data-bs-theme="light"] .search-input {
+  background: #fff !important;
+  color: #212529;
+  box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1),
+              -8px -8px 16px rgba(255, 255, 255, 0.7);
+}
+
+/* Dark mode look */
+[data-bs-theme="dark"] .search-input {
+  background: #1e2530 !important; /* dark tone */
+  color: #f8f9fa;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.6),
+              -4px -4px 10px rgba(255, 255, 255, 0.05);
+}
+
+/* Placeholder adapts */
+.search-input::placeholder {
+  color: var(--bs-secondary-color);
+  opacity: 1;
+}
+
+          
       `}</style>
 
       {/* Hero Section */}
@@ -302,7 +334,7 @@ const Problems = () => {
         )}
 
         {/* Enhanced Filter Section */}
-    <div className="row mb-5">
+<div className="row mb-5">
   <div className="col-lg-8 mx-auto">
     <div className="card border-0 shadow-sm rounded-4 p-4 bg-body">
       <div className="row align-items-center">
@@ -329,6 +361,7 @@ const Problems = () => {
     </div>
   </div>
 </div>
+
 
         {/* Loading State */}
         {loading && (
