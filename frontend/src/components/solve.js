@@ -224,6 +224,17 @@ const Solve = () => {
                     height: 5px;
                     background: linear-gradient(to right, #ff416c, #ff4b2b);
                 }
+                    .btn-gradient {
+                     background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+                    color: #fff;
+                    border: none;
+                    }
+
+                .btn-gradient:hover { 
+                       opacity: 0.9; 
+                  color: #fff;
+                   }
+
                 
                 .gradient-text-primary {
                     background: linear-gradient(to right, #ff416c, #ff4b2b);
@@ -436,7 +447,7 @@ const Solve = () => {
                     {/* C++ Button */}
                     <button
                       type="button"
-                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'cpp' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'cpp' ? 'btn-gradient' : 'btn-outline-secondary'}`}
                       onClick={() => handleLanguageChange({ target: { value: 'cpp' } })}
                     >
                       <i className="bi bi-motherboard-fill"></i> C++
@@ -445,7 +456,7 @@ const Solve = () => {
                     {/* Python Button */}
                     <button
                       type="button"
-                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'py' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'py' ? 'btn-gradient' : 'btn-outline-secondary'}`}
                       onClick={() => handleLanguageChange({ target: { value: 'py' } })}
                     >
                       <i className="bi bi-braces"></i> Python
@@ -454,7 +465,7 @@ const Solve = () => {
                     {/* Java Button */}
                     <button
                       type="button"
-                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'java' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      className={`btn btn-sm d-flex align-items-center gap-2 ${language === 'java' ? 'btn-gradient' : 'btn-outline-secondary'}`}
                       onClick={() => handleLanguageChange({ target: { value: 'java' } })}
                     >
                       <i className="bi bi-cup-hot-fill"></i> Java
@@ -463,6 +474,7 @@ const Solve = () => {
                 </div>
               </div>
             </div>
+
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top">Code Editor</div>
               <div className="card-body p-0">

@@ -302,33 +302,33 @@ const Problems = () => {
         )}
 
         {/* Enhanced Filter Section */}
-        <div className="row mb-5">
-          <div className="col-lg-8 mx-auto">
-            <div className="card border-0 shadow-sm rounded-4 p-4">
-              <div className="row align-items-center">
-                <div className="col-md-8">
-                  <label className="form-label fw-semibold text-muted mb-2">
-                    🔍 Filter Problems by Tags
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control form-control-lg search-input rounded-pill px-4"
-                    placeholder="Search tags: array, dp, hash, tree..."
-                    value={filterTag}
-                    onChange={handleFilterChange}
-                  />
-                </div>
-                <div className="col-md-4 text-md-end mt-3 mt-md-0">
-                  <div className="text-muted">
-                    <small className="fw-medium">
-                      Showing {filteredProblems.length} problems
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div className="row mb-5">
+  <div className="col-lg-8 mx-auto">
+    <div className="card border-0 shadow-sm rounded-4 p-4 bg-body">
+      <div className="row align-items-center">
+        <div className="col-md-8">
+          <label className="form-label fw-semibold text-body-secondary mb-2">
+            🔍 Filter Problems by Tags
+          </label>
+          <input
+            type="text"
+            className="form-control form-control-lg search-input rounded-pill px-4 bg-body text-body"
+            placeholder="Search tags: array, dp, hash, tree..."
+            value={filterTag}
+            onChange={handleFilterChange}
+          />
+        </div>
+        <div className="col-md-4 text-md-end mt-3 mt-md-0">
+          <div className="text-body-secondary">
+            <small className="fw-medium">
+              Showing {filteredProblems.length} problems
+            </small>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Loading State */}
         {loading && (
