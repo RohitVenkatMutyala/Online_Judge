@@ -487,11 +487,11 @@ const Tview = () => {
                 {/* Tutorial Header */}
                 <div className="card-header border-0 p-5 pb-0 bg-gradient-custom text-white rounded-top-4">
                   <div className="text-center mb-4">
-                    <h1 className="fw-bold mb-3 display-5 gradient-text-secondary">
+                    <h1 className="fw-bold mb-3 display-5 text-dark">
                       {problem.name}
                     </h1>
                     <p className="lead text-light opacity-75">
-                      Solve and practice coding challenges with style 🚀
+                          
                     </p>
                   </div>
                 </div>
