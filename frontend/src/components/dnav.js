@@ -187,7 +187,8 @@ function Dnav() {
             </ul>
           </div>
         </div>
-      </nav>
+      
+      </nav> 
 
       {/* CSS for additional logo effects */}
       <style>{`
@@ -201,6 +202,7 @@ function Dnav() {
           to { transform: rotate(360deg); }
         }
       `}</style>
+
     </>
   );
 }
