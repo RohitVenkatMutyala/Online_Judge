@@ -19,12 +19,7 @@ const Solve = () => {
   const [input, setInput] = useState('');
   const { theme } = useTheme();
 
-  const [code, setCode] = useState(`#include <iostream>
-
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
-}`);
+  const [code, setCode] = useState(``);
   const [language, setLanguage] = useState('cpp');
   const [output, setOutput] = useState('');
   const [verdicts, setVerdicts] = useState([]);

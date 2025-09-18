@@ -59,7 +59,7 @@ function Home() {
                     <p 
                       className="display-6 fw-bold mb-3"
                       style={{
-                        background: 'linear-gradient(135deg, #11998e, #38ef7d)',
+                        background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         fontStyle: 'italic'
@@ -104,7 +104,7 @@ function Home() {
                       onClick={handleWatchDemo}
                       className="btn btn-lg fw-semibold text-white px-5 py-3"
                       style={{
-                        background: 'linear-gradient(135deg, #11998e, #38ef7d)',
+                        background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444)',
                         border: 'none',
                         borderRadius: '12px',
                         transition: 'all 0.3s ease',
@@ -221,7 +221,7 @@ function Home() {
                     href="mailto:heisenberg@randoman.online"
                     className="btn btn-sm fw-semibold px-4 py-2 text-white"
                     style={{
-                      background: 'linear-gradient(135deg, #11998e, #38ef7d)',
+                      background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444)',
                       border: 'none',
                       borderRadius: '8px'
                     }}
@@ -236,7 +236,7 @@ function Home() {
               <div className="why-choose-card h-100 p-4 rounded-4">
                 <div className="text-center mb-4">
                   <div className="why-icon mb-3 mx-auto">
-                    <i className="bi bi-brain"></i>
+                   <i className="bi bi-lightbulb"></i>
                   </div>
                   <h5 className="fw-bold text-white mb-3">Expert AI Mentorship</h5>
                   <span className="badge why-badge mb-3">Premium</span>
@@ -279,7 +279,7 @@ function Home() {
             <h2 className="fw-bold display-4 mb-3">
               <span
                 style={{
-                  background: 'linear-gradient(135deg, #11998e, #38ef7d)',
+                  background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
@@ -460,7 +460,7 @@ function Home() {
               onClick={handleLogin}
               className="btn btn-lg fw-semibold text-white px-5 py-3"
               style={{
-                background: 'linear-gradient(135deg, #11998e, #38ef7d)',
+                background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444)',
                 border: 'none',
                 borderRadius: '12px',
                 transition: 'all 0.3s ease',
@@ -527,7 +527,7 @@ function Home() {
         .feature-icon {
           width: 70px;
           height: 70px;
-          background: linear-gradient(135deg, #11998e, #38ef7d);
+          background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -568,7 +568,7 @@ function Home() {
         }
 
         .why-badge {
-          background: linear-gradient(135deg, #11998e, #38ef7d) !important;
+          background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444) !important;
           color: white !important;
           border: none;
           font-size: 0.8rem;
@@ -596,7 +596,7 @@ function Home() {
         .product-icon {
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, #11998e, #38ef7d);
+          background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
           border-radius: 50%;
           display: flex;
           align-items: center;

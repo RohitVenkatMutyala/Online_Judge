@@ -60,7 +60,7 @@ function Dashboard() {
                   <div 
                     className="profile-section h-100 d-flex flex-column align-items-center justify-content-center p-5"
                     style={{
-                      background: 'linear-gradient(145deg, #f12711, #f5af19)',
+                    
                       color: 'white'
                     }}
                   >
@@ -102,7 +102,7 @@ function Dashboard() {
                       <div
                         className="user-badge d-inline-flex align-items-center px-4 py-2 rounded-pill"
                         style={{
-                          background: 'linear-gradient(45deg, #11998e, #38ef7d)',
+                          background: ' linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);',
                           boxShadow: '0 4px 15px rgba(17, 153, 142, 0.3)'
                         }}
                       >
@@ -158,7 +158,7 @@ function Dashboard() {
                             <i className="bi bi-collection-fill"></i>
                           </div>
                           <div className="nav-content flex-grow-1">
-                            <h4 className="mb-2 fw-bold text-white">Contexts</h4>
+                            <h4 className="mb-2 fw-bold text-white">Contests</h4>
                             <p className="mb-0 text-light opacity-90">Explore real-world examples and use cases</p>
                           </div>
                           <div className="nav-arrow">
@@ -219,7 +219,7 @@ function Dashboard() {
         }
 
         .nav-card-inner {
-          background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+         background: "linear-gradient(135deg, #a8edea 0%, #dcedc2 100%)",
           color: white;
           transition: all 0.3s ease;
           border: none;

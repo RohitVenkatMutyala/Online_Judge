@@ -88,7 +88,7 @@ const Theory = () => {
             {/* Custom Styles */}
             <style jsx>{`
                 .theory-hero {
-                    background: linear-gradient(135deg, #1C1F22 0%, #000000 100%);
+                    
                     position: relative;
                     overflow: hidden;
                     min-height: 200px;
@@ -110,11 +110,11 @@ const Theory = () => {
                 }
                 
                 .search-container {
-                    background: rgba(255, 255, 255, 0.15);
+                   
                     backdrop-filter: blur(10px);
                     border-radius: 20px;
                     padding: 2rem;
-                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    
                 }
                 
                 .search-input {

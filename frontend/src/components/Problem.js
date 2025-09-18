@@ -235,6 +235,12 @@ const Problems = () => {
           box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
           border-color: transparent;
         }
+          .dark-theme .search-input::placeholder {
+              color: #aaa !important;
+              }
+           .light-theme .search-input::placeholder {
+            color: #555 !important;
+              }
         
         .loading-spinner {
           width: 3rem;
