@@ -62,75 +62,7 @@ function Dnav() {
 
           {/* === MODIFIED LOGO SECTION START === */}
           <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-3 py-2">
-            <div className="position-relative">
-              <svg
-                width="45"
-                height="45"
-                viewBox="0 0 100 100"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{
-                  filter: 'drop-shadow(0 6px 12px rgba(0, 201, 255, 0.4)) drop-shadow(0 0 20px rgba(146, 254, 157, 0.3))',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'rotate(20deg) scale(1.15)';
-                  e.currentTarget.style.filter = 'drop-shadow(0 8px 16px rgba(241, 39, 17, 0.5)) drop-shadow(0 0 30px rgba(245, 175, 25, 0.4))';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'rotate(0deg) scale(1)';
-                  e.currentTarget.style.filter = 'drop-shadow(0 6px 12px rgba(0, 201, 255, 0.4)) drop-shadow(0 0 20px rgba(146, 254, 157, 0.3))';
-                }}
-              >
-                <defs>
-                  <linearGradient id="logoGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#00C9FF" />
-                    <stop offset="35%" stopColor="#92FE9D" />
-                    <stop offset="70%" stopColor="#38ef7d" />
-                    <stop offset="100%" stopColor="#11998e" />
-                  </linearGradient>
-                  <linearGradient id="logoGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#f12711" />
-                    <stop offset="50%" stopColor="#f5af19" />
-                    <stop offset="100%" stopColor="#ff6b6b" />
-                  </linearGradient>
-                  <filter id="glow">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                <circle cx="50" cy="50" r="40" fill="url(#logoGrad1)" opacity="0.95" filter="url(#glow)"/>
-                <path
-                  d="M50 18 L68 48 L32 48 Z"
-                  fill="url(#logoGrad2)"
-                  stroke="#fff"
-                  strokeWidth="2.5"
-                  filter="url(#glow)"
-                />
-                <circle cx="50" cy="68" r="7" fill="#fff" opacity="0.9" filter="url(#glow)"/>
-              </svg>
-
-              {/* Animated Ring Effect */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '-5px',
-                  left: '-5px',
-                  width: '55px',
-                  height: '55px',
-                  border: '2px solid transparent',
-                  borderRadius: '50%',
-                  backgroundImage: 'linear-gradient(45deg, #f12711, #f5af19, #11998e, #38ef7d)',
-                  backgroundClip: 'padding-box',
-                  opacity: '0',
-                  transition: 'all 0.4s ease'
-                }}
-                className="logo-ring"
-              ></div>
-            </div>
-
+       
             <span
               className="fw-bold"
               style={{
