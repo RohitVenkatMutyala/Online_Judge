@@ -1,23 +1,27 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// --- ADD THESE TWO LINES ---
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+import { useAuth } from '../context/AuthContext'; // --- ADD THIS IMPORT ---
 
-function CreateSession({ user }) {
+// --- CHANGE 1: Remove 'user' from props ---
+function CreateSession() { 
   const navigate = useNavigate();
- const { user } = useAuth();
+  // --- CHANGE 2: Call useAuth() inside the component ---
+  const { user } = useAuth(); 
+
   useEffect(() => {
-    if (!user) {
-        navigate('/login');
+    // The rest of the logic remains the same.
+    // It now uses the 'user' from the useAuth() hook.
+    const createAndNavigate = async () => {
+      if (!user) {
+        // This check is still important for when the user state is loading
         return;
-    }
+      }
 
-    const newSessionId = Math.random().toString(36).substring(2, 9);
-    const sessionDocRef = doc(db, 'sessions', newSessionId);
+      const newSessionId = Math.random().toString(36).substring(2, 9);
+      const sessionDocRef = doc(db, 'sessions', newSessionId);
 
-    const createSessionInDb = async () => {
       await setDoc(sessionDocRef, {
         code: `// Welcome, ${user.firstname}!\n// Session ID: ${newSessionId}`,
         text: 'This is a shared notes area.',
@@ -28,10 +32,14 @@ function CreateSession({ user }) {
           [user._id]: 'editor'
         }
       });
+      
       navigate(`/chat/${newSessionId}`);
     };
 
-    createSessionInDb();
+    // This condition prevents running the function before the user object is available.
+    if (user) {
+        createAndNavigate();
+    }
     
   }, [user, navigate]);
 
