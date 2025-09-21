@@ -14,7 +14,7 @@ function RecentSessions() {
     const sessionsQuery = query(
       collection(db, 'sessions'), 
       orderBy('createdAt', 'desc'), 
-      limit(21) // Fetching 6 is good for a 3x2 grid layout
+      limit(12) // Fetching 6 is good for a 3x2 grid layout
     );
 
     const unsubscribe = onSnapshot(sessionsQuery, (snapshot) => {
