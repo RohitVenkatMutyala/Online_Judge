@@ -184,6 +184,14 @@ function Navbar() {
                           <span>Fundamentals</span>
                         </Link>
                       </li>
+                        <li className="nav-item">
+                        <Link className="nav-link" to="/chat" style={navLinkStyle}
+                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          <i className="bi bi-book-fill"></i>
+                          <span>Doubts</span>
+                        </Link>
+                      </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/contexts" style={navLinkStyle}
                               onMouseEnter={(e) => handleNavLinkHover(e, true)}

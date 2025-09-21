@@ -20,6 +20,7 @@ import Contexts from './components/context';
 import Userview from './components/userview';
 import Theory from './components/theory';
 import Tview from './components/tview';
+import Chat from './components/chat';
 function App() {
   return (
     <ThemeProvider>
@@ -141,6 +142,15 @@ function App() {
                 <>
                   <Helmet><title>Dashboard - Randoman</title></Helmet>
                   <Dashboard />
+                </>
+              }
+            />
+             <Route
+              path="/chat"
+              element={
+                <>
+                  <Helmet><title>Doubts - Randoman</title></Helmet>
+                  <Chat />
                 </>
               }
             />
