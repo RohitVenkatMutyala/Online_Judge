@@ -21,6 +21,7 @@ import Userview from './components/userview';
 import Theory from './components/theory';
 import Tview from './components/tview';
 import Chat from './components/chat';
+import CreateSession from './components/CreateSession';
 function App() {
   return (
     <ThemeProvider>
