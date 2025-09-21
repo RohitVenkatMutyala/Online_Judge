@@ -109,6 +109,20 @@ function Chat() {
                     setActiveUsers(data.activeParticipants || []);
                     setCodeLanguage(data.language || 'javascript');
                     setDescription(data.description || '');
+
+                    // --- 🚀 ADDED: Real-time verdict syncing ---
+                    // Read the shared verdict data from the Firestore document
+                    setOutput(data.lastRunOutput || '');
+                    setVerdicts(data.lastRunVerdicts || []);
+                    setTime(data.lastRunTime || null);
+                    setSolved(data.lastRunStatus || '');
+
+                    // Automatically switch everyone's tab to the verdict tab when it's updated
+                    if (data.lastRunVerdicts && data.lastRunVerdicts.length > 0) {
+                        setActiveTab('verdict');
+                    }
+                    // --- End of added features ---
+
                 } else {
                     setAccessDenied(true);
                 }
@@ -173,13 +187,11 @@ function Chat() {
     };
 
     // FIXED: Rewrote handleRun to be more robust and handle all response data
+    // src/components/Chat.js
+
     const handleRun = async () => {
         setIsRunning(true);
-        setOutput('');
-        setVerdicts([]);
-        setTime(null);
-        setSolved('');
-        setActiveTab('output'); // Switch to output to show progress/result
+        setActiveTab('output'); // Switch user's tab immediately
 
         try {
             const res = await axios.post(`${API_COM}/run`, {
@@ -188,22 +200,24 @@ function Chat() {
                 input,
             });
 
-            // Assuming a backend response like: { output, verdicts, totalTime, status }
-            setOutput(res.data.output || 'Execution finished with no output.');
-            setVerdicts(res.data.verdicts || []);
-            setTime(res.data.totalTime || null);
-            setSolved(res.data.status || ''); // e.g., "Solved", "Failed"
-
-            // If there are test case verdicts, switch to that tab
-            if (res.data.verdicts && res.data.verdicts.length > 0) {
-                setActiveTab('verdict');
-            }
+            // FIXED: Save the successful result to Firestore for everyone to see
+            const sessionDocRef = doc(db, 'sessions', sessionId);
+            await updateDoc(sessionDocRef, {
+                lastRunOutput: res.data.output || 'Execution finished with no output.',
+                lastRunVerdicts: res.data.verdicts || [],
+                lastRunTime: res.data.totalTime || null,
+                lastRunStatus: res.data.status || '',
+                lastRunTimestamp: serverTimestamp() // Good practice to add a timestamp
+            });
 
         } catch (error) {
             console.error("Compilation/Execution error:", error);
+            // Errors are local, so update only the current user's output
             const errorMessage = error.response?.data?.error || error.message || 'An unexpected error occurred.';
             setOutput(errorMessage);
-            setActiveTab('output');
+            setVerdicts([]); // Clear previous verdicts on error
+            setTime(null);
+            setSolved('');
         } finally {
             setIsRunning(false);
         }
