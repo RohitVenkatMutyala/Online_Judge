@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 function CreateSession({ user }) {
   const navigate = useNavigate();
 
