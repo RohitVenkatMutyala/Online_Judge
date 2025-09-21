@@ -82,47 +82,51 @@ function Chat() {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 let hasAccess = false;
-                let role = 'viewer';
+                let role = 'viewer'; // Default role
 
-                // --- EMAIL-ONLY ACCESS LOGIC ---
-                if (data.access === 'public') {
+                // --- ✅ NEW & CORRECTED PERMISSION LOGIC ---
+
+                // 1. Highest Priority: Check if the user is the owner or an admin.
+                if (user._id === data.ownerId || user.role === 'admin') {
+                    hasAccess = true;
+                    role = 'editor';
+                }
+                // 2. Next: Check the 'permissions' map set by your SharingComponent.
+                else if (data.permissions && data.permissions[user._id]) {
+                    hasAccess = true;
+                    role = data.permissions[user._id]; // This will be 'viewer' or 'editor'
+                }
+                // 3. Fallback: Check if the session is public for anyone else.
+                else if (data.access === 'public') {
                     hasAccess = true;
                     role = data.defaultRole || 'viewer';
-                } else { // access === 'private'
-                    if (data.allowedEmails?.includes(user.email)) {
-                        hasAccess = true;
-                        role = data.defaultRole || 'viewer';
-                    }
                 }
 
-                if (user._id === data.ownerId || user.role === 'admin') {
-                    role = 'editor';
-                    hasAccess = true;
-                }
+                // --- End of corrected logic ---
 
                 if (hasAccess) {
                     setAccessDenied(false);
                     setUserRole(role);
+
+                    // Sync all shared data from Firestore
                     setCode(data.code || '');
                     setText(data.text || '');
-                     setInput(data.codeInput || '');
+                    setInput(data.codeInput || '');
                     setSessionAccess(data.access || 'public');
                     setActiveUsers(data.activeParticipants || []);
                     setCodeLanguage(data.language || 'javascript');
                     setDescription(data.description || '');
 
-                    // --- 🚀 ADDED: Real-time verdict syncing ---
-                    // Read the shared verdict data from the Firestore document
+                    // Sync the verdict and output
                     setOutput(data.lastRunOutput || '');
                     setVerdicts(data.lastRunVerdicts || []);
                     setTime(data.lastRunTime || null);
                     setSolved(data.lastRunStatus || '');
 
-                    // Automatically switch everyone's tab to the verdict tab when it's updated
+                    // Automatically switch tab to the verdict tab when it's updated
                     if (data.lastRunVerdicts && data.lastRunVerdicts.length > 0) {
                         setActiveTab('verdict');
                     }
-                    // --- End of added features ---
 
                 } else {
                     setAccessDenied(true);
@@ -132,7 +136,6 @@ function Chat() {
             }
             setLoading(false);
         });
-
         const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
         const messagesQuery = query(messagesColRef, orderBy('timestamp'));
         const unsubscribeMessages = onSnapshot(messagesQuery, (qSnap) => {
@@ -338,7 +341,7 @@ function Chat() {
                                                 placeholder="Enter custom input (if required)..."
                                                 value={input}
                                                 // FIXED: Replaced non-existent 'handleinput' with a proper handler
-                                                 onChange={handleInputChange}
+                                                onChange={handleInputChange}
                                             />
                                             <button
                                                 className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-1"
