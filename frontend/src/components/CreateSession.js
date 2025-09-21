@@ -10,9 +10,12 @@ function CreateSession() {
   const { user } = useAuth(); 
 
   const createAndNavigate = async () => {
-    if (!user) return;
+    // This check is important to make sure the user object is loaded
+    if (!user) {
+      toast.error("You must be logged in to create a session.");
+      return;
+    }
 
-    // --- NEW PERMISSION LOGIC ---
     const accessType = window.prompt("Who can access this session? Type 'public' for anyone with the link, or 'private' for specific people.", 'public');
 
     let allowedEmails = [];
@@ -22,28 +25,30 @@ function CreateSession() {
         allowedEmails = emailsInput.split(',').map(email => email.trim());
       }
     }
-    // Always include the creator's email
+    
     if (user.email && !allowedEmails.includes(user.email)) {
         allowedEmails.push(user.email);
     }
-    // --- END OF NEW LOGIC ---
-
+    
     const newSessionId = Math.random().toString(36).substring(2, 9);
     const sessionDocRef = doc(db, 'sessions', newSessionId);
 
     try {
+      // --- UPDATED THIS BLOCK WITH CORRECT USER PROPERTIES ---
       await setDoc(sessionDocRef, {
-        code: `// Welcome, ${user.displayName || user.email}!\n// Session ID: ${newSessionId}`,
+        code: `// Welcome, ${user.firstname}!\n// Session ID: ${newSessionId}`,
         text: 'This is a shared notes area.',
         createdAt: serverTimestamp(),
-        ownerId: user.uid,
-        ownerName: user.displayName || user.email,
+        ownerId: user._id, // Changed from user.uid
+        ownerName: `${user.firstname} ${user.lastname}`, // Changed from user.displayName
         access: accessType.toLowerCase() === 'private' ? 'private' : 'public',
         allowedEmails: allowedEmails,
         permissions: {
-          [user.uid]: 'editor'
+          [user._id]: 'editor' // Changed from user.uid
         }
       });
+      // --- END OF UPDATE ---
+      
       navigate(`/chat/${newSessionId}`);
     } catch (error) {
       console.error("Failed to create session:", error);
