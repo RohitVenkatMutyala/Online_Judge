@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
-// Corrected import path below
 import { db } from '../firebaseConfig'; // Import the firestore instance
 import {
   doc,
@@ -15,20 +14,17 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 
-// Code Editor Imports
-import AceEditor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-javascript';
-import 'ace-builds/src-noconflict/theme-monokai';
+// --- CHANGE 1: Import Monaco Editor instead of Ace ---
+import Editor from '@monaco-editor/react';
 
 // Bootstrap and CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './sketchy.css';
 import Navbar from './navbar';
-import CreateSession from './CreateSession';
 
 function Chat() {
   const { user } = useAuth();
-  const { sessionId } = useParams(); // Get the unique session ID from the URL
+  const { sessionId } = useParams();
   const navigate = useNavigate();
 
   // State for collaborative features
@@ -85,6 +81,7 @@ function Chat() {
 
   // --- Handler Functions to update Firestore ---
 
+  // Note: Monaco's onChange provides the value directly, same as Ace
   const handleCodeChange = (newCode) => {
     setCode(newCode);
     const sessionDocRef = doc(db, 'sessions', sessionId);
@@ -135,18 +132,15 @@ function Chat() {
               <div className="card-header">
                 <h5>Collaborative Code Editor</h5>
               </div>
-              <div className="card-body p-0">
-                <AceEditor
-                  mode="javascript"
-                  theme="monokai"
-                  onChange={handleCodeChange}
+              <div className="card-body p-0" style={{ height: '400px' }}>
+                {/* --- CHANGE 2: Use the Monaco Editor Component --- */}
+                <Editor
+                  height="100%"
+                  defaultLanguage="javascript"
+                  theme="vs-dark" // Common theme for Monaco, similar to monokai
                   value={code}
-                  name="code-editor"
-                  editorProps={{ $blockScrolling: true }}
-                  width="100%"
-                  height="400px"
-                  fontSize={14}
-                  setOptions={{ useWorker: false }}
+                  onChange={handleCodeChange}
+                  options={{ minimap: { enabled: false } }} // Optional: hide the minimap
                 />
               </div>
             </div>
