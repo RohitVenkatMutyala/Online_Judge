@@ -231,7 +231,7 @@ function RecentSessions() {
               <div className="card-footer bg-transparent border-0 px-4 pb-4">
                 <div className="d-flex gap-2 flex-wrap">
                   <Link 
-                    to={`/session/${session.id}`} 
+                    to={`/chat/${session.id}`} 
                     className="btn btn-join flex-fill d-flex align-items-center justify-content-center"
                   >
                     <i className="bi bi-box-arrow-in-right me-2"></i>
