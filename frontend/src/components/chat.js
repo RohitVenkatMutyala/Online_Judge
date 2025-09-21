@@ -1,3 +1,5 @@
+// src/components/Chat.js
+
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
@@ -11,10 +13,7 @@ import {
     addDoc, 
     query, 
     orderBy, 
-    serverTimestamp,
-    // --- FIX: Add arrayUnion and arrayRemove for the active users feature ---
-    arrayUnion,
-    arrayRemove
+    serverTimestamp 
 } from 'firebase/firestore';
 import Editor from '@monaco-editor/react';
 
@@ -22,9 +21,10 @@ import Editor from '@monaco-editor/react';
 import Navbar from './navbar';
 import RecentSessions from './RecentSessions';
 import SharingComponent from './SharingComponent';
-import './Chat.css';
+import './chat.css';
 import './sketchy.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function Chat() {
     const { user } = useAuth();
@@ -38,11 +38,8 @@ function Chat() {
     const [accessDenied, setAccessDenied] = useState(false);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
+    // --- ADDED: State for session privacy and badge ---
     const [sessionAccess, setSessionAccess] = useState('public');
-    
-    // --- FIX: Add missing state for new features ---
-    const [activeUsers, setActiveUsers] = useState([]);
-    const [codeLanguage, setCodeLanguage] = useState('javascript');
 
     const chatMessagesEndRef = useRef(null);
 
@@ -54,14 +51,6 @@ function Chat() {
         if (!sessionId || !user) return;
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
-        
-        // --- ADDED: Logic to add user to active list when they join ---
-        const enterSession = async () => {
-            await updateDoc(sessionDocRef, {
-                activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            });
-        };
-        enterSession();
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -70,11 +59,12 @@ function Chat() {
                 let hasAccess = false;
                 let role = 'viewer';
 
+                // --- CORRECTED ACCESS LOGIC ---
                 if (data.access === 'public') {
                     hasAccess = true;
                     role = permissions[user._id] || data.defaultRole || 'viewer';
                 } else { // private
-                    if (permissions[user._id]) {
+                    if (permissions[user._id]) { // Check if user's ID is in the permissions map
                         hasAccess = true;
                         role = permissions[user._id];
                     }
@@ -90,10 +80,8 @@ function Chat() {
                     setUserRole(role);
                     setCode(data.code || '');
                     setText(data.text || '');
+                    // --- ADDED: Set state for the private badge ---
                     setSessionAccess(data.access || 'public');
-                    // --- FIX: Update the new state variables from Firestore data ---
-                    setActiveUsers(data.activeParticipants || []);
-                    setCodeLanguage(data.language || 'javascript');
                 } else {
                     setAccessDenied(true);
                 }
@@ -109,21 +97,13 @@ function Chat() {
             setMessages(qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
 
-        // --- ADDED: Logic to remove user from active list when they leave ---
-        const leaveSession = async () => {
-             await updateDoc(sessionDocRef, {
-                activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            });
-        };
-
         return () => {
             unsubscribeSession();
             unsubscribeMessages();
-            leaveSession(); // This runs when the component is unmounted
         };
     }, [sessionId, user]);
 
-    // Handlers
+    // --- All Handlers (handleCodeChange, etc.) remain the same ---
     const handleCodeChange = (newCode) => {
         if (userRole !== 'editor') return;
         updateDoc(doc(db, 'sessions', sessionId), { code: newCode });
@@ -146,24 +126,26 @@ function Chat() {
         setNewMessage('');
     };
 
-    // --- FIX: Add the missing handler function for the language selector ---
-    const handleLanguageChange = (e) => {
-        if (userRole !== 'editor') {
-            toast.warn("Only editors can change the language.");
-            return;
-        }
-        const newLanguage = e.target.value;
-        setCodeLanguage(newLanguage);
-        updateDoc(doc(db, 'sessions', sessionId), { language: newLanguage });
-    };
-
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return '';
         return timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
-    if (loading) { /* ... render loading ... */ }
-    if (accessDenied) { /* ... render access denied ... */ }
+    // Render logic for loading and access denied states
+    if (loading) {
+        return <div className="container mt-5 text-center"><h2>Loading Session...</h2></div>;
+    }
+
+    if (accessDenied) {
+        return (
+            <>
+                <Navbar />
+                <div className="container mt-5">
+                    <div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div>
+                </div>
+            </>
+        );
+    }
     
     return (
         <>
@@ -174,12 +156,12 @@ function Chat() {
                         <div className="col-lg-8">
                             <div className="card shadow-sm rounded-3 mb-4">
                                 <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                    <div className="d-flex align-items-center">
-                                        <h5 className="mb-0">Collaborative Code Editor</h5>
+                                    <h5>Collaborative Code Editor</h5>
+                                       {/* --- ADDED: Conditional Private Session Badge --- */}
                                         {sessionAccess === 'private' && (
                                             <span className="badge bg-info ms-3">Private Session</span>
                                         )}
-                                    </div>
+                                    {/* --- NEW FEATURE: Language Selector --- */}
                                     <div className="d-flex align-items-center">
                                         {userRole === 'viewer' && <span className="badge bg-warning text-dark me-3">View Only</span>}
                                         <select className="form-select form-select-sm bg-dark text-white" value={codeLanguage} onChange={handleLanguageChange}>
@@ -205,13 +187,11 @@ function Chat() {
                                 </div>
                             </div>
                             <div className="card shadow-sm rounded-3">
-                                <div className="card-header"><h5>Shared Notes</h5></div>
-                                <div className="card-body">
-                                    <textarea className="form-control border-0" style={{ height: '200px', resize: 'none' }} value={text} onChange={handleTextChange} disabled={userRole !== 'editor'} />
-                                </div>
+                                {/* ... Shared Notes Card ... */}
                             </div>
                         </div>
                         <div className="col-lg-4 d-flex flex-column">
+                            {/* --- NEW FEATURE: Active Users Panel --- */}
                             <div className="card shadow-sm mb-4">
                                 <div className="card-header">
                                     Active Users ({activeUsers.length})
