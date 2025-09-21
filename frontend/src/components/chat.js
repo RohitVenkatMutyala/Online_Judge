@@ -191,7 +191,7 @@ function Chat() {
 
     const handleRun = async () => {
         setIsRunning(true);
-        setActiveTab('output'); // Switch user's tab immediately
+        setActiveTab('output'); // Switch the current user's tab immediately
 
         try {
             const res = await axios.post(`${API_COM}/run`, {
@@ -200,24 +200,30 @@ function Chat() {
                 input,
             });
 
-            // FIXED: Save the successful result to Firestore for everyone to see
-            const sessionDocRef = doc(db, 'sessions', sessionId);
-            await updateDoc(sessionDocRef, {
+            // ✅ FIX: Sanitize the data from the API response.
+            // This ensures that if a key is missing from the response, we send a valid
+            // default value (like an empty array or null) instead of 'undefined'.
+            const dataToUpdate = {
                 lastRunOutput: res.data.output || 'Execution finished with no output.',
                 lastRunVerdicts: res.data.verdicts || [],
                 lastRunTime: res.data.totalTime || null,
                 lastRunStatus: res.data.status || '',
-                lastRunTimestamp: serverTimestamp() // Good practice to add a timestamp
-            });
+                lastRunTimestamp: serverTimestamp()
+            };
+
+            // 🔍 DEBUG STEP 1: Log the exact data being sent to Firestore.
+            console.log("Attempting to write this data to Firestore:", dataToUpdate);
+
+            const sessionDocRef = doc(db, 'sessions', sessionId);
+            await updateDoc(sessionDocRef, dataToUpdate);
+
+            // 🔍 DEBUG STEP 2: If you see this message, the command was successful.
+            console.log("Firestore update successful! Check your database now.");
 
         } catch (error) {
-            console.error("Compilation/Execution error:", error);
-            // Errors are local, so update only the current user's output
-            const errorMessage = error.response?.data?.error || error.message || 'An unexpected error occurred.';
-            setOutput(errorMessage);
-            setVerdicts([]); // Clear previous verdicts on error
-            setTime(null);
-            setSolved('');
+            // This block will catch any remaining errors.
+            console.error("An error occurred during the run process:", error);
+            setOutput(error.message || 'An unexpected error occurred.');
         } finally {
             setIsRunning(false);
         }
