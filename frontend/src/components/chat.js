@@ -1,5 +1,6 @@
+// src/components/Chat.js
+
 import React, { useState, useEffect, useRef } from 'react';
-import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
@@ -13,8 +14,9 @@ import {
     orderBy, 
     serverTimestamp,
     arrayUnion,
-    arrayRemove,
+    arrayRemove
 } from 'firebase/firestore';
+import { toast } from 'react-toastify';
 import Editor from '@monaco-editor/react';
 
 // Import all your components and CSS
@@ -52,9 +54,7 @@ function Chat() {
         if (!sessionId || !user) return;
         
         const sessionDocRef = doc(db, 'sessions', sessionId);
-        
-        // --- FIX: Declare docSnap here so the cleanup function can access it ---
-        let docSnap = null;
+        let docSnapCache = null;
 
         const enterSession = async () => {
             await updateDoc(sessionDocRef, {
@@ -63,23 +63,21 @@ function Chat() {
         };
         enterSession();
 
-        const unsubscribeSession = onSnapshot(sessionDocRef, (snapshot) => {
-            // Assign the snapshot to the outer variable
-            docSnap = snapshot;
-            
+        const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
+            docSnapCache = docSnap;
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                const permissions = data.permissions || {};
                 let hasAccess = false;
                 let role = 'viewer';
 
+                // --- EMAIL-ONLY ACCESS LOGIC ---
                 if (data.access === 'public') {
                     hasAccess = true;
-                    role = permissions[user._id] || data.defaultRole || 'viewer';
-                } else { // private
-                    if (permissions[user._id]) {
+                    role = data.defaultRole || 'viewer';
+                } else { // access === 'private'
+                    if (data.allowedEmails?.includes(user.email)) {
                         hasAccess = true;
-                        role = permissions[user._id];
+                        role = data.defaultRole || 'viewer';
                     }
                 }
 
@@ -120,8 +118,7 @@ function Chat() {
         return () => {
             unsubscribeSession();
             unsubscribeMessages();
-            // Now this check will work correctly
-            if (docSnap && docSnap.exists()) {
+            if (docSnapCache && docSnapCache.exists()) {
                leaveSession();
             }
         };
