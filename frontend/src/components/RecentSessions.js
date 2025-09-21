@@ -5,80 +5,74 @@ import { collection, query, orderBy, limit, onSnapshot, doc, deleteDoc } from 'f
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
-function RecentSessions() {
+// RENAMED the function to match the file name
+function RecentSessions() { 
   const { user } = useAuth();
   const [sessions, setSessions] = useState([]);
-  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, sessionId: null });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Query to get the last 5 sessions, ordered by creation time
-    const sessionsQuery = query(collection(db, 'sessions'), orderBy('createdAt', 'desc'), limit(5));
-    
-    // onSnapshot listens for real-time updates
+    // This query correctly points to the 'sessions' collection
+    const sessionsQuery = query(
+      collection(db, 'sessions'), 
+      orderBy('createdAt', 'desc'), 
+      limit(5)
+    );
+
     const unsubscribe = onSnapshot(sessionsQuery, (snapshot) => {
-      setSessions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const sessionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setSessions(sessionsData);
+      setLoading(false);
     });
 
-    // Cleanup the listener when the component unmounts
     return () => unsubscribe();
   }, []);
 
-  // Show context menu on right-click for admins
-  const handleRightClick = (event, sessionId) => {
-    if (user && user.role === 'admin') {
-      event.preventDefault();
-      setContextMenu({ visible: true, x: event.pageX, y: event.pageY, sessionId });
-    }
-  };
-
-  const handleCloseContextMenu = () => {
-    setContextMenu({ ...contextMenu, visible: false });
-  };
-
-  // Delete the session from Firestore
-  const handleDelete = async () => {
-    if (contextMenu.sessionId) {
+  const handleDelete = async (sessionId) => {
+    if (window.confirm(`Are you sure you want to delete session "${sessionId}"?`)) {
       try {
-        await deleteDoc(doc(db, 'sessions', contextMenu.sessionId));
-        toast.success(`Session ${contextMenu.sessionId} deleted.`);
+        // This delete function correctly targets the 'sessions' collection
+        await deleteDoc(doc(db, 'sessions', sessionId));
+        toast.success(`Session "${sessionId}" was deleted.`);
       } catch (error) {
-        toast.error("Failed to delete session.");
-        console.error(error);
+        toast.error("You don't have permission to delete this.");
+        console.error("Delete error: ", error);
       }
     }
-    handleCloseContextMenu();
   };
 
+  if (loading) {
+    return <p className="text-center mt-3">Loading recent sessions...</p>;
+  }
+
   return (
-    <div className="card shadow-sm mt-4" onMouseLeave={handleCloseContextMenu}>
+    <div className="card shadow-sm mt-4">
       <div className="card-header bg-dark text-white">
         <h5>Recent Sessions</h5>
       </div>
       <div className="list-group list-group-flush">
         {sessions.map(session => (
-          <Link
-            key={session.id}
-            to={`/chat/${session.id}`}
-            className="list-group-item list-group-item-action"
-            onContextMenu={(e) => handleRightClick(e, session.id)}
-          >
-            <div className="d-flex w-100 justify-content-between">
+          <div key={session.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <Link to={`/chat/${session.id}`} className="text-decoration-none text-dark flex-grow-1">
               <h6 className="mb-1">Session: {session.id}</h6>
-              {session.access === 'private' && <span className="badge bg-secondary">Private</span>}
-            </div>
-            <small className="text-muted">Created by {session.ownerName || 'Unknown'}</small>
-          </Link>
+              <small className="text-muted">By: {session.ownerName || 'Unknown'}</small>
+            </Link>
+
+            {user && user.role === 'admin' && (
+              <button 
+                onClick={() => handleDelete(session.id)} 
+                className="btn btn-sm btn-outline-danger ms-2"
+                title="Delete Session"
+              >
+                &times;
+              </button>
+            )}
+          </div>
         ))}
       </div>
-      {contextMenu.visible && (
-        <div style={{ top: contextMenu.y, left: contextMenu.x, position: 'absolute' }} className="dropdown-menu show">
-          <button className="dropdown-item text-danger" onClick={handleDelete}>
-            Delete Session
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
+// RENAMED the export
 export default RecentSessions;

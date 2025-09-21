@@ -10,6 +10,7 @@ import './sketchy.css';
 import Navbar from './navbar';
 import './chat.css';
 import RecentSessions from './RecentSessions';
+import SharingComponent from './SharingComponent';
 
 function Chat() {
     const { user } = useAuth();
@@ -129,6 +130,8 @@ function Chat() {
                             </div>
                         </div>
                         <div className="col-lg-4 d-flex flex-column">
+                             {/* --- ADDED: Conditionally render the new sharing component --- */}
+                            {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
                             <div className="card shadow-sm rounded-3 flex-grow-1">
                                 <div className="card-header bg-success text-white"><h5>Live Chat</h5></div>
                                 <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
@@ -153,7 +156,7 @@ function Chat() {
                                     </form>
                                 </div>
                             </div>
-                            <RecentSessions />
+                              <RecentSessions /> 
                         </div>
                     </div>
                 </div>
