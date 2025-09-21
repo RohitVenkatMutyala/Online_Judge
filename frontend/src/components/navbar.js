@@ -185,7 +185,7 @@ function Navbar() {
                         </Link>
                       </li>
                         <li className="nav-item">
-                        <Link className="nav-link" to="/chat" style={navLinkStyle}
+                        <Link className="nav-link" to="/new-chat" style={navLinkStyle}
                               onMouseEnter={(e) => handleNavLinkHover(e, true)}
                               onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-book-fill"></i>

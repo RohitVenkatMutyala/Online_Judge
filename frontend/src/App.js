@@ -145,15 +145,11 @@ function App() {
                 </>
               }
             />
-             <Route
-              path="/chat"
-              element={
-                <>
-                  <Helmet><title>Doubts - Randoman</title></Helmet>
-                  <Chat />
-                </>
-              }
-            />
+             {/* Add this new route */}
+      <Route path="/new-chat" element={<CreateSession />} />
+
+      {/* This is your existing route for joining a session */}
+      <Route path="/chat/:sessionId" element={<Chat />} />
             <Route
               path="/problem/:QID"
               element={
