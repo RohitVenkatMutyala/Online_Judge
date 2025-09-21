@@ -20,7 +20,7 @@ import Editor from '@monaco-editor/react';
 // CSS and Component Imports
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './sketchy.css';
-import './Chat.css';
+import './chat.css';
 import Navbar from './navbar';
 import RecentSessions from './RecentSessions';
 import SharingComponent from './SharingComponent';
