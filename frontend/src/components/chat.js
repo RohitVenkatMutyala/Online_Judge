@@ -261,7 +261,7 @@ function Chat() {
                             <div className="col-lg-8">
                                 <div className="card editor-card shadow-lg rounded-3 mb-4">
                                     {/* FIXED: Restructured header for better layout */}
-                                    <div className="card-header editor-header text-white py-3">
+                                    <div className={`card-header ${theme === 'dark' ? 'editor-header text-white' : 'bg-light text-dark'} py-3`}>
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div className="d-flex align-items-center">
                                                 <i className="bi bi-code-slash me-2 fs-5"></i>
