@@ -7,6 +7,7 @@ import { db } from '../firebaseConfig';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import RecentSessions from './RecentSessions';
+import Navbar from './navbar';
 function CreateSession() { 
     const navigate = useNavigate();
     const { user } = useAuth(); 
@@ -59,6 +60,7 @@ function CreateSession() {
 
     return (
         <>
+        <Navbar/>
         <div className="container mt-5">
             <div className="card text-center shadow-sm">
                 <div className="card-body p-4">
