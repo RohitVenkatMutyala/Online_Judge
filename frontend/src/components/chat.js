@@ -105,6 +105,7 @@ function Chat() {
                     setUserRole(role);
                     setCode(data.code || '');
                     setText(data.text || '');
+                     setInput(data.codeInput || '');
                     setSessionAccess(data.access || 'public');
                     setActiveUsers(data.activeParticipants || []);
                     setCodeLanguage(data.language || 'javascript');
@@ -184,6 +185,14 @@ function Chat() {
         const newLanguage = e.target.value;
         setCodeLanguage(newLanguage);
         updateDoc(doc(db, 'sessions', sessionId), { language: newLanguage });
+    };
+    // Add this new handler function
+    const handleInputChange = (e) => {
+        const newInput = e.target.value;
+        setInput(newInput); // Update local state immediately for a smooth experience
+        if (userRole === 'editor') {
+            updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput });
+        }
     };
 
     // FIXED: Rewrote handleRun to be more robust and handle all response data
@@ -329,7 +338,7 @@ function Chat() {
                                                 placeholder="Enter custom input (if required)..."
                                                 value={input}
                                                 // FIXED: Replaced non-existent 'handleinput' with a proper handler
-                                                onChange={(e) => setInput(e.target.value)}
+                                                 onChange={handleInputChange}
                                             />
                                             <button
                                                 className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-1"
