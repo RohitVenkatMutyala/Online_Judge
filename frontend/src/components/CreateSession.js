@@ -7,7 +7,7 @@ import { db } from '../firebaseConfig';
 
 function CreateSession({ user }) {
   const navigate = useNavigate();
-
+ const { user } = useAuth();
   useEffect(() => {
     if (!user) {
         navigate('/login');
