@@ -42,7 +42,7 @@ function Chat() {
     const [sessionAccess, setSessionAccess] = useState('public');
     const [activeUsers, setActiveUsers] = useState([]);
     const [codeLanguage, setCodeLanguage] = useState('javascript');
-
+ const [description, setDescription] = useState('');
     const chatMessagesEndRef = useRef(null);
 
     // --- Hooks for Functionality ---
@@ -94,6 +94,7 @@ function Chat() {
                     setSessionAccess(data.access || 'public');
                     setActiveUsers(data.activeParticipants || []);
                     setCodeLanguage(data.language || 'javascript');
+                    setDescription(data.description || '');
                 } else {
                     setAccessDenied(true);
                 }
@@ -682,6 +683,8 @@ function Chat() {
                                                 <option value="html">HTML</option>
                                             </select>
                                         </div>
+                                        {/* --- ADDED: Display the description as a subtitle --- */}
+                                    <small className="text-muted d-block mt-1">{description}</small>
                                     </div>
                                     <div className="card-body p-0" style={{ height: '450px' }}>
                                         <Editor

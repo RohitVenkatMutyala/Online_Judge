@@ -17,6 +17,11 @@ function CreateSession() {
             toast.error("You must be logged in to create a session.");
             return;
         }
+        const description = window.prompt("Please enter a short description for this session:");
+        if (!description) {
+            toast.warn("A description is required to create a session.");
+            return; // Stop if the user cancels or enters nothing
+        }
 
         // 1. Get session type
         const accessType = window.prompt("Session access: 'public' or 'private'?", 'public')?.toLowerCase() || 'public';
@@ -41,7 +46,8 @@ function CreateSession() {
 
         try {
             await setDoc(sessionDocRef, {
-                code: `// Welcome, ${user.firstname}!\n// Session ID: ${newSessionId}`,
+                description: description,
+                code: `// Welcome, ${user.firstname}!\n// ${description}`,
                 text: 'This is a shared notes area.',
                 createdAt: serverTimestamp(),
                 ownerId: user._id, // Still need owner ID for the 'editor' override

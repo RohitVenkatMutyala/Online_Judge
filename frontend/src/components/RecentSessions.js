@@ -205,7 +205,10 @@ function RecentSessions() {
                   {session.access === 'private' ? 'Private' : 'Public'}
                 </span>
               </div>
-              
+               {/* --- ADDED: Display the session description --- */}
+                <p className="card-text text-muted small text-truncate">
+                  {session.description || 'No description available.'}
+                </p>
               <div className="card-body px-4">
                 <div className="creator-info">
                   <div className="d-flex align-items-center mb-2">
