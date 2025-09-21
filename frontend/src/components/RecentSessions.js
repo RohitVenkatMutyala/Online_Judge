@@ -11,13 +11,19 @@ function RecentSessions() {
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, sessionId: null });
 
   useEffect(() => {
+    // Query to get the last 5 sessions, ordered by creation time
     const sessionsQuery = query(collection(db, 'sessions'), orderBy('createdAt', 'desc'), limit(5));
+    
+    // onSnapshot listens for real-time updates
     const unsubscribe = onSnapshot(sessionsQuery, (snapshot) => {
       setSessions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
+
+    // Cleanup the listener when the component unmounts
     return () => unsubscribe();
   }, []);
 
+  // Show context menu on right-click for admins
   const handleRightClick = (event, sessionId) => {
     if (user && user.role === 'admin') {
       event.preventDefault();
@@ -29,6 +35,7 @@ function RecentSessions() {
     setContextMenu({ ...contextMenu, visible: false });
   };
 
+  // Delete the session from Firestore
   const handleDelete = async () => {
     if (contextMenu.sessionId) {
       try {
