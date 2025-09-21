@@ -22,7 +22,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './sketchy.css';
 import Navbar from './navbar';
 import './chat.css';
-
+import RecentSessions from './RecentSessions';
 function Chat() {
   const { user } = useAuth();
   const { sessionId } = useParams();
