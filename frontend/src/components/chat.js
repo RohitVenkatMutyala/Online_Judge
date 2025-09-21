@@ -186,9 +186,11 @@ function Chat() {
                                         <select className="form-select form-select-sm bg-dark text-white" value={codeLanguage} onChange={handleLanguageChange}>
                                             <option value="javascript">JavaScript</option>
                                             <option value="python">Python</option>
-                                            <option value="html">HTML</option>
+                                            <option value="cpp">CPP</option>
+                                            <option value="java">Java</option>
                                             <option value="css">CSS</option>
                                             <option value="json">JSON</option>
+                                            <option value="html">HTML</option>
                                         </select>
                                     </div>
                                 </div>
@@ -249,7 +251,7 @@ function Chat() {
                                 </div>
                             </div>
                             
-                            <RecentSessions />
+                            
                         </div>
                     </div>
                 </div>

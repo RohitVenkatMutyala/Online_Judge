@@ -58,6 +58,7 @@ function CreateSession() {
     };
 
     return (
+        <>
         <div className="container mt-5">
             <div className="card text-center shadow-sm">
                 <div className="card-body p-4">
@@ -69,6 +70,8 @@ function CreateSession() {
                 </div>
             </div>
         </div>
+        <RecentSessions />
+        </>
     );
 }
 

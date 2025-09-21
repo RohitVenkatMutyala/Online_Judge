@@ -1,5 +1,3 @@
-// src/components/RecentSessions.js
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebaseConfig';
@@ -39,36 +37,64 @@ function RecentSessions() {
       }
     }
   };
+  
+  // --- ADDED: Helper function to format the timestamp ---
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'No date';
+    // Converts Firestore timestamp to a readable Date string
+    return timestamp.toDate().toLocaleString(); 
+  };
 
   if (loading) {
     return <p className="text-center mt-3">Loading recent sessions...</p>;
   }
 
   return (
-    <div className="card shadow-sm mt-4">
-      <div className="card-header bg-dark text-white">
-        <h5>Recent Sessions</h5>
-      </div>
-      <div className="list-group list-group-flush">
-        {sessions.map(session => (
-          <div key={session.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-            <Link to={`/chat/${session.id}`} className="text-decoration-none text-dark flex-grow-1">
-              <h6 className="mb-1">Session: {session.id}</h6>
-              <small className="text-muted">By: {session.ownerName || 'Unknown'}</small>
-            </Link>
+    <div className="mt-4">
+      <h5 className="mb-3">Recent Sessions</h5>
+      {/* --- UI CHANGED: From a list-group to individual cards --- */}
+      {sessions.map(session => (
+        <div key={session.id} className="card shadow-sm mb-3">
+          <div className="card-body">
+            <div className="d-flex justify-content-between align-items-start">
+              <h6 className="card-title mb-1">Session: {session.id}</h6>
+              {/* --- ADDED: Public or Private badge --- */}
+              {session.access === 'private' ? (
+                <span className="badge bg-info">Private</span>
+              ) : (
+                <span className="badge bg-success">Public</span>
+              )}
+            </div>
+            
+            <div className="card-text small text-muted">
+              {/* --- ADDED: Clearer creator (sender) and timestamp info --- */}
+              <div><strong>Creator:</strong> {session.ownerName || 'Unknown'}</div>
+              <div><strong>Created:</strong> {formatTimestamp(session.createdAt)}</div>
+              {/* --- ADDED: Receiver count for private sessions --- */}
+              {session.access === 'private' && (
+                <div>
+                  <strong>Invited:</strong> {(session.allowedEmails?.length || 1) - 1} user(s)
+                </div>
+              )}
+            </div>
 
-            {user && user.role === 'admin' && (
-              <button 
-                onClick={() => handleDelete(session.id)} 
-                className="btn btn-sm btn-outline-danger ms-2"
-                title="Delete Session"
-              >
-                &times;
-              </button>
-            )}
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <Link to={`/chat/${session.id}`} className="btn btn-sm btn-outline-primary">
+                Join
+              </Link>
+              {user && user.role === 'admin' && (
+                <button 
+                  onClick={() => handleDelete(session.id)} 
+                  className="btn btn-sm btn-outline-danger"
+                  title="Delete Session"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
