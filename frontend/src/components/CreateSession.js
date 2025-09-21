@@ -6,7 +6,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-
+import RecentSessions from './RecentSessions';
 function CreateSession() { 
     const navigate = useNavigate();
     const { user } = useAuth(); 
