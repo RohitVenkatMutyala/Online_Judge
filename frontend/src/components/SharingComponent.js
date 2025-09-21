@@ -1,73 +1,58 @@
 // src/components/SharingComponent.js
 
-import React, { useState, useEffect } from 'react';
-import { db } from '../firebaseConfig';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react';
+import { toast } from 'react-toastify'; // Using toast for user feedback
 
-function SharingComponent({ sessionId }) {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
+function SharingComponent() {
+    // The state will manage the button's text for feedback
+    const [copyButtonText, setCopyButtonText] = useState('Copy');
+    
+    // This gets the full URL of the current page
+    const sessionUrl = window.location.href;
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            const usersRef = collection(db, 'users');
-            const userSnapshot = await getDocs(usersRef);
-            setUsers(userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            setLoading(false);
-        };
-        fetchUsers();
-    }, []);
-
-    const handleSendInvite = async (userId, userName, role) => {
-        if (!sessionId || !userId) return;
-
+    // This function handles the copy-to-clipboard logic
+    const handleCopyToClipboard = async () => {
         try {
-            const sessionDocRef = doc(db, 'sessions', sessionId);
-            await updateDoc(sessionDocRef, {
-                [`permissions.${userId}`]: role 
-            });
-            toast.success(`Added ${userName} as an ${role}!`);
-        } catch (error) {
-            console.error("Error sending invite:", error);
-            toast.error("Failed to send invite.");
+            await navigator.clipboard.writeText(sessionUrl);
+            setCopyButtonText('Copied!'); // Change button text
+            toast.success("Session link copied to clipboard!"); // Show a success message
+
+            // Reset the button text after 2 seconds
+            setTimeout(() => {
+                setCopyButtonText('Copy');
+            }, 2000);
+        } catch (err) {
+            toast.error("Failed to copy the link.");
+            console.error('Failed to copy link: ', err);
         }
     };
 
-    if (loading) {
-        return <div>Loading users...</div>;
-    }
-
     return (
-        <div className="card border-info mb-4">
-            <div className="card-header">
-                <h5>Share Session</h5>
+        <div className="card users-card shadow-lg mb-4">
+            <div className="card-header users-header d-flex align-items-center">
+                <i className="bi bi-share-fill me-2"></i>
+                <h5 className="mb-0">Share Session</h5>
             </div>
-            <div className="card-body" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                <ul className="list-group list-group-flush">
-                    {users.map(user => (
-                        <li key={user.id} className="list-group-item">
-                            <div>
-                                {user.firstname} {user.lastname}
-                                <small className="d-block text-muted">{user.email}</small>
-                            </div>
-                            <div className="btn-group mt-2" role="group">
-                                <button 
-                                    className="btn btn-sm btn-outline-secondary" 
-                                    onClick={() => handleSendInvite(user.id, user.firstname, 'viewer')}
-                                >
-                                    Add as Viewer
-                                </button>
-                                <button 
-                                    className="btn btn-sm btn-outline-primary" 
-                                    onClick={() => handleSendInvite(user.id, user.firstname, 'editor')}
-                                >
-                                    Add as Editor
-                                </button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+            <div className="card-body">
+                <p className="card-text text-muted small">
+                    Anyone with this link can join the session.
+                </p>
+                <div className="input-group">
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={sessionUrl}
+                        readOnly // Makes the input field not editable
+                        aria-label="Session Link"
+                    />
+                    <button
+                        className="btn btn-primary"
+                        type="button"
+                        onClick={handleCopyToClipboard}
+                    >
+                        <i className="bi bi-clipboard me-1"></i> {copyButtonText}
+                    </button>
+                </div>
             </div>
         </div>
     );
