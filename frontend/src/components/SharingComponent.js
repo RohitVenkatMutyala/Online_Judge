@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'react-toastify'; // Using toast for user feedback
-
+ const [theme, setTheme] = useState('light'); 
 function SharingComponent() {
     // The state will manage the button's text for feedback
     const [copyButtonText, setCopyButtonText] = useState('Copy');
