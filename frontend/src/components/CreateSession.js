@@ -17,8 +17,6 @@ function CreateSession() {
             return;
         }
 
-        // --- UNIFIED PERMISSION LOGIC ---
-
         // 1. Determine if the session is public or private
         const accessType = window.prompt("Who can access this session? Type 'public' for anyone, or 'private' for specific people.", 'public')?.toLowerCase() || 'public';
 
