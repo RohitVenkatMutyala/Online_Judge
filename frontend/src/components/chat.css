@@ -1,0 +1,54 @@
+/* Overall page background and layout */
+.chat-page-container {
+  background-color: #f8f9fa; /* Light grey background */
+  min-height: calc(100vh - 56px); /* Full height minus navbar */
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+/* Chat message styles */
+.chat-messages-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-message {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-sender {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.message-bubble {
+  padding: 0.5rem 1rem;
+  border-radius: 1.25rem;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+/* Style for messages sent by the current user */
+.own-message {
+  align-items: flex-end;
+}
+
+.own-message .message-bubble {
+  background-color: #0d6efd; /* Bootstrap primary blue */
+  color: white;
+  border-top-right-radius: 0.25rem;
+}
+
+/* Style for messages received from others */
+.other-message {
+  align-items: flex-start;
+}
+
+.other-message .message-bubble {
+  background-color: #e9ecef; /* Bootstrap light grey */
+  color: #212529;
+  border-top-left-radius: 0.25rem;
+}

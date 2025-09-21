@@ -21,6 +21,7 @@ import Editor from '@monaco-editor/react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './sketchy.css';
 import Navbar from './navbar';
+import './chat.css';
 
 function Chat() {
   const { user } = useAuth();
@@ -120,79 +121,85 @@ function Chat() {
     );
   }
 
-  return (
+   return (
     <>
       <Navbar />
-      <div className="container-fluid mt-4">
-        <div className="row g-4">
-          {/* ----- Left Column: Editors ----- */}
-          <div className="col-lg-8">
-            {/* Code Editor */}
-            <div className="card border-primary mb-4">
-              <div className="card-header">
-                <h5>Collaborative Code Editor</h5>
-              </div>
-              <div className="card-body p-0" style={{ height: '400px' }}>
-                {/* --- CHANGE 2: Use the Monaco Editor Component --- */}
-                <Editor
-                  height="100%"
-                  defaultLanguage="javascript"
-                  theme="vs-dark" // Common theme for Monaco, similar to monokai
-                  value={code}
-                  onChange={handleCodeChange}
-                  options={{ minimap: { enabled: false } }} // Optional: hide the minimap
-                />
-              </div>
-            </div>
-
-            {/* Text Editor */}
-            <div className="card border-secondary">
-              <div className="card-header">
-                <h5>Shared Notes</h5>
-              </div>
-              <div className="card-body">
-                <textarea
-                  className="form-control"
-                  style={{ height: '200px', resize: 'none' }}
-                  value={text}
-                  onChange={handleTextChange}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* ----- Right Column: Chat ----- */}
-          <div className="col-lg-4">
-            <div className="card border-success" style={{ height: '75vh' }}>
-              <div className="card-header">
-                <h5>Live Chat</h5>
-              </div>
-              <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
-                <div className="flex-grow-1 mb-3">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className={`mb-2 ${msg.senderId === user._id ? 'text-end' : ''}`}>
-                      <div className="fw-bold small">{msg.senderName}</div>
-                      <span className={`badge ${msg.senderId === user._id ? 'bg-primary' : 'bg-secondary'}`}>
-                        {msg.text}
-                      </span>
-                    </div>
-                  ))}
-                  <div ref={chatMessagesEndRef} />
+      <div className="chat-page-container">
+        <div className="container-fluid">
+          <div className="row g-4">
+            {/* ----- Left Column: Editors ----- */}
+            <div className="col-lg-8">
+              {/* Code Editor */}
+              <div className="card shadow-sm rounded-3 mb-4">
+                <div className="card-header bg-dark text-white">
+                  <h5>Collaborative Code Editor</h5>
                 </div>
-                {/* Chat Input Form */}
-                <form onSubmit={handleSendMessage}>
-                  <div className="input-group">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Type a message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                    />
-                    <button className="btn btn-success" type="submit">Send</button>
-                  </div>
-                </form>
+                <div className="card-body p-0" style={{ height: '450px' }}>
+                  <Editor
+                    height="100%"
+                    defaultLanguage="javascript"
+                    theme="vs-dark"
+                    value={code}
+                    onChange={handleCodeChange}
+                    options={{ minimap: { enabled: false } }}
+                  />
+                </div>
               </div>
+
+              {/* Text Editor */}
+              <div className="card shadow-sm rounded-3">
+                <div className="card-header">
+                  <h5>Shared Notes</h5>
+                </div>
+                <div className="card-body">
+                  <textarea
+                    className="form-control border-0"
+                    style={{ height: '200px', resize: 'none' }}
+                    value={text}
+                    onChange={handleTextChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ----- Right Column: Chat and Sessions ----- */}
+            <div className="col-lg-4 d-flex flex-column">
+              {/* Live Chat Card */}
+              <div className="card shadow-sm rounded-3 flex-grow-1">
+                <div className="card-header bg-success text-white">
+                  <h5>Live Chat</h5>
+                </div>
+                <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
+                  <div className="chat-messages-container flex-grow-1 mb-3">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`chat-message ${msg.senderId === user._id ? 'own-message' : 'other-message'}`}
+                      >
+                        <div className="message-sender">{msg.senderName}</div>
+                        <div className="message-bubble">{msg.text}</div>
+                      </div>
+                    ))}
+                    <div ref={chatMessagesEndRef} />
+                  </div>
+                  {/* Chat Input Form */}
+                  <form onSubmit={handleSendMessage}>
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Type a message..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                      />
+                      <button className="btn btn-success" type="submit">Send</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              {/* --- ADDED RECENT SESSIONS COMPONENT --- */}
+              <RecentSessions />
             </div>
           </div>
         </div>
