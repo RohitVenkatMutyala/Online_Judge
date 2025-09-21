@@ -29,7 +29,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 // FIXED: Define the base URL for your compiler API.
 // It's best practice to store this in a .env file.
-const API_COM = process.env.REACT_APP_COMPILER_API_URL || 'http://localhost:5000';
+const API_COM = process.env.REACT_APP_COMPILER_API || 'http://localhost:5000';
 
 function Chat() {
     const { user } = useAuth();
