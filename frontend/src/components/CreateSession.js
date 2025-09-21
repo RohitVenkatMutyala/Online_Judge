@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// --- ADD THESE TWO LINES ---
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+
 function CreateSession({ user }) {
   const navigate = useNavigate();
 
@@ -20,8 +23,7 @@ function CreateSession({ user }) {
         text: 'This is a shared notes area.',
         createdAt: serverTimestamp(),
         ownerId: user._id,
-        // --- ADD THIS LINE ---
-        ownerName: `${user.firstname} ${user.lastname}`, 
+        ownerName: `${user.firstname} ${user.lastname}`,
         permissions: {
           [user._id]: 'editor'
         }
@@ -32,10 +34,10 @@ function CreateSession({ user }) {
     createSessionInDb();
     
   }, [user, navigate]);
-  // You can show a loading message while the redirect happens
+
   return (
     <div className="container mt-5">
-      <h2 className="text-center">Creating a new session...</h2>
+      <h2 className="text-center">Creating a secure session...</h2>
     </div>
   );
 }
