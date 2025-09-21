@@ -293,7 +293,6 @@ function Chat() {
                                                 </select>
                                             </div>
                                         </div>
-                                        {description && <small className="text d-block mt-2">{description}</small>}
                                     </div>
                                     <div className="card-body p-0" style={{ height: '450px' }}>
                                         <Editor
