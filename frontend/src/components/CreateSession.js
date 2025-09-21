@@ -6,7 +6,7 @@ import { doc, setDoc, serverTimestamp, collection, where, query, getDocs } from 
 import { db } from '../firebaseConfig';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import RecentSessions from './RecentSessions';
+
 function CreateSession() { 
     const navigate = useNavigate();
     const { user } = useAuth(); 
@@ -17,22 +17,18 @@ function CreateSession() {
             return;
         }
 
-        // --- NEW UNIFIED LOGIC ---
+        // --- UNIFIED PERMISSION LOGIC ---
 
-        // 1. Determine if the session is public or private
-        const accessType = window.prompt("Who can access this session? Type 'public' for anyone, or 'private' for specific people.", 'public')?.toLowerCase() || 'public';
-
-        // 2. Determine the default role for OTHER users
-        const defaultRole = window.prompt("What permission should other users have? Type 'editor' or 'viewer'.", 'viewer')?.toLowerCase() || 'viewer';
-
-        // 3. Initialize permissions map. The creator is always an editor.
+        const accessType = window.prompt("Is this session 'public' or 'private'?", 'public')?.toLowerCase() || 'public';
+        const defaultRole = window.prompt("What permission should others have? ('editor' or 'viewer')", 'viewer')?.toLowerCase() || 'viewer';
+        
+        // The creator is always an editor.
         const permissions = { [user._id]: 'editor' };
 
-        // 4. If private, get invited users and add them to the permissions map
         if (accessType === 'private') {
-            const emailsInput = window.prompt("Enter the emails of people to invite, separated by commas:");
+            const emailsInput = window.prompt("Enter emails to invite (comma-separated):");
             if (emailsInput) {
-                const emails = emailsInput.split(',').map(email => email.trim()).filter(email => email !== user.email);
+                const emails = emailsInput.split(',').map(email => email.trim()).filter(Boolean);
                 
                 if (emails.length > 0) {
                     // Find the user documents that match the invited emails
@@ -40,13 +36,11 @@ function CreateSession() {
                     const q = query(usersRef, where('email', 'in', emails));
                     const userSnapshot = await getDocs(q);
                     
-                    let foundUsers = 0;
+                    // Add the found user's ID and their assigned role to the permissions map
                     userSnapshot.forEach(doc => {
-                        // Add the found user's ID and their assigned role to the map
                         permissions[doc.id] = defaultRole;
-                        foundUsers++;
                     });
-                    toast.info(`Found and invited ${foundUsers} user(s) as ${defaultRole}s.`);
+                    toast.info(`Invited ${userSnapshot.size} user(s) as ${defaultRole}s.`);
                 }
             }
         }
@@ -62,7 +56,7 @@ function CreateSession() {
                 ownerId: user._id,
                 ownerName: `${user.firstname} ${user.lastname}`,
                 access: accessType, // 'public' or 'private'
-                defaultRole: defaultRole, // 'editor' or 'viewer'
+                defaultRole: defaultRole, // 'editor' or 'viewer' for public sessions
                 permissions: permissions // The map of user IDs to roles
             });
             
@@ -74,21 +68,17 @@ function CreateSession() {
     };
 
     return (
-        <>
         <div className="container mt-5">
             <div className="card text-center">
                 <div className="card-body">
                     <h5 className="card-title">Start a New Collaboration</h5>
-                    <p className="card-text">Click the button below to start a new live coding session.</p>
+                    <p className="card-text">Click below to start a new live coding session.</p>
                     <button className="btn btn-primary" onClick={createAndNavigate}>
                         Create New Session
                     </button>
                 </div>
             </div>
         </div>
-        <RecentSessions/>
-        </>
-        
     );
 }
 

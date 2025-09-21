@@ -1,7 +1,9 @@
+// src/components/Chat.js
+
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
 import { 
     doc, 
@@ -11,24 +13,22 @@ import {
     addDoc, 
     query, 
     orderBy, 
-    serverTimestamp, 
-    arrayUnion, 
-    arrayRemove 
+    serverTimestamp 
 } from 'firebase/firestore';
 import Editor from '@monaco-editor/react';
 
-// CSS and Component Imports
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './sketchy.css';
-import './chat.css';
+// Import all your components and CSS
 import Navbar from './navbar';
 import RecentSessions from './RecentSessions';
 import SharingComponent from './SharingComponent';
+import './chat.css';
+import './sketchy.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function Chat() {
     const { user } = useAuth();
     const { sessionId } = useParams();
-    const navigate = useNavigate();
 
     // State variables
     const [code, setCode] = useState('');
@@ -38,34 +38,19 @@ function Chat() {
     const [accessDenied, setAccessDenied] = useState(false);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
-    
-    // --- NEW FEATURE STATES ---
-    const [activeUsers, setActiveUsers] = useState([]);
-    const [codeLanguage, setCodeLanguage] = useState('javascript');
+    // --- ADDED: State for session privacy and badge ---
+    const [sessionAccess, setSessionAccess] = useState('public');
 
     const chatMessagesEndRef = useRef(null);
 
-    // Auto-scroll for chat
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Main listener for session data and permissions
     useEffect(() => {
         if (!sessionId || !user) return;
-        
-        const sessionDocRef = doc(db, 'sessions', sessionId);
 
-        // --- NEW FEATURE: Add user to active list on mount ---
-        const enterSession = async () => {
-            await updateDoc(sessionDocRef, {
-                activeParticipants: arrayUnion({
-                    id: user._id,
-                    name: `${user.firstname} ${user.lastname}`
-                })
-            });
-        };
-        enterSession();
+        const sessionDocRef = doc(db, 'sessions', sessionId);
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -74,11 +59,12 @@ function Chat() {
                 let hasAccess = false;
                 let role = 'viewer';
 
+                // --- CORRECTED ACCESS LOGIC ---
                 if (data.access === 'public') {
                     hasAccess = true;
                     role = permissions[user._id] || data.defaultRole || 'viewer';
                 } else { // private
-                    if (permissions[user._id]) {
+                    if (permissions[user._id]) { // Check if user's ID is in the permissions map
                         hasAccess = true;
                         role = permissions[user._id];
                     }
@@ -94,9 +80,8 @@ function Chat() {
                     setUserRole(role);
                     setCode(data.code || '');
                     setText(data.text || '');
-                    // --- NEW FEATURE: Update active users and language state ---
-                    setActiveUsers(data.activeParticipants || []);
-                    setCodeLanguage(data.language || 'javascript');
+                    // --- ADDED: Set state for the private badge ---
+                    setSessionAccess(data.access || 'public');
                 } else {
                     setAccessDenied(true);
                 }
@@ -106,31 +91,19 @@ function Chat() {
             setLoading(false);
         });
 
-        // Chat messages listener
         const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
         const messagesQuery = query(messagesColRef, orderBy('timestamp'));
-        const unsubscribeMessages = onSnapshot(messagesQuery, (querySnapshot) => {
-            setMessages(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const unsubscribeMessages = onSnapshot(messagesQuery, (qSnap) => {
+            setMessages(qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
-        
-        // --- NEW FEATURE: Remove user from active list on unmount (closing tab/navigating away) ---
-        const leaveSession = async () => {
-            await updateDoc(sessionDocRef, {
-                activeParticipants: arrayRemove({
-                    id: user._id,
-                    name: `${user.firstname} ${user.lastname}`
-                })
-            });
-        };
 
         return () => {
             unsubscribeSession();
             unsubscribeMessages();
-            leaveSession();
         };
     }, [sessionId, user]);
 
-    // --- All Handlers ---
+    // --- All Handlers (handleCodeChange, etc.) remain the same ---
     const handleCodeChange = (newCode) => {
         if (userRole !== 'editor') return;
         updateDoc(doc(db, 'sessions', sessionId), { code: newCode });
@@ -140,7 +113,7 @@ function Chat() {
         if (userRole !== 'editor') return;
         updateDoc(doc(db, 'sessions', sessionId), { text: e.target.value });
     };
-
+    
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (newMessage.trim() === '' || !user) return;
@@ -151,17 +124,6 @@ function Chat() {
             timestamp: serverTimestamp(),
         });
         setNewMessage('');
-    };
-    
-    // --- NEW FEATURE: Handler for language change ---
-    const handleLanguageChange = (e) => {
-        if (userRole !== 'editor') {
-            toast.warn("Only editors can change the language.");
-            return;
-        }
-        const newLanguage = e.target.value;
-        setCodeLanguage(newLanguage);
-        updateDoc(doc(db, 'sessions', sessionId), { language: newLanguage });
     };
 
     const formatTimestamp = (timestamp) => {
@@ -195,6 +157,10 @@ function Chat() {
                             <div className="card shadow-sm rounded-3 mb-4">
                                 <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                                     <h5>Collaborative Code Editor</h5>
+                                       {/* --- ADDED: Conditional Private Session Badge --- */}
+                                        {sessionAccess === 'private' && (
+                                            <span className="badge bg-info ms-3">Private Session</span>
+                                        )}
                                     {/* --- NEW FEATURE: Language Selector --- */}
                                     <div className="d-flex align-items-center">
                                         {userRole === 'viewer' && <span className="badge bg-warning text-dark me-3">View Only</span>}
