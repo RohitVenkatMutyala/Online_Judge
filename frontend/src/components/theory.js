@@ -451,6 +451,7 @@ const Theory = () => {
                                     <h2 className="theory-title">
                                         {q.name}
                                     </h2>
+                                    <br></br>
 
                                   
 
