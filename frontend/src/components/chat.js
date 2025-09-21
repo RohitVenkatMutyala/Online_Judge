@@ -39,11 +39,10 @@ function Chat() {
     const [accessDenied, setAccessDenied] = useState(false);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
-      const [input, setInput] = useState('');
     const [sessionAccess, setSessionAccess] = useState('public');
     const [activeUsers, setActiveUsers] = useState([]);
     const [codeLanguage, setCodeLanguage] = useState('javascript');
-    const [description, setDescription] = useState('');
+ const [description, setDescription] = useState('');
     const chatMessagesEndRef = useRef(null);
 
     // --- Hooks for Functionality ---
@@ -158,24 +157,6 @@ function Chat() {
         setCodeLanguage(newLanguage);
         updateDoc(doc(db, 'sessions', sessionId), { language: newLanguage });
     };
-      const handleRun = async () => {
-    setIsRunning(true);
-    try {
-      const res = await axios.post(`${API_COM}/run`, {
-        codeLanguage,
-        code,
-        input,
-      });
-      setOutput(res.data.output || res.data.error || 'No output');
-      setActiveTab('output');
-    } catch (error) {
-      console.error("Compilation/Execution error:", error);
-      setOutput(error.response?.data?.error || 'Something went wrong!');
-      setActiveTab('output');
-    } finally {
-      setIsRunning(false);
-    }
-  };
 
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return '';
@@ -703,7 +684,7 @@ function Chat() {
                                             </select>
                                         </div>
                                         {/* --- ADDED: Display the description as a subtitle --- */}
-                                        <small className="text-muted d-block mt-1">{description}</small>
+                                    <small className="text-muted d-block mt-1">{description}</small>
                                     </div>
                                     <div className="card-body p-0" style={{ height: '450px' }}>
                                         <Editor
@@ -716,130 +697,7 @@ function Chat() {
                                         />
                                     </div>
                                 </div>
-                                <ul className="nav nav-tabs rounded-top">
-                                    <li className="nav-item">
-                                        <button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} onClick={() => setActiveTab('input')}>
-                                            Input
-                                        </button>
-                                    </li>
-                                    <li className="nav-item">
-                                        <button className={`nav-link ${activeTab === 'output' ? 'active' : ''}`} onClick={() => setActiveTab('output')}>
-                                            Output
-                                        </button>
-                                    </li>
-                                    <li className="nav-item">
-                                        <button className={`nav-link ${activeTab === 'verdict' ? 'active' : ''}`} onClick={() => setActiveTab('verdict')}>
-                                            Verdict
-                                        </button>
-                                    </li>
-                                </ul>
 
-                                <div className={`tab-content border border-top-0 p-3 rounded-bottom bg-${theme === 'dark' ? 'dark' : 'light'} text-${theme === 'dark' ? 'light' : 'dark'}`} style={{ minHeight: '180px' }}>
-                                    {activeTab === 'input' && (
-                                        <div className="tab-pane fade show active">
-                                            <label
-                                                htmlFor="inputArea"
-                                                className="form-label fw-semibold"
-                                                style={{
-                                                    background: 'linear-gradient(to right, #f12711, #f5af19)',
-                                                    WebkitBackgroundClip: 'text',
-                                                    WebkitTextFillColor: 'transparent',
-                                                }}
-                                            >
-                                                Custom Input:
-                                            </label>
-                                            <textarea
-                                                id="inputArea"
-                                                className="form-control mb-3 text-body bg-body border border-secondary"
-                                                style={{ resize: 'vertical', minHeight: '120px' }}
-                                                rows="4"
-                                                placeholder="Enter custom input (if required)..."
-                                                value={input || ''}
-                                                onChange={handleinput}
-                                            />
-                                            <div className="d-flex gap-2">
-                                                <button
-                                                    className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-1"
-                                                    onClick={handleRun}
-                                                    disabled={isRunning}
-                                                >
-                                                    {isRunning ? (
-                                                        <><div className="spinner-border spinner-border-sm text-primary" role="status"></div> Running...</>
-                                                    ) : (
-                                                        <><i className="bi bi-play-fill"></i> Run Code</>
-                                                    )}
-                                                </button>
-                                             
-                                            </div>
-                                        </div>
-                                    )}
-                                    {activeTab === 'output' && (
-                                        <div className="tab-pane fade show active">
-                                            {output ? (
-                                                <div className={`card shadow-sm border-0 bg-${theme === 'dark' ? 'dark' : 'white'} text-${theme === 'dark' ? 'light' : 'dark'}`}>
-                                                    <div className="card-header text-center fw-bold" style={{ background: 'linear-gradient(to right, #f12711, #f5af19)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '1.25rem' }}>
-                                                        Output
-                                                    </div>
-                                                    <div className="card-body">
-                                                        <pre className="mb-0">{output}</pre>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <p className="text-muted">Run code to see output.</p>
-                                            )}
-                                        </div>
-                                    )}
-                                    {activeTab === 'verdict' && (
-                                        <div className="tab-pane fade show active">
-                                            <div className="card shadow-sm border-0">
-                                                <div className="card-header text-center fw-bold" style={{ background: 'linear-gradient(to right, #f12711, #f5af19)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '1.25rem' }}>
-                                                    Verdict
-                                                </div>
-                                                <div className="card-body">
-                                                    {verdicts.length === 0 ? (
-                                                        <p className="text-muted">Verdict will appear here.</p>
-                                                    ) : (
-                                                        <>
-                                                            <div className="mb-3">
-                                                                <div className="alert alert-secondary d-inline-block fw-semibold">
-                                                                    ⏱️ Total Time Taken:{" "}
-                                                                    <span className="badge bg-dark">
-                                                                        {typeof TotalTime === "number" ? `${TotalTime}ms` : "N/A"}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="mt-2 fw-medium text-warning">
-                                                                    {(() => {
-                                                                        if (typeof TotalTime !== "number") return "⏰ Looks like something went wrong.";
-                                                                        if (TotalTime <= 1000 && Solved === "Solved") return "🧠 Beats 100% of submissions. Genius alert!";
-                                                                        if (TotalTime <= 2000 && Solved === "Solved") return "🚀 Solid run! You've outperformed most developers.";
-                                                                        if (TotalTime <= 4000 && Solved === "Solved") return "🛠️ Good job! There's still room for optimization.";
-                                                                        return null;
-                                                                    })()}
-                                                                </div>
-                                                            </div>
-                                                            <div className="d-flex flex-wrap gap-3">
-                                                                {verdicts.map((v, idx) => (
-                                                                    <div key={idx} className="border rounded p-2 bg-light text-center" style={{ minWidth: '130px' }}>
-                                                                        <strong style={{ color: 'yellowgreen' }}>Test Case {v.testCase}</strong>
-                                                                        <div className={v.verdict.includes("Passed") ? "text-success" : "text-danger fw-bold"}>
-                                                                            {v.verdict}
-                                                                        </div>
-                                                                        {!v.verdict.includes("Passed") && (
-                                                                            <div className="mt-2 text-start small">
-                                                                                <div><strong style={{ color: 'black' }}>Expected:</strong> <pre style={{ color: 'black' }}>{v.expected}</pre></div>
-                                                                                <div><strong style={{ color: 'black' }}>Actual:</strong> <pre style={{ color: 'black' }}>{v.actual}</pre></div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
                                 <div className="card notes-card shadow-lg rounded-3">
                                     <div className="card-header notes-header d-flex align-items-center">
                                         <i className="bi bi-journal-text me-2"></i>
