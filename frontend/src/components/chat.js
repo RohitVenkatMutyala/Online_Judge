@@ -144,7 +144,7 @@ function Chat() {
 
 
     // --- Auth Check ---
-    if (!user || user.role === 'admin') {
+    if (!user) {
         return (
             <div className="container mt-5">
                 <div className="alert alert-danger text-center">
