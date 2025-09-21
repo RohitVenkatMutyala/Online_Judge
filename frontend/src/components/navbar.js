@@ -53,16 +53,16 @@ function Navbar() {
     <>
       {/* Enhanced Navigation Bar */}
       <nav className="navbar navbar-expand-lg sticky-top shadow-lg"
-           style={{
-             background: 'linear-gradient(135deg, #1a1d23 0%, #20232a 50%, #2c3e50 100%)',
-             backdropFilter: 'blur(10px)',
-             borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-           }}>
+        style={{
+          background: 'linear-gradient(135deg, #1a1d23 0%, #20232a 50%, #2c3e50 100%)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
         <div className="container-fluid px-4">
 
           {/* === MODIFIED LOGO SECTION START === */}
           <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-3 py-2">
-           
+
             <span
               className="fw-bold"
               style={{
@@ -127,32 +127,40 @@ function Navbar() {
                     <>
                       <li className="nav-item">
                         <Link className="nav-link" to="/admindashboard" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-speedometer2"></i>
                           <span>Admin Dashboard</span>
                         </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/postproblem" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-plus-circle-fill"></i>
                           <span>Create Problem</span>
                         </Link>
                       </li>
                       <li className="nav-item">
+                        <Link className="nav-link" to="/new-chat" style={navLinkStyle}
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          <i className="bi bi-book-fill"></i>
+                          <span>Doubts</span>
+                        </Link>
+                      </li>
+                      <li className="nav-item">
                         <Link className="nav-link" to="/test" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-gear-fill"></i>
                           <span>Test Cases</span>
                         </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/adminproblems" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-collection-fill"></i>
                           <span>Manage Problems</span>
                         </Link>
@@ -162,48 +170,48 @@ function Navbar() {
                     <>
                       <li className="nav-item">
                         <Link className="nav-link" to="/dashboard" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-house-fill"></i>
                           <span>Dashboard</span>
                         </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/problems" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-code-slash"></i>
                           <span>Problems</span>
                         </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/funda" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-book-fill"></i>
                           <span>Fundamentals</span>
                         </Link>
                       </li>
-                        <li className="nav-item">
+                      <li className="nav-item">
                         <Link className="nav-link" to="/new-chat" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-book-fill"></i>
                           <span>Doubts</span>
                         </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/contexts" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-trophy-fill"></i>
                           <span>Contests</span>
                         </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/sub" style={navLinkStyle}
-                              onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                              onMouseLeave={(e) => handleNavLinkHover(e, false)}>
+                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
+                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-file-earmark-check-fill"></i>
                           <span>Submissions</span>
                         </Link>
