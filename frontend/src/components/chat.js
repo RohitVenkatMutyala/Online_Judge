@@ -14,7 +14,7 @@ import {
     serverTimestamp,
     arrayUnion,
     arrayRemove,
-    docSnap, 
+     
 } from 'firebase/firestore';
 import Editor from '@monaco-editor/react';
 
