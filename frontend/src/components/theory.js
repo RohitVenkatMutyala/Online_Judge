@@ -448,10 +448,10 @@ const Theory = () => {
                                         </div>
                                     )}
                                     
-                                    <h2 className="theory-title">
+                                    <h2 className="theory-title pb-4">
                                         {q.name}
                                     </h2>
-                                    <br></br>
+                                    
 
                                   
 
