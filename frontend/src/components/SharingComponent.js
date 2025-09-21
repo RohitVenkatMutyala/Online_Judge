@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { toast } from 'react-toastify'; // Using toast for user feedback
- const [theme, setTheme] = useState('light'); 
+
 function SharingComponent() {
     // The state will manage the button's text for feedback
     const [copyButtonText, setCopyButtonText] = useState('Copy');
-
+    
     // This gets the full URL of the current page
     const sessionUrl = window.location.href;
 
@@ -40,7 +40,7 @@ function SharingComponent() {
                 <div className="input-group">
                     <input
                         type="text"
-                        className={`form-control ${theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}`}
+                        className="form-control"
                         value={sessionUrl}
                         readOnly // Makes the input field not editable
                         aria-label="Session Link"
