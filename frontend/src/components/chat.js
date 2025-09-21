@@ -22,7 +22,7 @@ import Editor from '@monaco-editor/react';
 import Navbar from './navbar';
 import RecentSessions from './RecentSessions';
 import SharingComponent from './SharingComponent';
-import './Chat.css';
+import './chat.css';
 import './sketchy.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
