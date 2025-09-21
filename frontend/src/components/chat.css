@@ -52,3 +52,31 @@
   color: #212529;
   border-top-left-radius: 0.25rem;
 }
+/* In src/components/Chat.css */
+
+/* ... (keep all your existing styles) ... */
+
+/* --- ADD THESE NEW STYLES --- */
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Adds space between name and time */
+  margin-bottom: 0.25rem;
+}
+
+.message-sender {
+  font-size: 0.8rem;
+  font-weight: 600; /* Make the name slightly bolder */
+  color: #495057;
+}
+
+.message-timestamp {
+  font-size: 0.7rem; /* Make the timestamp smaller */
+  color: #adb5bd;   /* Make it a light grey color */
+}
+
+/* A small adjustment to the main sender class is needed
+   if it was defined before. If not, this is fine. */
+.message-sender {
+  margin-bottom: 0; /* Remove bottom margin if it existed */
+}
