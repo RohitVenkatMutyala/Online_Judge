@@ -2,231 +2,138 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../firebaseConfig'; // Import the firestore instance
-import {
-    doc,
-    onSnapshot,
-    setDoc,
-    updateDoc,
-    collection,
-    addDoc,
-    query,
-    orderBy,
-    serverTimestamp,
-    deleteDoc,
-} from 'firebase/firestore';
-
-// --- CHANGE 1: Import Monaco Editor instead of Ace ---
+import { db } from '../firebaseConfig';
+import { doc, onSnapshot, updateDoc, collection, addDoc, query, orderBy, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import Editor from '@monaco-editor/react';
-
-// Bootstrap and CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './sketchy.css';
 import Navbar from './navbar';
 import './chat.css';
 import RecentSessions from './RecentSessions';
+
 function Chat() {
     const { user } = useAuth();
     const { sessionId } = useParams();
     const navigate = useNavigate();
 
-    // State for collaborative features
-    const [code, setCode] = useState('// Start coding here...');
-    const [text, setText] = useState('Type your notes here...');
+    const [code, setCode] = useState('');
+    const [text, setText] = useState('');
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [accessDenied, setAccessDenied] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [userRole, setUserRole] = useState(null);
+
     const chatMessagesEndRef = useRef(null);
 
-    // Scroll to the latest message
-    const scrollToBottom = () => {
-        chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(scrollToBottom, [messages]);
-
-    // Set up real-time listeners for Firestore
     useEffect(() => {
-        if (!sessionId) return;
+        chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
-        // --- Real-time listener for Code and Text ---
+    useEffect(() => {
+        if (!sessionId || !user) return;
+
         const sessionDocRef = doc(db, 'sessions', sessionId);
-
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                setCode(data.code || '');
-                setText(data.text || '');
+                // --- PERMISSION CHECK ---
+                const isPublic = data.access === 'public';
+                const isAllowed = data.allowedEmails?.includes(user.email);
+                
+                if (isPublic || isAllowed) {
+                    setAccessDenied(false);
+                    setCode(data.code || '');
+                    setText(data.text || '');
+                    setUserRole(data.permissions?.[user.uid] || 'viewer');
+                } else {
+                    setAccessDenied(true);
+                }
             } else {
-                // If the session doesn't exist, create it.
-                setDoc(sessionDocRef, {
-                    code: '// Welcome! Start coding collaboratively.',
-                    text: 'This is a shared notes area.',
-                    createdAt: serverTimestamp()
-                });
+                setAccessDenied(true);
             }
+            setLoading(false);
         });
 
-        // --- Real-time listener for Chat Messages ---
         const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
         const messagesQuery = query(messagesColRef, orderBy('timestamp'));
-
         const unsubscribeMessages = onSnapshot(messagesQuery, (querySnapshot) => {
-            const msgs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setMessages(msgs);
+            setMessages(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
 
-        // Cleanup listeners on component unmount
         return () => {
             unsubscribeSession();
             unsubscribeMessages();
         };
-    }, [sessionId]);
+    }, [sessionId, user]);
 
-    // --- Handler Functions to update Firestore ---
-
-    // Note: Monaco's onChange provides the value directly, same as Ace
     const handleCodeChange = (newCode) => {
-        setCode(newCode);
-        const sessionDocRef = doc(db, 'sessions', sessionId);
-        updateDoc(sessionDocRef, { code: newCode });
+        if (userRole !== 'editor') return;
+        updateDoc(doc(db, 'sessions', sessionId), { code: newCode });
     };
 
     const handleTextChange = (e) => {
-        const newText = e.target.value;
-        setText(newText);
-        const sessionDocRef = doc(db, 'sessions', sessionId);
-        updateDoc(sessionDocRef, { text: newText });
+        if (userRole !== 'editor') return;
+        updateDoc(doc(db, 'sessions', sessionId), { text: e.target.value });
     };
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (newMessage.trim() === '' || !user) return;
-
-        const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
-        await addDoc(messagesColRef, {
+        await addDoc(collection(db, 'sessions', sessionId, 'messages'), {
             text: newMessage,
-            senderName: `${user.firstname} ${user.lastname}`,
-            senderId: user._id,
+            senderName: user.displayName || user.email,
+            senderId: user.uid,
             timestamp: serverTimestamp(),
         });
         setNewMessage('');
     };
-
-    const handleDeleteSession = async () => {
-        const isConfirmed = window.confirm(
-            'Are you sure you want to permanently delete this session? This action cannot be undone.'
-        );
-
-        if (isConfirmed) {
-            try {
-                // This MUST be inside a try...catch block
-                const sessionDocRef = doc(db, 'sessions', sessionId);
-                await deleteDoc(sessionDocRef);
-
-                // Navigate AWAY from the page immediately after successful deletion
-                navigate('/admindashboard');
-
-                // Show a success message AFTER navigation has been triggered
-                toast.success('Session deleted successfully!');
-
-            } catch (error) {
-                // If an error occurs, log it and inform the user
-                console.error("Error deleting session: ", error);
-                toast.error('Failed to delete the session.');
-            }
-        }
-    };
-    // --- ADD THIS HELPER FUNCTION ---
+    
     const formatTimestamp = (timestamp) => {
-        if (!timestamp) {
-            return ''; // Return an empty string if the timestamp isn't available yet
-        }
-        const date = timestamp.toDate(); // Convert Firestore Timestamp to JS Date
-        return date.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
+        if (!timestamp) return '';
+        return timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
-
-    // --- Auth Check ---
-    if (!user) {
-        return (
-            <div className="container mt-5">
-                <div className="alert alert-danger text-center">
-                    You must be logged in as a regular user to access this page.
-                </div>
-            </div>
-        );
+    if (loading) {
+        return <div className="container mt-5 text-center"><h2>Loading Session...</h2></div>;
     }
 
+    if (accessDenied) {
+        return <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div></div>;
+    }
+    
     return (
         <>
             <Navbar />
             <div className="chat-page-container">
                 <div className="container-fluid">
                     <div className="row g-4">
-                        {/* ----- Left Column: Editors ----- */}
                         <div className="col-lg-8">
-                            {/* Code Editor */}
                             <div className="card shadow-sm rounded-3 mb-4">
-                                <div className="card-header bg-dark text-white">
+                                <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                                     <h5>Collaborative Code Editor</h5>
-                                    {user && user.role === 'admin' && (
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={handleDeleteSession}
-                                        >
-                                            Delete Session
-                                        </button>
-                                    )}
+                                    {userRole === 'viewer' && <span className="badge bg-warning text-dark">View Only</span>}
                                 </div>
                                 <div className="card-body p-0" style={{ height: '450px' }}>
-                                    <Editor
-                                        height="100%"
-                                        defaultLanguage="javascript"
-                                        theme="vs-dark"
-                                        value={code}
-                                        onChange={handleCodeChange}
-                                        options={{ minimap: { enabled: false } }}
-                                    />
+                                    <Editor height="100%" defaultLanguage="javascript" theme="vs-dark" value={code} onChange={handleCodeChange} options={{ minimap: { enabled: false }, readOnly: userRole !== 'editor' }} />
                                 </div>
                             </div>
-
-                            {/* Text Editor */}
                             <div className="card shadow-sm rounded-3">
-                                <div className="card-header">
-                                    <h5>Shared Notes</h5>
-                                </div>
+                                <div className="card-header"><h5>Shared Notes</h5></div>
                                 <div className="card-body">
-                                    <textarea
-                                        className="form-control border-0"
-                                        style={{ height: '200px', resize: 'none' }}
-                                        value={text}
-                                        onChange={handleTextChange}
-                                    />
+                                    <textarea className="form-control border-0" style={{ height: '200px', resize: 'none' }} value={text} onChange={handleTextChange} disabled={userRole !== 'editor'} />
                                 </div>
                             </div>
                         </div>
-
-                        {/* ----- Right Column: Chat and Sessions ----- */}
                         <div className="col-lg-4 d-flex flex-column">
-                            {/* Live Chat Card */}
                             <div className="card shadow-sm rounded-3 flex-grow-1">
-                                <div className="card-header bg-success text-white">
-                                    <h5>Live Chat</h5>
-                                </div>
+                                <div className="card-header bg-success text-white"><h5>Live Chat</h5></div>
                                 <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
                                     <div className="chat-messages-container flex-grow-1 mb-3">
                                         {messages.map((msg) => (
-                                            <div
-                                                key={msg.id}
-                                                className={`chat-message ${msg.senderId === user._id ? 'own-message' : 'other-message'}`}
-                                            >
+                                            <div key={msg.id} className={`chat-message ${msg.senderId === user.uid ? 'own-message' : 'other-message'}`}>
                                                 <div className="message-header">
                                                     <span className="message-sender">{msg.senderName}</span>
-                                                    {/* --- ADD THIS SPAN FOR THE TIMESTAMP --- */}
                                                     <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
                                                 </div>
                                                 <div className="message-bubble">{msg.text}</div>
@@ -234,23 +141,14 @@ function Chat() {
                                         ))}
                                         <div ref={chatMessagesEndRef} />
                                     </div>
-                                    {/* Chat Input Form */}
                                     <form onSubmit={handleSendMessage}>
                                         <div className="input-group">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Type a message..."
-                                                value={newMessage}
-                                                onChange={(e) => setNewMessage(e.target.value)}
-                                            />
+                                            <input type="text" className="form-control" placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
                                             <button className="btn btn-success" type="submit">Send</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
-
-                            {/* --- ADDED RECENT SESSIONS COMPONENT --- */}
                             <RecentSessions />
                         </div>
                     </div>
