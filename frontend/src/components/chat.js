@@ -281,13 +281,13 @@ function Chat() {
                                                         <i className="bi bi-eye me-1"></i> View Only
                                                     </span>
                                                 )}
-                                                
+
                                                 <select
                                                     className={`form-select form-select-sm ${theme === 'dark' ? 'language-select text-white' : ''}`}
                                                     value={codeLanguage}
                                                     onChange={handleLanguageChange}
                                                 >
-                                                    <option value="python">Python</option>
+                                                    <option value="py">Python</option>
                                                     <option value="cpp">C++</option>
                                                     <option value="java">Java</option>
                                                     <option value="javascript">JavaScript</option>
