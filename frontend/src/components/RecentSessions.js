@@ -1,3 +1,5 @@
+// src/components/RecentSessions.js (File renamed from RecentSubmissions.js)
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebaseConfig';
@@ -5,14 +7,12 @@ import { collection, query, orderBy, limit, onSnapshot, doc, deleteDoc } from 'f
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
-// RENAMED the function to match the file name
-function RecentSessions() { 
+function RecentSessions() { // Function name updated
   const { user } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This query correctly points to the 'sessions' collection
     const sessionsQuery = query(
       collection(db, 'sessions'), 
       orderBy('createdAt', 'desc'), 
@@ -31,7 +31,6 @@ function RecentSessions() {
   const handleDelete = async (sessionId) => {
     if (window.confirm(`Are you sure you want to delete session "${sessionId}"?`)) {
       try {
-        // This delete function correctly targets the 'sessions' collection
         await deleteDoc(doc(db, 'sessions', sessionId));
         toast.success(`Session "${sessionId}" was deleted.`);
       } catch (error) {
@@ -74,5 +73,4 @@ function RecentSessions() {
   );
 }
 
-// RENAMED the export
-export default RecentSessions;
+export default RecentSessions; // Export name updated

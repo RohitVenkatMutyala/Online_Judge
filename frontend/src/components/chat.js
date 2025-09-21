@@ -6,25 +6,17 @@ import { useAuth } from '../context/AuthContext';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
 import { 
-    doc, 
-    onSnapshot, 
-    updateDoc, 
-    collection, 
-    addDoc, 
-    query, 
-    orderBy, 
-    serverTimestamp 
+    doc, onSnapshot, updateDoc, collection, addDoc, query, orderBy, serverTimestamp, arrayUnion, arrayRemove 
 } from 'firebase/firestore';
 import Editor from '@monaco-editor/react';
 
 // Import all your components and CSS
 import Navbar from './navbar';
-import RecentSessions from './RecentSessions';
+import RecentSessions from './RecentSessions'; // Ensure this points to the renamed file
 import SharingComponent from './SharingComponent';
 import './chat.css';
 import './sketchy.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 
 function Chat() {
     const { user } = useAuth();
@@ -38,8 +30,9 @@ function Chat() {
     const [accessDenied, setAccessDenied] = useState(false);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
-    // --- ADDED: State for session privacy and badge ---
     const [sessionAccess, setSessionAccess] = useState('public');
+    const [activeUsers, setActiveUsers] = useState([]);
+    const [codeLanguage, setCodeLanguage] = useState('javascript');
 
     const chatMessagesEndRef = useRef(null);
 
@@ -49,8 +42,15 @@ function Chat() {
 
     useEffect(() => {
         if (!sessionId || !user) return;
-
+        
         const sessionDocRef = doc(db, 'sessions', sessionId);
+
+        const enterSession = async () => {
+            await updateDoc(sessionDocRef, {
+                activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
+            }).catch(err => console.log("Failed to enter session, might not exist yet."));
+        };
+        enterSession();
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -64,7 +64,7 @@ function Chat() {
                     hasAccess = true;
                     role = permissions[user._id] || data.defaultRole || 'viewer';
                 } else { // private
-                    if (permissions[user._id]) { // Check if user's ID is in the permissions map
+                    if (permissions[user._id]) {
                         hasAccess = true;
                         role = permissions[user._id];
                     }
@@ -80,8 +80,9 @@ function Chat() {
                     setUserRole(role);
                     setCode(data.code || '');
                     setText(data.text || '');
-                    // --- ADDED: Set state for the private badge ---
                     setSessionAccess(data.access || 'public');
+                    setActiveUsers(data.activeParticipants || []);
+                    setCodeLanguage(data.language || 'javascript');
                 } else {
                     setAccessDenied(true);
                 }
@@ -96,14 +97,21 @@ function Chat() {
         const unsubscribeMessages = onSnapshot(messagesQuery, (qSnap) => {
             setMessages(qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
+        
+        const leaveSession = async () => {
+            await updateDoc(sessionDocRef, {
+                activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
+            });
+        };
 
         return () => {
             unsubscribeSession();
             unsubscribeMessages();
+            leaveSession();
         };
     }, [sessionId, user]);
 
-    // --- All Handlers (handleCodeChange, etc.) remain the same ---
+    // --- All Handlers ---
     const handleCodeChange = (newCode) => {
         if (userRole !== 'editor') return;
         updateDoc(doc(db, 'sessions', sessionId), { code: newCode });
@@ -113,7 +121,7 @@ function Chat() {
         if (userRole !== 'editor') return;
         updateDoc(doc(db, 'sessions', sessionId), { text: e.target.value });
     };
-    
+
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (newMessage.trim() === '' || !user) return;
@@ -125,27 +133,24 @@ function Chat() {
         });
         setNewMessage('');
     };
+    
+    const handleLanguageChange = (e) => {
+        if (userRole !== 'editor') {
+            toast.warn("Only editors can change the language.");
+            return;
+        }
+        const newLanguage = e.target.value;
+        setCodeLanguage(newLanguage);
+        updateDoc(doc(db, 'sessions', sessionId), { language: newLanguage });
+    };
 
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return '';
         return timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
-    // Render logic for loading and access denied states
-    if (loading) {
-        return <div className="container mt-5 text-center"><h2>Loading Session...</h2></div>;
-    }
-
-    if (accessDenied) {
-        return (
-            <>
-                <Navbar />
-                <div className="container mt-5">
-                    <div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div>
-                </div>
-            </>
-        );
-    }
+    if (loading) { return <div className="container mt-5 text-center"><h2>Loading Session...</h2></div>; }
+    if (accessDenied) { return <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div></div>; }
     
     return (
         <>
@@ -156,19 +161,17 @@ function Chat() {
                         <div className="col-lg-8">
                             <div className="card shadow-sm rounded-3 mb-4">
                                 <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                    <h5>Collaborative Code Editor</h5>
-                                       {/* --- ADDED: Conditional Private Session Badge --- */}
+                                    <div className="d-flex align-items-center">
+                                        <h5 className="mb-0">Collaborative Code Editor</h5>
                                         {sessionAccess === 'private' && (
                                             <span className="badge bg-info ms-3">Private Session</span>
                                         )}
-                                    {/* --- NEW FEATURE: Language Selector --- */}
+                                    </div>
                                     <div className="d-flex align-items-center">
                                         {userRole === 'viewer' && <span className="badge bg-warning text-dark me-3">View Only</span>}
                                         <select className="form-select form-select-sm bg-dark text-white" value={codeLanguage} onChange={handleLanguageChange}>
                                             <option value="javascript">JavaScript</option>
                                             <option value="python">Python</option>
-                                            <option value="java">Java</option>
-                                            <option value="csharp">C#</option>
                                             <option value="html">HTML</option>
                                             <option value="css">CSS</option>
                                             <option value="json">JSON</option>
@@ -187,29 +190,15 @@ function Chat() {
                                 </div>
                             </div>
                             <div className="card shadow-sm rounded-3">
-                                {/* ... Shared Notes Card ... */}
+                                {/* Shared Notes JSX */}
                             </div>
                         </div>
                         <div className="col-lg-4 d-flex flex-column">
-                            {/* --- NEW FEATURE: Active Users Panel --- */}
-                            <div className="card shadow-sm mb-4">
-                                <div className="card-header">
-                                    Active Users ({activeUsers.length})
-                                </div>
-                                <ul className="list-group list-group-flush">
-                                    {activeUsers.map(participant => (
-                                        <li key={participant.id} className="list-group-item">{participant.name}</li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
-                            
-                            <div className="card shadow-sm rounded-3 flex-grow-1 mt-4">
-                                {/* ... Live Chat Card ... */}
-                            </div>
-                            
-                            <RecentSessions />
+                           {/* Active Users and Sharing JSX */}
+                           <div className="card shadow-sm rounded-3 flex-grow-1 mt-4">
+                                {/* Live Chat JSX */}
+                           </div>
+                           <RecentSessions />
                         </div>
                     </div>
                 </div>
