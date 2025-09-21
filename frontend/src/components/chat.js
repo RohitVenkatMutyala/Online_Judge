@@ -14,7 +14,6 @@ import {
     serverTimestamp,
     arrayUnion,
     arrayRemove,
-     
 } from 'firebase/firestore';
 import Editor from '@monaco-editor/react';
 
@@ -22,7 +21,7 @@ import Editor from '@monaco-editor/react';
 import Navbar from './navbar';
 import RecentSessions from './RecentSessions';
 import SharingComponent from './SharingComponent';
-import './chat.css';
+import './Chat.css';
 import './sketchy.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -53,22 +52,27 @@ function Chat() {
         if (!sessionId || !user) return;
         
         const sessionDocRef = doc(db, 'sessions', sessionId);
+        
+        // --- FIX: Declare docSnap here so the cleanup function can access it ---
+        let docSnap = null;
 
         const enterSession = async () => {
             await updateDoc(sessionDocRef, {
                 activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            }).catch(() => {}); // Fails gracefully if doc doesn't exist yet
+            }).catch(() => {});
         };
         enterSession();
 
-        const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
+        const unsubscribeSession = onSnapshot(sessionDocRef, (snapshot) => {
+            // Assign the snapshot to the outer variable
+            docSnap = snapshot;
+            
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 const permissions = data.permissions || {};
                 let hasAccess = false;
                 let role = 'viewer';
 
-                // --- CORRECTED & FINAL PERMISSION LOGIC ---
                 if (data.access === 'public') {
                     hasAccess = true;
                     role = permissions[user._id] || data.defaultRole || 'viewer';
@@ -116,7 +120,8 @@ function Chat() {
         return () => {
             unsubscribeSession();
             unsubscribeMessages();
-            if (docSnap.exists()) { // Ensure doc exists before trying to leave
+            // Now this check will work correctly
+            if (docSnap && docSnap.exists()) {
                leaveSession();
             }
         };
