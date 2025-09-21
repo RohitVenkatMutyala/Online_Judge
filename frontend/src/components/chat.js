@@ -16,6 +16,7 @@ function Chat() {
     const { sessionId } = useParams();
     const navigate = useNavigate();
 
+    // All state variables remain the same
     const [code, setCode] = useState('');
     const [text, setText] = useState('');
     const [messages, setMessages] = useState([]);
@@ -37,7 +38,6 @@ function Chat() {
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                // --- PERMISSION CHECK ---
                 const isPublic = data.access === 'public';
                 const isAllowed = data.allowedEmails?.includes(user.email);
                 
@@ -45,7 +45,8 @@ function Chat() {
                     setAccessDenied(false);
                     setCode(data.code || '');
                     setText(data.text || '');
-                    setUserRole(data.permissions?.[user.uid] || 'viewer');
+                    // --- UPDATED to use user._id ---
+                    setUserRole(data.permissions?.[user._id] || 'viewer');
                 } else {
                     setAccessDenied(true);
                 }
@@ -80,10 +81,12 @@ function Chat() {
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (newMessage.trim() === '' || !user) return;
+        
+        // --- UPDATED to use your custom user properties ---
         await addDoc(collection(db, 'sessions', sessionId, 'messages'), {
             text: newMessage,
-            senderName: user.displayName || user.email,
-            senderId: user.uid,
+            senderName: `${user.firstname} ${user.lastname}`, // Changed
+            senderId: user._id, // Changed
             timestamp: serverTimestamp(),
         });
         setNewMessage('');
@@ -131,7 +134,8 @@ function Chat() {
                                 <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
                                     <div className="chat-messages-container flex-grow-1 mb-3">
                                         {messages.map((msg) => (
-                                            <div key={msg.id} className={`chat-message ${msg.senderId === user.uid ? 'own-message' : 'other-message'}`}>
+                                            // --- UPDATED to use user._id for comparison ---
+                                            <div key={msg.id} className={`chat-message ${msg.senderId === user._id ? 'own-message' : 'other-message'}`}>
                                                 <div className="message-header">
                                                     <span className="message-sender">{msg.senderName}</span>
                                                     <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
