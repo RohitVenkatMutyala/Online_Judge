@@ -473,9 +473,13 @@ function Chat() {
                                                         value={newMessage}
                                                         onChange={(e) => setNewMessage(e.target.value)}
                                                     />
-                                                    <button className="send-button" type="submit">
-                                                        <i className="bi bi-send-fill me-1"></i>
-                                                        Send
+                                                    <button
+                                                        className="send-button"
+                                                        type="submit"
+                                                        disabled={newMessage.trim() === ''}
+                                                    >
+                                                        <i className="bi bi-send-fill"></i>
+                                                        <span>Send</span>
                                                     </button>
                                                 </div>
                                             </div>
