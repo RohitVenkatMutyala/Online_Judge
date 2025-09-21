@@ -111,19 +111,26 @@ function Chat() {
         });
         setNewMessage('');
     };
+
     const handleDeleteSession = async () => {
-        // A confirmation prompt is crucial for destructive actions
         const isConfirmed = window.confirm(
             'Are you sure you want to permanently delete this session? This action cannot be undone.'
         );
 
         if (isConfirmed) {
             try {
+                // This MUST be inside a try...catch block
                 const sessionDocRef = doc(db, 'sessions', sessionId);
                 await deleteDoc(sessionDocRef);
+
+                // Navigate AWAY from the page immediately after successful deletion
+                navigate('/admindashboard');
+
+                // Show a success message AFTER navigation has been triggered
                 toast.success('Session deleted successfully!');
-                navigate('/'); // Redirect to the home page after deletion
+
             } catch (error) {
+                // If an error occurs, log it and inform the user
                 console.error("Error deleting session: ", error);
                 toast.error('Failed to delete the session.');
             }
