@@ -185,7 +185,7 @@ function RecentSessions() {
           margin-bottom: 1rem;
         }
       `}</style>
-
+            <br></br>
             <div className="mb-4">
                 <h2 className="gradient-header display-6 text-center mb-4">
                     Recent Sessions
