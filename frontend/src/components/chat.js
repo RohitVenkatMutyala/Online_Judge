@@ -105,7 +105,7 @@ function Chat() {
                     setUserRole(role);
                     setCode(data.code || '');
                     setText(data.text || '');
-                     setInput(data.codeInput || '');
+                    setInput(data.codeInput || '');
                     setSessionAccess(data.access || 'public');
                     setActiveUsers(data.activeParticipants || []);
                     setCodeLanguage(data.language || 'javascript');
@@ -265,9 +265,11 @@ function Chat() {
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div className="d-flex align-items-center">
                                                 <i className="bi bi-code-slash me-2 fs-5"></i>
-                                                <h5 className="gradient-title mb-0">Collaborative Code Editor</h5>
+                                                <h5 className={`${theme === 'dark' ? 'gradient-title' : 'text-dark fw-bold'} mb-0`}>
+                                                    Collaborative Code Editor
+                                                </h5>
                                                 {sessionAccess === 'private' && (
-                                                    <span className="badge private-badge ms-3">
+                                                    <span className={`badge ${theme === 'dark' ? 'private-badge' : 'bg-warning text-dark'} ms-3`}>
                                                         <i className="bi bi-lock-fill me-1"></i> Private Session
                                                     </span>
                                                 )}
@@ -280,17 +282,14 @@ function Chat() {
                                                     </span>
                                                 )}
                                                 <select
-                                                    className="form-select form-select-sm language-select text-white"
+                                                    className={`form-select form-select-sm ${theme === 'dark' ? 'language-select text-white' : ''}`}
                                                     value={codeLanguage}
                                                     onChange={handleLanguageChange}
                                                 >
-                                                    <option value="javascript">JavaScript</option>
                                                     <option value="python">Python</option>
                                                     <option value="cpp">C++</option>
                                                     <option value="java">Java</option>
-                                                    <option value="css">CSS</option>
-                                                    <option value="json">JSON</option>
-                                                    <option value="html">HTML</option>
+                                                    <option value="javascript">JavaScript</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -338,7 +337,7 @@ function Chat() {
                                                 placeholder="Enter custom input (if required)..."
                                                 value={input}
                                                 // FIXED: Replaced non-existent 'handleinput' with a proper handler
-                                                 onChange={handleInputChange}
+                                                onChange={handleInputChange}
                                             />
                                             <button
                                                 className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-1"
@@ -418,7 +417,7 @@ function Chat() {
                                         <div className="d-flex align-items-center">
                                             <i className="bi bi-people-fill me-2"></i>
                                             <span>Active Users</span>
-                                            <span className="user-count">{activeUsers.length}</span>
+                                            <span className="user-count ms-2">{activeUsers.length}</span>
                                         </div>
                                         <i className="bi bi-broadcast text-success"></i>
                                     </div>
@@ -438,7 +437,7 @@ function Chat() {
                                 {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
 
                                 <div className="card chat-card shadow-lg rounded-3 flex-grow-1 mt-4">
-                                    <div className="card-header chat-header text-white d-flex align-items-center justify-content-between py-3">
+                                    <div className={`card-header ${theme === 'dark' ? 'chat-header text-white' : 'bg-light text-dark'} d-flex align-items-center justify-content-between py-3`}>
                                         <div className="d-flex align-items-center">
                                             <i className="bi bi-chat-dots-fill me-2"></i>
                                             <h5 className="mb-0">Live Chat</h5>
