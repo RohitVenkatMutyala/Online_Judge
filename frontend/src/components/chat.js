@@ -201,10 +201,10 @@ function Chat() {
     const handleRun = async () => {
         setIsRunning(true);
         setActiveTab('output'); // Switch the current user's tab immediately
-
+   const apiLanguage = codeLanguage === 'python' ? 'py' : codeLanguage;
         try {
             const res = await axios.post(`${API_COM}/run`, {
-                language: codeLanguage,
+                language: apiLanguage,
                 code,
                 input,
             });
@@ -281,13 +281,13 @@ function Chat() {
                                                         <i className="bi bi-eye me-1"></i> View Only
                                                     </span>
                                                 )}
-
+                                                
                                                 <select
                                                     className={`form-select form-select-sm ${theme === 'dark' ? 'language-select text-white' : ''}`}
                                                     value={codeLanguage}
                                                     onChange={handleLanguageChange}
                                                 >
-                                                    <option value="py">Python</option>
+                                                    <option value="python">Python</option>
                                                     <option value="cpp">C++</option>
                                                     <option value="java">Java</option>
                                                     <option value="javascript">JavaScript</option>
