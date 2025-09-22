@@ -481,7 +481,7 @@ function CreateSession() {
 
                         <button
                             className="btn create-btn position-relative"
-                            onClick={createAndNavigate}
+                            onClick={handleCreateSession}
                         >
                             <i className="bi bi-rocket-takeoff me-2"></i>
                             Create New Session
