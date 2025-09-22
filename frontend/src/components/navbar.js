@@ -145,7 +145,7 @@ function Navbar() {
                         <Link className="nav-link" to="/new-chat" style={navLinkStyle}
                           onMouseEnter={(e) => handleNavLinkHover(e, true)}
                           onMouseLeave={(e) => handleNavLinkHover(e, false)}>
-                          <i className="bi bi-book-fill"></i>
+                          <i className="bi bi-broadcast-pin"></i>
                           <span>Sessions</span>
                         </Link>
                       </li>
@@ -196,7 +196,7 @@ function Navbar() {
                         <Link className="nav-link" to="/new-chat" style={navLinkStyle}
                           onMouseEnter={(e) => handleNavLinkHover(e, true)}
                           onMouseLeave={(e) => handleNavLinkHover(e, false)}>
-                          <i className="bi bi-book-fill"></i>
+                           <i className="bi bi-broadcast-pin"></i>
                           <span>Sessions</span>
                         </Link>
                       </li>

@@ -57,10 +57,10 @@ function Dashboard() {
               <div className="row g-0 h-100">
                 {/* Profile Section - Left Side */}
                 <div className="col-12 col-lg-4">
-                  <div 
+                  <div
                     className="profile-section h-100 d-flex flex-column align-items-center justify-content-center p-5"
                     style={{
-                    
+
                       color: 'white'
                     }}
                   >
@@ -86,7 +86,7 @@ function Dashboard() {
                         </div>
                       </div>
                     </label>
-                    
+
                     <input
                       type="file"
                       id="profileUpload"
@@ -94,11 +94,11 @@ function Dashboard() {
                       onChange={handleImageChange}
                       style={{ display: "none" }}
                     />
-                    
+
                     <div className="text-center">
                       <h2 className="mb-2 fw-bold">{user.firstname} {user.lastname}</h2>
                       <p className="mb-3 text-light opacity-75" style={{ fontSize: "1.1rem" }}>{user.email}</p>
-                      
+
                       <div
                         className="user-badge d-inline-flex align-items-center px-4 py-2 rounded-pill"
                         style={{
@@ -151,7 +151,20 @@ function Dashboard() {
                           </div>
                         </div>
                       </div>
-
+                      <div className="nav-card mb-4" onClick={() => navigate("/new-chat")}>
+                        <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
+                          <div className="nav-icon me-4">
+                           <i className="bi bi-broadcast-pin"></i>
+                          </div>
+                          <div className="nav-content flex-grow-1">
+                            <h4 className="mb-2 fw-bold text-white">Live Sessions</h4>
+                            <p className="mb-0 text-light opacity-90">Real-time collaborative coding sessions, with an integrated chat for immediate doubt clarification</p>
+                          </div>
+                          <div className="nav-arrow">
+                            <i className="bi bi-arrow-right-circle-fill"></i>
+                          </div>
+                        </div>
+                      </div>
                       <div className="nav-card mb-4" onClick={() => navigate("/contexts")}>
                         <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
                           <div className="nav-icon me-4">
