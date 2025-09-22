@@ -437,6 +437,7 @@ function CreateSession() {
     `}</style>
 
                 <div className="card create-session-card text-center shadow-lg border-0 position-relative">
+                     {renderStep()}
                     {/* Floating background icons */}
                     <i className="floating-icon bi bi-code-slash"></i>
                     <i className="floating-icon bi bi-people"></i>
