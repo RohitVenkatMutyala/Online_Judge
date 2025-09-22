@@ -243,7 +243,19 @@ function Chat() {
         return timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
-    if (loading) { return <div className="container mt-5 text-center"><h2>Loading Session...</h2></div>; }
+   if (loading) {
+    return (
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+            <div className="text-center">
+                <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+                <h4>Loading Session...</h4>
+                <p className="text-muted">Please make sure you are logged into your Randoman platform account.</p>
+            </div>
+        </div>
+    );
+}
     if (accessDenied) { return (<> <Navbar /> <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div></div></>); }
 
     return (
