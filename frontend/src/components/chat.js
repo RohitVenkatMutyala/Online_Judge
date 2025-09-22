@@ -108,20 +108,11 @@ function Chat() {
                 setLoading(false);
                 return;
             }
-            // This is the NEW, corrected code block
+
             const data = docSnap.data();
-
-            // --- FIXED PERMISSION LOGIC ---
-            const isOwner = data.ownerId === user._id;
-            const isAdmin = user.role === 'admin';
-
-            // Check all access conditions at the same time
-            const hasAccess = (
-                data.access === 'public' ||
-                data.allowedEmails?.includes(user.email) ||
-                isOwner ||
-                isAdmin
-            );
+            let hasAccess = data.access === 'public' || data.allowedEmails?.includes(user.email);
+            let role = data.ownerId === user._id ? 'editor' : (data.defaultRole || 'viewer');
+            if (user.role === 'admin') role = 'editor';
 
             if (!hasAccess) {
                 setAccessDenied(true);
@@ -129,17 +120,6 @@ function Chat() {
                 return;
             }
 
-            // Now, determine the role for users who have access.
-            // Owners and Admins are always editors.
-            let role = data.defaultRole || 'viewer';
-            if (isOwner || isAdmin) {
-                role = 'editor';
-            }
-            // --- END OF FIX ---
-
-            // Update standard session state
-            setAccessDenied(false);
-            setUserRole(role);
             // Update standard session state
             setAccessDenied(false);
             setUserRole(role);
@@ -581,15 +561,13 @@ function Chat() {
                                                         <i className="bi bi-person-circle me-2"></i>
                                                         {participant.name} {isSelf ? "(You)" : ""}
                                                     </div>
-
-                                                    {sessionAccess === 'private' && stream && (
+                                                    {/* Voice Chat Icon - visible only in private sessions */}
+                                                    {sessionAccess === 'private' && (
                                                         <button
                                                             className={`btn btn-sm ${isMuted ? 'text-danger' : 'text-success'}`}
                                                             onClick={() => handleToggleMute(participant.id)}
-                                                            // --- THIS IS THE FIX ---
-                                                            // Only the owner can click this button.
-                                                            disabled={!isOwner}
-                                                            title={isOwner ? (isMuted ? "Click to Unmute" : "Click to Mute") : "Owner controls audio"}
+                                                            disabled={!isOwner && !isSelf} // Only owner can mute others, but you can mute yourself
+                                                            title={isMuted ? "Unmute" : "Mute"}
                                                         >
                                                             <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{ fontSize: '1.1rem' }}></i>
                                                         </button>
