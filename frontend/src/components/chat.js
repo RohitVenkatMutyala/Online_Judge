@@ -1,89 +1,103 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext'; // ✅ ADDED: Import the theme hook
 import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
-import { doc, onSnapshot, updateDoc, collection, addDoc, query, orderBy, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
+import {
+    doc,
+    onSnapshot,
+    updateDoc,
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    serverTimestamp,
+    arrayUnion,
+    arrayRemove
+} from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import Editor from '@monaco-editor/react';
-import axios from 'axios';
+import axios from 'axios'; // FIXED: Added missing axios import
+
+// Import all your components and CSS
 import Navbar from './navbar';
+// import RecentSessions from './RecentSessions'; // Removed as it was unused
 import SharingComponent from './SharingComponent';
 import './chat.css';
 import './sketchy.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+// FIXED: Define the base URL for your compiler API.
+// It's best practice to store this in a .env file.
 const API_COM = process.env.REACT_APP_COMPILER_API || 'http://localhost:5000';
 
 function Chat() {
-    // --- Context and Params ---
-    const { user, loading: authLoading } = useAuth();
-    const { theme } = useTheme(); // ✅ FIXED: Use global theme from context
+    const { user } = useAuth();
     const { sessionId } = useParams();
 
-    // --- State Variables ---
-    const [sessionLoading, setSessionLoading] = useState(true);
-    const [accessDenied, setAccessDenied] = useState(false);
+    // --- All State Variables ---
     const [code, setCode] = useState('');
     const [text, setText] = useState('');
     const [activeTab, setActiveTab] = useState('input');
-    const [TotalTime, setTime] = useState(null);
+    const [TotalTime, setTime] = useState(null); // FIXED: Initialized to null
     const [output, setOutput] = useState('');
     const [isRunning, setIsRunning] = useState(false);
     const [Solved, setSolved] = useState('');
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [accessDenied, setAccessDenied] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
     const [input, setInput] = useState('');
     const [sessionAccess, setSessionAccess] = useState('public');
     const [activeUsers, setActiveUsers] = useState([]);
     const [codeLanguage, setCodeLanguage] = useState('javascript');
     const [description, setDescription] = useState('');
-    const [verdicts, setVerdicts] = useState([]);
     const chatMessagesEndRef = useRef(null);
-    // ❌ REMOVED: Redundant `loading` and local `theme` states are gone.
+
+    // --- NEW & FIXED State Variables ---
+    const [verdicts, setVerdicts] = useState([]); // FIXED: Added uninitialized 'verdicts' state
+    const [theme, setTheme] = useState('light'); // FIXED: Added 'theme' state for dynamic styling (assuming it might come from context later)
 
     // --- Hooks for Functionality ---
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // ✅ FIXED: This entire hook is updated for correctness
     useEffect(() => {
-        if (authLoading) {
-            return;
-        }
-        if (!user) {
-            setAccessDenied(true);
-            setSessionLoading(false);
-            return;
-        }
+        if (!sessionId || !user) return;
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
+        let docSnapCache = null;
 
         const enterSession = async () => {
             await updateDoc(sessionDocRef, {
                 activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            }).catch(() => {});
+            }).catch(() => { });
         };
         enterSession();
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
+            docSnapCache = docSnap;
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 let hasAccess = false;
                 let role = 'viewer';
 
-                // --- Corrected Permission Logic ---
-                if (user._id === data.ownerId || user.role === 'admin') {
-                    hasAccess = true;
-                    role = 'editor';
-                } else if (data.permissions && data.permissions[user._id]) {
-                    hasAccess = true;
-                    role = data.permissions[user._id];
-                } else if (data.access === 'public') {
+                // --- EMAIL-ONLY ACCESS LOGIC ---
+                if (data.access === 'public') {
                     hasAccess = true;
                     role = data.defaultRole || 'viewer';
+                } else { // access === 'private'
+                    if (data.allowedEmails?.includes(user.email)) {
+                        hasAccess = true;
+                        role = data.defaultRole || 'viewer';
+                    }
+                }
+
+                if (user._id === data.ownerId || user.role === 'admin') {
+                    role = 'editor';
+                    hasAccess = true;
                 }
 
                 if (hasAccess) {
@@ -96,17 +110,27 @@ function Chat() {
                     setActiveUsers(data.activeParticipants || []);
                     setCodeLanguage(data.language || 'javascript');
                     setDescription(data.description || '');
+
+                    // --- 🚀 ADDED: Real-time verdict syncing ---
+                    // Read the shared verdict data from the Firestore document
                     setOutput(data.lastRunOutput || '');
                     setVerdicts(data.lastRunVerdicts || []);
                     setTime(data.lastRunTime || null);
                     setSolved(data.lastRunStatus || '');
+
+                    // Automatically switch everyone's tab to the verdict tab when it's updated
+                    if (data.lastRunVerdicts && data.lastRunVerdicts.length > 0) {
+                        setActiveTab('verdict');
+                    }
+                    // --- End of added features ---
+
                 } else {
                     setAccessDenied(true);
                 }
             } else {
                 setAccessDenied(true);
             }
-            setSessionLoading(false);
+            setLoading(false);
         });
 
         const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
@@ -118,15 +142,17 @@ function Chat() {
         const leaveSession = async () => {
             await updateDoc(sessionDocRef, {
                 activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            }).catch(() => {});
+            });
         };
 
         return () => {
             unsubscribeSession();
             unsubscribeMessages();
-            leaveSession();
+            if (docSnapCache && docSnapCache.exists()) {
+                leaveSession();
+            }
         };
-    }, [sessionId, user, authLoading]);
+    }, [sessionId, user]);
 
     // --- All Handler Functions ---
     const handleCodeChange = (newCode) => {
@@ -137,14 +163,6 @@ function Chat() {
     const handleTextChange = (e) => {
         if (userRole !== 'editor') return;
         updateDoc(doc(db, 'sessions', sessionId), { text: e.target.value });
-    };
-    
-    const handleInputChange = (e) => {
-        const newInput = e.target.value;
-        setInput(newInput);
-        if (userRole === 'editor') {
-            updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput });
-        }
     };
 
     const handleSendMessage = async (e) => {
@@ -168,17 +186,32 @@ function Chat() {
         setCodeLanguage(newLanguage);
         updateDoc(doc(db, 'sessions', sessionId), { language: newLanguage });
     };
+    // Add this new handler function
+    const handleInputChange = (e) => {
+        const newInput = e.target.value;
+        setInput(newInput); // Update local state immediately for a smooth experience
+        if (userRole === 'editor') {
+            updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput });
+        }
+    };
+
+    // FIXED: Rewrote handleRun to be more robust and handle all response data
+    // src/components/Chat.js
 
     const handleRun = async () => {
         setIsRunning(true);
-        setActiveTab('output');
-        const apiLanguage = codeLanguage === 'python' ? 'py' : codeLanguage;
+        setActiveTab('output'); // Switch the current user's tab immediately
+   const apiLanguage = codeLanguage === 'python' ? 'py' : codeLanguage;
         try {
             const res = await axios.post(`${API_COM}/run`, {
                 language: apiLanguage,
                 code,
                 input,
             });
+
+            // ✅ FIX: Sanitize the data from the API response.
+            // This ensures that if a key is missing from the response, we send a valid
+            // default value (like an empty array or null) instead of 'undefined'.
             const dataToUpdate = {
                 lastRunOutput: res.data.output || 'Execution finished with no output.',
                 lastRunVerdicts: res.data.verdicts || [],
@@ -186,8 +219,18 @@ function Chat() {
                 lastRunStatus: res.data.status || '',
                 lastRunTimestamp: serverTimestamp()
             };
-            await updateDoc(doc(db, 'sessions', sessionId), dataToUpdate);
+
+            // 🔍 DEBUG STEP 1: Log the exact data being sent to Firestore.
+            console.log("Attempting to write this data to Firestore:", dataToUpdate);
+
+            const sessionDocRef = doc(db, 'sessions', sessionId);
+            await updateDoc(sessionDocRef, dataToUpdate);
+
+            // 🔍 DEBUG STEP 2: If you see this message, the command was successful.
+            console.log("Firestore update successful! Check your database now.");
+
         } catch (error) {
+            // This block will catch any remaining errors.
             console.error("An error occurred during the run process:", error);
             setOutput(error.message || 'An unexpected error occurred.');
         } finally {
@@ -200,41 +243,63 @@ function Chat() {
         return timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
-    // --- Render Logic ---
-    if (authLoading || sessionLoading) {
-        return <div className="container mt-5 text-center"><h2>Loading Session...</h2></div>;
-    }
-
-    if (accessDenied) {
-        return (
-            <>
-                <Navbar />
-                <div className="container mt-5">
-                    <div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div>
-                </div>
-            </>
-        );
-    }
+    if (loading) { return <div className="container mt-5 text-center"><h2>Loading Session...</h2></div>; }
+    if (accessDenied) { return (<> <Navbar /> <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div></div></>); }
 
     return (
         <>
             <Navbar />
             <div className="chat-page-container">
+                {/* All the inline CSS from your original code goes here. */}
+                {/* It has been omitted for brevity but should be included. */}
                 <style jsx>{` /* Your very long CSS string here */ `}</style>
+
                 <div className="collaboration-container">
                     <div className="container-fluid">
                         <div className="row g-4">
-                            {/* ----- Left Column ----- */}
+                            {/* ----- Left Column: Editors ----- */}
                             <div className="col-lg-8">
                                 <div className="card editor-card shadow-lg rounded-3 mb-4">
+                                    {/* FIXED: Restructured header for better layout */}
                                     <div className={`card-header ${theme === 'dark' ? 'editor-header text-white' : 'bg-light text-dark'} py-3`}>
-                                        {/* ... Your theme-sensitive header JSX ... */}
+                                        <div className="d-flex justify-content-between align-items-center">
+                                            <div className="d-flex align-items-center">
+                                                <i className="bi bi-code-slash me-2 fs-5"></i>
+                                                <h5 className={`${theme === 'dark' ? 'gradient-title' : 'text-dark fw-bold'} mb-0`}>
+                                                    Collaborative Code Editor
+                                                </h5>
+                                                {sessionAccess === 'private' && (
+                                                    <span className={`badge ${theme === 'dark' ? 'private-badge' : 'bg-warning text-dark'} ms-3`}>
+                                                        <i className="bi bi-lock-fill me-1"></i> Private Session
+                                                    </span>
+                                                )}
+                                                <div className="activity-indicator"></div>
+                                            </div>
+                                            <div className="d-flex align-items-center">
+                                                {userRole === 'viewer' && (
+                                                    <span className="badge viewer-badge text-dark me-3">
+                                                        <i className="bi bi-eye me-1"></i> View Only
+                                                    </span>
+                                                )}
+                                                
+                                                <select
+                                                    className={`form-select form-select-sm ${theme === 'dark' ? 'language-select text-white' : ''}`}
+                                                    value={codeLanguage}
+                                                    onChange={handleLanguageChange}
+                                                >
+                                                    <option value="python">Python</option>
+                                                    <option value="cpp">C++</option>
+                                                    <option value="java">Java</option>
+                                                    <option value="javascript">JavaScript</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="card-body p-0" style={{ height: '450px' }}>
                                         <Editor
                                             height="100%"
                                             language={codeLanguage}
-                                            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                                            theme="vs-dark"
                                             value={code}
                                             onChange={handleCodeChange}
                                             options={{ minimap: { enabled: false }, readOnly: userRole !== 'editor' }}
