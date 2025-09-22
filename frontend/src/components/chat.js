@@ -539,99 +539,102 @@ function Chat() {
                             </div>
                             {/* ----- Right Column: All Features ----- */}
                             <div className="col-lg-4 d-flex flex-column">
-                                <div className="card users-card shadow-lg mb-4">
-                                    <div className="card-header users-header d-flex align-items-center justify-content-between">
-                                        <div className="d-flex align-items-center">
-                                            <i className="bi bi-people-fill me-2"></i>
-                                            <span>Active Users</span>
-                                            <span className="user-count ms-2">{activeUsers.length}</span>
-                                        </div>
-                                        <i className="bi bi-broadcast text-success"></i>
-                                    </div>
-                                    <ul className="list-group list-group-flush">
-                                        {activeUsers.map(participant => {
-                                            const isMuted = muteStatus[participant.id] === undefined ? true : muteStatus[participant.id];
-                                            const isOwner = userRole === 'editor';
-                                            const isSelf = participant.id === user._id;
+                                // In Chat.js, find the "Active Users" card in your return() statement
+// and REPLACE the <ul> with this new version.
 
-                                            return (
-                                                <li key={participant.id} className="list-group-item user-item d-flex justify-content-between align-items-center">
-                                                    <div className="user-name">
-                                                        <div className="user-status"></div>
-                                                        <i className="bi bi-person-circle me-2"></i>
-                                                        {participant.name} {isSelf ? "(You)" : ""}
-                                                    </div>
-                                                    {/* Voice Chat Icon - visible only in private sessions */}
-                                                    {sessionAccess === 'private' && (
-                                                        <button
-                                                            className={`btn btn-sm ${isMuted ? 'text-danger' : 'text-success'}`}
-                                                            onClick={() => handleToggleMute(participant.id)}
-                                                            disabled={!isOwner && !isSelf} // Only owner can mute others, but you can mute yourself
-                                                            title={isMuted ? "Unmute" : "Mute"}
-                                                        >
-                                                            <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{ fontSize: '1.1rem' }}></i>
-                                                        </button>
-                                                    )}
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                    {/* This hidden div will contain all the <audio> elements for remote streams */}
-                                    <div ref={audioContainerRef} style={{ display: 'none' }}></div>
-                                </div>
-
-                                {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
-
-                                <div className="card chat-card shadow-lg rounded-3 flex-grow-1 mt-4">
-                                    <div className={`card-header ${theme === 'dark' ? 'chat-header text-white' : 'bg-light text-dark'} d-flex align-items-center justify-content-between py-3`}>
-                                        <div className="d-flex align-items-center">
-                                            <i className="bi bi-chat-dots-fill me-2"></i>
-                                            <h5 className="mb-0">Live Chat</h5>
-                                        </div>
-                                        <div className="d-flex align-items-center">
-                                            <span className="badge bg-light text-success me-2">
-                                                <i className="bi bi-circle-fill" style={{ fontSize: '0.5rem' }}></i>
-                                                Live
-                                            </span>
-                                            <i className="bi bi-lightning-charge"></i>
-                                        </div>
-                                    </div>
-                                    <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
-                                        <div className="chat-messages-container flex-grow-1 mb-3">
-                                            {messages.map((msg) => (
-                                                <div key={msg.id} className={`chat-message ${msg.senderId === user._id ? 'own-message' : 'other-message'}`}>
-                                                    <div className="message-header">
-                                                        <span className="message-sender">{msg.senderName}</span>
-                                                        <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
-                                                    </div>
-                                                    <div className="message-bubble">{msg.text}</div>
-                                                </div>
-                                            ))}
-                                            <div ref={chatMessagesEndRef} />
-                                        </div>
-                                        <form onSubmit={handleSendMessage}>
-                                            <div className="chat-input-group">
-                                                <div className="d-flex">
-                                                    <input
-                                                        type="text"
-                                                        className="form-control chat-input"
-                                                        placeholder="Type your message..."
-                                                        value={newMessage}
-                                                        onChange={(e) => setNewMessage(e.target.value)}
-                                                    />
-                                                    <button
-                                                        className="send-button"
-                                                        type="submit"
-                                                        disabled={newMessage.trim() === ''}
-                                                    >
-                                                        <i className="bi bi-send-fill"></i>
-                                                        <span>Send</span>
-                                                    </button>
-                                                </div>
+                                    <div className="card users-card shadow-lg mb-4">
+                                        <div className="card-header users-header d-flex align-items-center justify-content-between">
+                                            <div className="d-flex align-items-center">
+                                                <i className="bi bi-people-fill me-2"></i>
+                                                <span>Active Users</span>
+                                                <span className="user-count ms-2">{activeUsers.length}</span>
                                             </div>
-                                        </form>
+                                            <i className="bi bi-broadcast text-success"></i>
+                                        </div>
+                                        <ul className="list-group list-group-flush">
+                                            {activeUsers.map(participant => {
+                                                const isMuted = muteStatus[participant.id] === undefined ? true : muteStatus[participant.id];
+                                                const isOwner = userRole === 'editor';
+                                                const isSelf = participant.id === user._id;
+
+                                                return (
+                                                    <li key={participant.id} className="list-group-item user-item d-flex justify-content-between align-items-center">
+                                                        <div className="user-name">
+                                                            <div className="user-status"></div>
+                                                            <i className="bi bi-person-circle me-2"></i>
+                                                            {participant.name} {isSelf ? "(You)" : ""}
+                                                        </div>
+                                                        {/* Voice Chat Icon - visible only in private sessions */}
+                                                        {sessionAccess === 'private' && (
+                                                            <button
+                                                                className={`btn btn-sm ${isMuted ? 'text-danger' : 'text-success'}`}
+                                                                onClick={() => handleToggleMute(participant.id)}
+                                                                disabled={!isOwner && !isSelf} // Only owner can mute others, but you can mute yourself
+                                                                title={isMuted ? "Unmute" : "Mute"}
+                                                            >
+                                                                <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{ fontSize: '1.1rem' }}></i>
+                                                            </button>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                        {/* This hidden div will contain all the <audio> elements for remote streams */}
+                                        <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                                     </div>
-                                </div>
+
+                                    {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
+
+                                    <div className="card chat-card shadow-lg rounded-3 flex-grow-1 mt-4">
+                                        <div className={`card-header ${theme === 'dark' ? 'chat-header text-white' : 'bg-light text-dark'} d-flex align-items-center justify-content-between py-3`}>
+                                            <div className="d-flex align-items-center">
+                                                <i className="bi bi-chat-dots-fill me-2"></i>
+                                                <h5 className="mb-0">Live Chat</h5>
+                                            </div>
+                                            <div className="d-flex align-items-center">
+                                                <span className="badge bg-light text-success me-2">
+                                                    <i className="bi bi-circle-fill" style={{ fontSize: '0.5rem' }}></i>
+                                                    Live
+                                                </span>
+                                                <i className="bi bi-lightning-charge"></i>
+                                            </div>
+                                        </div>
+                                        <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
+                                            <div className="chat-messages-container flex-grow-1 mb-3">
+                                                {messages.map((msg) => (
+                                                    <div key={msg.id} className={`chat-message ${msg.senderId === user._id ? 'own-message' : 'other-message'}`}>
+                                                        <div className="message-header">
+                                                            <span className="message-sender">{msg.senderName}</span>
+                                                            <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
+                                                        </div>
+                                                        <div className="message-bubble">{msg.text}</div>
+                                                    </div>
+                                                ))}
+                                                <div ref={chatMessagesEndRef} />
+                                            </div>
+                                            <form onSubmit={handleSendMessage}>
+                                                <div className="chat-input-group">
+                                                    <div className="d-flex">
+                                                        <input
+                                                            type="text"
+                                                            className="form-control chat-input"
+                                                            placeholder="Type your message..."
+                                                            value={newMessage}
+                                                            onChange={(e) => setNewMessage(e.target.value)}
+                                                        />
+                                                        <button
+                                                            className="send-button"
+                                                            type="submit"
+                                                            disabled={newMessage.trim() === ''}
+                                                        >
+                                                            <i className="bi bi-send-fill"></i>
+                                                            <span>Send</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                             </div>
                         </div>
                     </div>
