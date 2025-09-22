@@ -146,7 +146,7 @@ function Navbar() {
                           onMouseEnter={(e) => handleNavLinkHover(e, true)}
                           onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-book-fill"></i>
-                          <span>Doubts</span>
+                          <span>Sessions</span>
                         </Link>
                       </li>
                       <li className="nav-item">
@@ -197,7 +197,7 @@ function Navbar() {
                           onMouseEnter={(e) => handleNavLinkHover(e, true)}
                           onMouseLeave={(e) => handleNavLinkHover(e, false)}>
                           <i className="bi bi-book-fill"></i>
-                          <span>Doubts</span>
+                          <span>Sessions</span>
                         </Link>
                       </li>
                       <li className="nav-item">
