@@ -236,10 +236,10 @@ function Chat() {
         if (!stream || !user || stream.getAudioTracks().length === 0) {
             return;
         }
-
+        
         const isMuted = muteStatus[user._id] ?? true;
         const audioTrack = stream.getAudioTracks()[0];
-
+        
         // 1. Locally enable or disable the track
         audioTrack.enabled = !isMuted;
 
@@ -501,8 +501,32 @@ function Chat() {
                                         <i className="bi bi-broadcast text-success"></i>
                                     </div>
                                     <ul className="list-group list-group-flush">
-                                        {activeUsers.map(p => (<li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                            {p.name} {p.id === user?._id && "(You)"}{sessionAccess === 'private' && stream && (<button className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`} onClick={() => handleToggleMute(p.id)} disabled={userRole !== 'editor' && p.id !== user?._id}><i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i></button>)}</li>))}
+                                        {activeUsers.map(participant => {
+                                            const isMuted = muteStatus[participant.id] ?? true;
+                                            const isOwner = userRole === 'editor';
+                                            const isSelf = participant.id === user._id;
+
+                                            return (
+                                                <li key={participant.id} className="list-group-item user-item d-flex justify-content-between align-items-center">
+                                                    <div className="user-name">
+                                                        <div className="user-status"></div>
+                                                        <i className="bi bi-person-circle me-2"></i>
+                                                        {participant.name} {isSelf && "(You)"}
+                                                    </div>
+
+                                                    {sessionAccess === 'private' && stream && (
+                                                        <button
+                                                            className={`btn btn-sm ${isMuted ? 'text-danger' : 'text-success'}`}
+                                                            onClick={() => handleToggleMute(participant.id)}
+                                                            disabled={!isOwner && !isSelf}
+                                                            title={isOwner ? (isMuted ? "Unmute" : "Mute") : (isSelf ? "Mute Yourself (Owner can unmute)" : "Owner controls audio")}
+                                                        >
+                                                            <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{ fontSize: '1.1rem' }}></i>
+                                                        </button>
+                                                    )}
+                                                </li>
+                                            );
+                                        })}
                                     </ul>
                                     <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                                 </div>
@@ -516,7 +540,7 @@ function Chat() {
                                     <div className="card-body d-flex flex-column" style={{ overflowY: 'auto' }}>
                                         <div className="chat-messages-container flex-grow-1 mb-3">
                                             {messages.map((msg) => (
-                                                <div key={msg.id} className={`mb-2 ${msg.senderId === user?._id ? 'text-end' : ''}`}>
+                                                <div key={msg.id} className={`chat-message ${msg.senderId === user._id ? 'own-message' : 'other-message'}`}>
                                                     <div className="message-header">
                                                         <span className="message-sender">{msg.senderName}</span>
                                                         <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
