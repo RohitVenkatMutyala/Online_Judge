@@ -20,11 +20,10 @@ import './chat.css';
 const API_COM = process.env.REACT_APP_COMPILER_API || 'http://localhost:5000';
 
 function Chat() {
-    // --- Component State & Refs ---
     const { user } = useAuth();
     const { sessionId } = useParams();
 
-    // Session and UI State
+    // --- State Variables ---
     const [code, setCode] = useState('');
     const [activeTab, setActiveTab] = useState('input');
     const [output, setOutput] = useState('');
@@ -40,45 +39,30 @@ function Chat() {
     const [codeLanguage, setCodeLanguage] = useState('javascript');
     const [verdicts, setVerdicts] = useState([]);
     const [TotalTime, setTime] = useState(null);
-
-    // Voice Chat State & Refs
+    
+    // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
     const peersRef = useRef({});
     const audioContainerRef = useRef(null);
     const chatMessagesEndRef = useRef(null);
 
-    // --- Effects ---
-
-    // Effect to auto-scroll chat to the latest message
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Main effect to handle session data, user presence, and listeners
+    // ✅ FIX FOR STUCK LOADING SCREEN IS IN THIS REWRITTEN HOOK
     useEffect(() => {
-        if (!sessionId || !user) return; // Wait for session ID and user
+        if (!sessionId) {
+            setAccessDenied(true);
+            setLoading(false);
+            return;
+        }
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
 
-        // Adds the current user to the list of active participants
-        const enterSession = async () => {
-            await updateDoc(sessionDocRef, {
-                activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            }).catch(console.error);
-        };
-
-        // Removes the user when they leave
-        const leaveSession = async () => {
-            await updateDoc(sessionDocRef, {
-                activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            }).catch(console.error);
-        };
-
-        enterSession();
-
-        // Subscribe to real-time session updates
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
+            // Path 1: Session document doesn't exist at all.
             if (!docSnap.exists()) {
                 setAccessDenied(true);
                 setLoading(false);
@@ -86,55 +70,65 @@ function Chat() {
             }
 
             const data = docSnap.data();
-            const isOwner = data.ownerId === user._id;
-            const hasAccess = data.access === 'public' || data.allowedEmails?.includes(user.email) || isOwner;
+            
+            // Path 2: Session is private, but the user object hasn't loaded yet.
+            // We must wait for the user object to check permissions.
+            if (data.access === 'private' && !user) {
+                // Keep showing the loading screen. The hook will re-run when `user` loads.
+                return;
+            }
 
+            // From here, we either have a public session or a loaded user for a private one.
+            const isOwner = user && data.ownerId === user._id;
+            const hasAccess = data.access === 'public' || (user && data.allowedEmails?.includes(user.email)) || isOwner;
+
+            // Path 3: User does not have access to the private session.
             if (!hasAccess) {
                 setAccessDenied(true);
                 setLoading(false);
                 return;
             }
             
-            // Determine user role (owner is always an editor)
-            const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
-            
-            // Update all local state from Firestore
-            setAccessDenied(false);
-            setUserRole(role);
-            setCode(data.code || '');
-            setInput(data.codeInput || '');
-            setSessionAccess(data.access || 'public');
-            setActiveUsers(data.activeParticipants || []);
-            setCodeLanguage(data.language || 'javascript');
-            setMuteStatus(data.muteStatus || {});
-            setVerdicts(data.lastRunVerdicts || []);
-            setOutput(data.lastRunOutput || '');
-            setTime(data.lastRunTime || null);
-
-            // Get microphone permission for private sessions
-            if (data.access === 'private' && !stream) {
-                navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-                    .then(setStream)
-                    .catch(err => toast.error("Could not access microphone."));
+            // Path 4: Success. User has access.
+            if (user) {
+                const participantExists = data.activeParticipants?.some(p => p.id === user._id);
+                if (!participantExists) {
+                    updateDoc(sessionDocRef, {
+                        activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
+                    }).catch(console.error);
+                }
             }
+            
+            const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
+            setAccessDenied(false); setUserRole(role); setCode(data.code || '');
+            setInput(data.codeInput || ''); setSessionAccess(data.access || 'public');
+            setActiveUsers(data.activeParticipants || []); setCodeLanguage(data.language || 'javascript');
+            setMuteStatus(data.muteStatus || {}); setVerdicts(data.lastRunVerdicts || []);
+            setOutput(data.lastRunOutput || ''); setTime(data.lastRunTime || null);
+
+            if (data.access === 'private' && !stream) {
+                navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(setStream).catch(err => toast.error("Could not access microphone."));
+            }
+            
+            // This is now guaranteed to be called on all successful or denied paths.
             setLoading(false);
         });
 
-        // Subscribe to chat messages
         const messagesQuery = query(collection(db, 'sessions', sessionId, 'messages'), orderBy('timestamp'));
-        const unsubscribeMessages = onSnapshot(messagesQuery, qSnap => {
-            setMessages(qSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-        });
+        const unsubscribeMessages = onSnapshot(messagesQuery, qSnap => setMessages(qSnap.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-        // Cleanup function on component unmount
         return () => {
-            leaveSession();
+            if (user) {
+                updateDoc(doc(db, 'sessions', sessionId), {
+                    activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
+                }).catch(console.error);
+            }
             if (stream) { stream.getTracks().forEach(track => track.stop()); }
             Object.values(peersRef.current).forEach(peer => peer.destroy());
             unsubscribeSession();
             unsubscribeMessages();
         };
-    }, [sessionId, user]);
+    }, [sessionId, user, stream]); 
 
     // Effect for handling WebRTC connections
     useEffect(() => {
