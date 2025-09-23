@@ -79,12 +79,12 @@ function Chat() {
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
         const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
+        let localStream = null; // Use a local variable for the stream within the effect's scope
 
         // --- Voice Chat Cleanup Function ---
         const cleanupVoice = () => {
-            // Now use the state 'stream' for cleanup
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
             }
             Object.values(peersRef.current).forEach(peer => peer.destroy());
             peersRef.current = {};
@@ -105,7 +105,7 @@ function Chat() {
 
         enterSession();
 
-        // --- Main Listener for Session Data ---
+        // --- Main Listener for Session Data (Code, Mute Status, etc.) ---
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (!docSnap.exists()) {
                 setAccessDenied(true);
@@ -114,35 +114,47 @@ function Chat() {
             }
 
             const data = docSnap.data();
-            // ... (Your access control logic remains the same)
+            // Your existing access control logic...
             let hasAccess = data.access === 'public' || data.allowedEmails?.includes(user.email);
             let role = data.ownerId === user._id ? 'editor' : (data.defaultRole || 'viewer');
             if (user.role === 'admin') role = 'editor';
+
             if (!hasAccess && role !== 'editor') {
                 setAccessDenied(true);
                 setLoading(false);
                 return;
             }
 
+            // Update standard session state
             setAccessDenied(false);
             setUserRole(role);
-            // ... (Setting other states remains the same)
             if (code !== data.code) setCode(data.code || '');
+            // ... set other states like setText, setInput, etc.
             setSessionAccess(data.access || 'public');
             setActiveUsers(data.activeParticipants || []);
+
+            // 🚀 SYNC MUTE STATUS FROM FIRESTORE
             setMuteStatus(data.muteStatus || {});
 
             // --- VOICE CHAT INITIALIZATION ---
-            // This logic is mostly the same, but it now correctly sets the 'stream' state
+            // Only run this if the session is private and we don't have a stream yet
             if (data.access === 'private' && !stream) {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
                     .then(currentStream => {
-                        setStream(currentStream); // This will trigger re-evaluation of dependent effects
+                        setStream(currentStream);
+                        localStream = currentStream;
 
+                        // Mute self initially based on Firestore state, if it exists
+                        // The default is muted (true)
                         const initialMuteState = (data.muteStatus && data.muteStatus[user._id] !== undefined) ? data.muteStatus[user._id] : true;
                         currentStream.getAudioTracks()[0].enabled = !initialMuteState;
 
-                        // We will create peers in a separate effect that depends on the stream
+                        const participants = data.activeParticipants || [];
+                        participants.forEach(participant => {
+                            if (participant.id === user._id) return;
+                            const peer = createPeer(participant.id, user._id, currentStream);
+                            peersRef.current[participant.id] = peer;
+                        });
                     })
                     .catch(err => {
                         console.error("Failed to get audio stream:", err);
@@ -152,46 +164,7 @@ function Chat() {
             setLoading(false);
         });
 
-        // --- Listener for Chat Messages ---
-        const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
-        const messagesQuery = query(messagesColRef, orderBy('timestamp'));
-        const unsubscribeMessages = onSnapshot(messagesQuery, (qSnap) => {
-            setMessages(qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        });
-
-        // --- Cleanup on component unmount ---
-        return () => {
-            cleanupVoice();
-            leaveSession();
-            unsubscribeSession();
-            unsubscribeMessages();
-            // We will manage the signaling listener in another effect
-        };
-    }, [sessionId, user]); // This effect only runs once to set up listeners
-
-    // 👈 FIX: Create a NEW useEffect that handles PEER CONNECTIONS.
-    // This effect will ONLY run after the 'stream' state variable is successfully set.
-    useEffect(() => {
-        if (!stream || !user) return; // Exit if we don't have the audio stream yet
-
-        const sessionDocRef = doc(db, 'sessions', sessionId);
-        const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
-
-        // Re-fetch the current participants when the stream is ready
-        onSnapshot(doc(db, 'sessions', sessionId), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const participants = data.activeParticipants || [];
-
-                participants.forEach(participant => {
-                    if (participant.id === user._id || peersRef.current[participant.id]) return;
-                    console.log(`Creating peer for ${participant.name}`);
-                    const peer = createPeer(participant.id, user._id, stream);
-                    peersRef.current[participant.id] = peer;
-                });
-            }
-        });
-
+        // --- Listener for incoming WebRTC signaling messages ---
         const unsubscribeSignaling = onSnapshot(query(signalingColRef), (snapshot) => {
             snapshot.docChanges().forEach(change => {
                 if (change.type === "added") {
@@ -199,11 +172,11 @@ function Chat() {
                     if (signalData.recipientId === user._id) {
                         const peer = peersRef.current[signalData.senderId];
                         if (peer) {
+                            // If we initiated and this is the answer
                             peer.signal(signalData.signal);
                         } else {
-                            // We have the stream now, so this will work
-                            console.log(`Adding peer for ${signalData.senderId}`);
-                            const newPeer = addPeer(signalData, user._id, stream);
+                            // If another user initiated and this is the offer
+                            const newPeer = addPeer(signalData, user._id, localStream);
                             peersRef.current[signalData.senderId] = newPeer;
                         }
                     }
@@ -211,46 +184,69 @@ function Chat() {
             });
         });
 
+        // --- Listener for Chat Messages ---
+        const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
+        const messagesQuery = query(messagesColRef, orderBy('timestamp'));
+        const unsubscribeMessages = onSnapshot(messagesQuery, (qSnap) => {
+            setMessages(qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+
+        // --- WebRTC Peer Creation Functions ---
         const createPeer = (recipientId, senderId, stream) => {
-            const peer = new Peer({ initiator: true, trickle: false, stream });
+            const peer = new Peer({
+                initiator: true,
+                trickle: false,
+                stream: stream,
+            });
+
             peer.on('signal', signal => {
                 addDoc(signalingColRef, { recipientId, senderId, signal });
             });
+
             peer.on('stream', remoteStream => {
                 const audio = document.createElement('audio');
                 audio.srcObject = remoteStream;
                 audio.autoplay = true;
                 audio.id = `audio-${recipientId}`;
-                if (audioContainerRef.current) {
-                    audioContainerRef.current.appendChild(audio);
-                }
+                audioContainerRef.current.appendChild(audio);
             });
+
             return peer;
         };
 
         const addPeer = (incoming, recipientId, stream) => {
-            const peer = new Peer({ initiator: false, trickle: false, stream });
+            const peer = new Peer({
+                initiator: false,
+                trickle: false,
+                stream: stream,
+            });
+
             peer.on('signal', signal => {
                 addDoc(signalingColRef, { recipientId: incoming.senderId, senderId: recipientId, signal });
             });
+
             peer.on('stream', remoteStream => {
                 const audio = document.createElement('audio');
                 audio.srcObject = remoteStream;
                 audio.autoplay = true;
                 audio.id = `audio-${incoming.senderId}`;
-                if (audioContainerRef.current) {
-                    audioContainerRef.current.appendChild(audio);
-                }
+                audioContainerRef.current.appendChild(audio);
             });
+
             peer.signal(incoming.signal);
             return peer;
         };
 
+        // --- Cleanup on component unmount ---
         return () => {
-            if (unsubscribeSignaling) unsubscribeSignaling();
+            cleanupVoice();
+            leaveSession();
+            unsubscribeSession();
+            unsubscribeMessages();
+            unsubscribeSignaling();
         };
+    }, [sessionId, user]); // Keep dependencies as they were
 
-    }, [stream, user, sessionId]); // This effect depends on the stream
     // --- All Handler Functions ---
     const handleCodeChange = (newCode) => {
         if (userRole !== 'editor') return;
