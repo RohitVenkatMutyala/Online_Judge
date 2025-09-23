@@ -78,8 +78,7 @@ function CreateSession() {
                 lastRunVerdicts: [],
                 lastRunTime: null,
                 lastRunStatus: '',
-                codeInput: '',
-              muteStatus: { [user._id]: true}
+                codeInput: ''
             });
             if (accessType === 'private') {
                 await sendInvitationEmails(newSessionId, description, invitedEmails);

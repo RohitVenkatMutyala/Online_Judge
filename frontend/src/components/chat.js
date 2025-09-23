@@ -17,7 +17,6 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import Editor from '@monaco-editor/react';
-import Peer from 'simple-peer';
 import axios from 'axios'; // FIXED: Added missing axios import
 
 // Import all your components and CSS
@@ -33,10 +32,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const API_COM = process.env.REACT_APP_COMPILER_API || 'http://localhost:5000';
 
 function Chat() {
-    const [stream, setStream] = useState(null);
-    const [muteStatus, setMuteStatus] = useState({});
-    const peersRef = useRef({});
-    const audioContainerRef = useRef(null); // To hold the <audio> elements
     const { user } = useAuth();
     const { sessionId } = useParams();
 
@@ -69,29 +64,81 @@ function Chat() {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // In Chat.js, REPLACE the entire useEffect hook
     useEffect(() => {
         if (!sessionId || !user) return;
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
-        const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
-        let localStream = null;
+        let docSnapCache = null;
 
-        // --- Voice Chat Cleanup Function ---
-        const cleanupVoice = () => {
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            Object.values(peersRef.current).forEach(peer => peer.destroy());
-            peersRef.current = {};
-        };
-
-        // --- Function to handle entering and leaving ---
         const enterSession = async () => {
             await updateDoc(sessionDocRef, {
                 activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            });
+            }).catch(() => { });
         };
+        enterSession();
+
+        const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
+            docSnapCache = docSnap;
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                let hasAccess = false;
+                let role = 'viewer';
+
+                // --- EMAIL-ONLY ACCESS LOGIC ---
+                if (data.access === 'public') {     
+                    
+                    hasAccess = true;
+                    role = data.defaultRole || 'viewer';
+                } else { // access === 'private'
+                    if (data.allowedEmails?.includes(user.email)) {
+                        hasAccess = true;
+                        role = data.defaultRole || 'viewer';
+                    }
+                }
+
+                if (user._id === data.ownerId || user.role === 'admin') {
+                    role = 'editor';
+                    hasAccess = true;
+                }
+
+                if (hasAccess) {
+                    setAccessDenied(false);
+                    setUserRole(role);
+                    setCode(data.code || '');
+                    setText(data.text || '');
+                    setInput(data.codeInput || '');
+                    setSessionAccess(data.access || 'public');
+                    setActiveUsers(data.activeParticipants || []);
+                    setCodeLanguage(data.language || 'javascript');
+                    setDescription(data.description || '');
+
+                    // --- 🚀 ADDED: Real-time verdict syncing ---
+                    // Read the shared verdict data from the Firestore document
+                    setOutput(data.lastRunOutput || '');
+                    setVerdicts(data.lastRunVerdicts || []);
+                    setTime(data.lastRunTime || null);
+                    setSolved(data.lastRunStatus || '');
+
+                    // Automatically switch everyone's tab to the verdict tab when it's updated
+                    if (data.lastRunVerdicts && data.lastRunVerdicts.length > 0) {
+                        setActiveTab('verdict');
+                    }
+                    // --- End of added features ---
+
+                } else {
+                    setAccessDenied(true);
+                }
+            } else {
+                setAccessDenied(true);
+            }
+            setLoading(false);
+        });
+
+        const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
+        const messagesQuery = query(messagesColRef, orderBy('timestamp'));
+        const unsubscribeMessages = onSnapshot(messagesQuery, (qSnap) => {
+            setMessages(qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
 
         const leaveSession = async () => {
             await updateDoc(sessionDocRef, {
@@ -99,168 +146,14 @@ function Chat() {
             });
         };
 
-        enterSession();
-
-        // --- Main Listener for Session Data (Code, Mute Status, etc.) ---
-        const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
-            if (!docSnap.exists()) {
-                setAccessDenied(true);
-                setLoading(false);
-                return;
-            }
-            // This is the NEW, corrected code block
-            const data = docSnap.data();
-
-            // --- FIXED PERMISSION LOGIC ---
-            const isOwner = data.ownerId === user._id;
-            const isAdmin = user.role === 'admin';
-
-            // Check all access conditions at the same time
-            const hasAccess = (
-                data.access === 'public' ||
-                data.allowedEmails?.includes(user.email) ||
-                isOwner ||
-                isAdmin
-            );
-
-            if (!hasAccess) {
-                setAccessDenied(true);
-                setLoading(false);
-                return;
-            }
-
-            // Now, determine the role for users who have access.
-            // Owners and Admins are always editors.
-            let role = data.defaultRole || 'viewer';
-            if (isOwner || isAdmin) {
-                role = 'editor';
-            }
-            // --- END OF FIX ---
-
-            // Update standard session state
-            setAccessDenied(false);
-            setUserRole(role);
-            // Update standard session state
-            setAccessDenied(false);
-            setUserRole(role);
-            if (code !== data.code) setCode(data.code || '');
-            setText(data.text || '');
-            setInput(data.codeInput || '');
-            setSessionAccess(data.access || 'public');
-            setActiveUsers(data.activeParticipants || []);
-            setCodeLanguage(data.language || 'javascript');
-            setDescription(data.description || '');
-
-            // Sync mute status from Firestore
-            setMuteStatus(data.muteStatus || {});
-
-            // --- VOICE CHAT INITIALIZATION ---
-            if (data.access === 'private' && !stream) {
-                navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-                    .then(currentStream => {
-                        setStream(currentStream);
-                        localStream = currentStream;
-
-                        // Mute self initially based on Firestore state, if it exists
-                        const initialMuteState = (data.muteStatus && data.muteStatus[user._id] !== undefined) ? data.muteStatus[user._id] : true;
-                        currentStream.getAudioTracks()[0].enabled = !initialMuteState;
-
-                        const participants = data.activeParticipants || [];
-                        participants.forEach(participant => {
-                            if (participant.id === user._id) return;
-                            const peer = createPeer(participant.id, user._id, currentStream);
-                            peersRef.current[participant.id] = peer;
-                        });
-                    })
-                    .catch(err => {
-                        console.error("Failed to get audio stream:", err);
-                        toast.error("Could not access microphone. Voice chat disabled.");
-                    });
-            }
-            setLoading(false);
-        });
-
-        // --- Listener for incoming WebRTC signaling messages ---
-        const unsubscribeSignaling = onSnapshot(query(signalingColRef), (snapshot) => {
-            snapshot.docChanges().forEach(change => {
-                if (change.type === "added") {
-                    const signalData = change.doc.data();
-                    if (signalData.recipientId === user._id) {
-                        const peer = peersRef.current[signalData.senderId];
-                        if (peer) {
-                            peer.signal(signalData.signal);
-                        } else {
-                            const newPeer = addPeer(signalData, user._id, localStream);
-                            peersRef.current[signalData.senderId] = newPeer;
-                        }
-                    }
-                }
-            });
-        });
-
-        // --- Listener for Chat Messages ---
-        const messagesColRef = collection(db, 'sessions', sessionId, 'messages');
-        const messagesQuery = query(messagesColRef, orderBy('timestamp'));
-        const unsubscribeMessages = onSnapshot(messagesQuery, (qSnap) => {
-            setMessages(qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        });
-
-        // --- WebRTC Peer Creation Functions ---
-        const createPeer = (recipientId, senderId, stream) => {
-            const peer = new Peer({
-                initiator: true,
-                trickle: false,
-                stream: stream,
-            });
-
-            peer.on('signal', signal => {
-                addDoc(signalingColRef, { recipientId, senderId, signal });
-            });
-
-            peer.on('stream', remoteStream => {
-                const audio = document.createElement('audio');
-                audio.srcObject = remoteStream;
-                audio.autoplay = true;
-                audio.id = `audio-${recipientId}`;
-                audioContainerRef.current.appendChild(audio);
-            });
-
-            return peer;
-        };
-
-        const addPeer = (incoming, recipientId, stream) => {
-            const peer = new Peer({
-                initiator: false,
-                trickle: false,
-                stream: stream,
-            });
-
-            peer.on('signal', signal => {
-                addDoc(signalingColRef, { recipientId: incoming.senderId, senderId: recipientId, signal });
-            });
-
-            peer.on('stream', remoteStream => {
-                const audio = document.createElement('audio');
-                audio.srcObject = remoteStream;
-                audio.autoplay = true;
-                audio.id = `audio-${incoming.senderId}`;
-                audioContainerRef.current.appendChild(audio);
-            });
-
-            peer.signal(incoming.signal);
-            return peer;
-        };
-
-
-        // --- Cleanup on component unmount ---
         return () => {
-            cleanupVoice();
-            leaveSession();
             unsubscribeSession();
             unsubscribeMessages();
-            unsubscribeSignaling();
+            if (docSnapCache && docSnapCache.exists()) {
+                leaveSession();
+            }
         };
-    }, [sessionId, user]); // Keep dependencies as they were
+    }, [sessionId, user]);
 
     // --- All Handler Functions ---
     const handleCodeChange = (newCode) => {
@@ -284,33 +177,6 @@ function Chat() {
         });
         setNewMessage('');
     };
-    // In Chat.js, add these two new functions after your other handlers
-
-    const handleToggleMute = async (targetUserId) => {
-        // Only the session owner can mute/unmute others
-        if (userRole !== 'editor') {
-            toast.warn("Only the session owner can mute/unmute participants.");
-            return;
-        }
-
-        const sessionDocRef = doc(db, 'sessions', sessionId);
-        const currentStatus = muteStatus[targetUserId] === undefined ? true : muteStatus[targetUserId];
-
-        // The key for the map uses dot notation
-        const fieldKey = `muteStatus.${targetUserId}`;
-
-        await updateDoc(sessionDocRef, {
-            [fieldKey]: !currentStatus
-        });
-    };
-
-    // This effect toggles your OWN microphone when your status changes in Firestore
-    useEffect(() => {
-        if (stream) {
-            const isMuted = muteStatus[user._id] === undefined ? true : muteStatus[user._id];
-            stream.getAudioTracks()[0].enabled = !isMuted;
-        }
-    }, [muteStatus, stream, user._id]);
 
     const handleLanguageChange = (e) => {
         if (userRole !== 'editor') {
@@ -336,7 +202,7 @@ function Chat() {
     const handleRun = async () => {
         setIsRunning(true);
         setActiveTab('output'); // Switch the current user's tab immediately
-        const apiLanguage = codeLanguage === 'python' ? 'py' : codeLanguage;
+   const apiLanguage = codeLanguage === 'python' ? 'py' : codeLanguage;
         try {
             const res = await axios.post(`${API_COM}/run`, {
                 language: apiLanguage,
@@ -378,19 +244,19 @@ function Chat() {
         return timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
-    if (loading) {
-        return (
-            <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-                <div className="text-center">
-                    <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <h4>Loading Session...</h4>
-                    <p className="text-muted">Please make sure you are logged into your Randoman platform account.</p>
+   if (loading) {
+    return (
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+            <div className="text-center">
+                <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
+                    <span className="visually-hidden">Loading...</span>
                 </div>
+                <h4>Loading Session...</h4>
+                <p className="text-muted">Please make sure you are logged into your Randoman platform account.</p>
             </div>
-        );
-    }
+        </div>
+    );
+}
     if (accessDenied) { return (<> <Navbar /> <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b> You do not have permission to view this session or it does not exist.</div></div></>); }
 
     return (
@@ -428,7 +294,7 @@ function Chat() {
                                                         <i className="bi bi-eye me-1"></i> View Only
                                                     </span>
                                                 )}
-
+                                                
                                                 <select
                                                     className={`form-select form-select-sm ${theme === 'dark' ? 'language-select text-white' : ''}`}
                                                     value={codeLanguage}
@@ -569,37 +435,16 @@ function Chat() {
                                         <i className="bi bi-broadcast text-success"></i>
                                     </div>
                                     <ul className="list-group list-group-flush">
-                                        {activeUsers.map(participant => {
-                                            const isMuted = muteStatus[participant.id] === undefined ? true : muteStatus[participant.id];
-                                            const isOwner = userRole === 'editor';
-                                            const isSelf = participant.id === user._id;
-
-                                            return (
-                                                <li key={participant.id} className="list-group-item user-item d-flex justify-content-between align-items-center">
-                                                    <div className="user-name">
-                                                        <div className="user-status"></div>
-                                                        <i className="bi bi-person-circle me-2"></i>
-                                                        {participant.name} {isSelf ? "(You)" : ""}
-                                                    </div>
-
-                                                    {sessionAccess === 'private' && stream && (
-                                                        <button
-                                                            className={`btn btn-sm ${isMuted ? 'text-danger' : 'text-success'}`}
-                                                            onClick={() => handleToggleMute(participant.id)}
-                                                            // --- THIS IS THE FIX ---
-                                                            // Only the owner can click this button.
-                                                            disabled={!isOwner}
-                                                            title={isOwner ? (isMuted ? "Click to Unmute" : "Click to Mute") : "Owner controls audio"}
-                                                        >
-                                                            <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{ fontSize: '1.1rem' }}></i>
-                                                        </button>
-                                                    )}
-                                                </li>
-                                            );
-                                        })}
+                                        {activeUsers.map(participant => (
+                                            <li key={participant.id} className="list-group-item user-item">
+                                                <div className="user-name">
+                                                    <div className="user-status"></div>
+                                                    <i className="bi bi-person-circle me-2"></i>
+                                                    {participant.name}
+                                                </div>
+                                            </li>
+                                        ))}
                                     </ul>
-                                    {/* This hidden div will contain all the <audio> elements for remote streams */}
-                                    <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                                 </div>
 
                                 {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
