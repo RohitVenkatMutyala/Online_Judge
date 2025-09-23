@@ -177,6 +177,13 @@ function CreateSession() {
                 );
         }
     };
+      if (!user) {
+    return (
+      <div className="container mt-5">
+        <div className="alert alert-danger text-center">You are not logged in.</div>
+      </div>
+    );
+  }
 
     return (
         <>
