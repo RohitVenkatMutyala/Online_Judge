@@ -53,7 +53,7 @@ function Chat() {
     const [description, setDescription] = useState('');
     const [verdicts, setVerdicts] = useState([]);
     const [theme, setTheme] = useState('light');
-    
+
     // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
@@ -73,13 +73,13 @@ function Chat() {
         const sessionDocRef = doc(db, 'sessions', sessionId);
 
         const enterSession = async () => {
-             await updateDoc(sessionDocRef, {
+            await updateDoc(sessionDocRef, {
                 activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
             }).catch(console.error);
         };
 
         const leaveSession = async () => {
-             await updateDoc(sessionDocRef, {
+            await updateDoc(sessionDocRef, {
                 activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
             }).catch(console.error);
         };
@@ -95,13 +95,13 @@ function Chat() {
             const isOwner = data.ownerId === user._id;
             const isAdmin = user.role === 'admin';
             const hasAccess = data.access === 'public' || data.allowedEmails?.includes(user.email) || isOwner || isAdmin;
-            
+
             if (!hasAccess) {
                 setAccessDenied(true); setLoading(false); return;
             }
-            
+
             const role = (isOwner || isAdmin) ? 'editor' : (data.defaultRole || 'viewer');
-            
+
             setAccessDenied(false);
             setUserRole(role);
             setCode(data.code || '');
@@ -112,7 +112,7 @@ function Chat() {
             setCodeLanguage(data.language || 'javascript');
             setDescription(data.description || '');
             setMuteStatus(data.muteStatus || {});
-            
+
             setOutput(data.lastRunOutput || '');
             setVerdicts(data.lastRunVerdicts || []);
             setTime(data.lastRunTime || null);
@@ -184,23 +184,23 @@ function Chat() {
                         audio.autoplay = true;
                         audioContainerRef.current.appendChild(audio);
                     }
-                     audio.srcObject = remoteStream;
+                    audio.srcObject = remoteStream;
                 }
             });
-             peer.on('close', () => {
+            peer.on('close', () => {
                 const audioElem = document.getElementById(`audio-${incoming.senderId}`);
                 if (audioElem) audioElem.remove();
             });
             peer.signal(incoming.signal);
             return peer;
         };
-        
+
         activeUsers.forEach(participant => {
             if (participant.id !== user._id && !peersRef.current[participant.id]) {
                 peersRef.current[participant.id] = createPeer(participant.id, user._id, stream);
             }
         });
-        
+
         Object.keys(peersRef.current).forEach(peerId => {
             if (!activeUsers.find(p => p.id === peerId)) {
                 peersRef.current[peerId].destroy();
@@ -229,15 +229,30 @@ function Chat() {
 
     }, [stream, activeUsers, sessionId, user._id, sessionAccess]);
 
+    // 4. Effect for applying mute status to your own microphone
     useEffect(() => {
-        if (stream?.getAudioTracks().length > 0) {
-            const isMuted = muteStatus[user._id] ?? true;
-              // 👇 ADD THIS LINE FOR DEBUGGING 👇
-        console.log(`STATUS CHANGE: User ${user.firstname} is muted: ${isMuted}. Audio track enabled: ${!isMuted}`);
-            stream.getAudioTracks()[0].enabled = !isMuted;
+        // Guard clause to ensure stream and user are loaded before running
+        if (!stream || !user || !stream.getAudioTracks().length > 0) {
+            return;
         }
-    }, [muteStatus, stream, user._id]);
-    
+
+        const isMuted = muteStatus[user._id] ?? true;
+        const audioTrack = stream.getAudioTracks()[0];
+
+        // 1. Locally enable or disable the track
+        audioTrack.enabled = !isMuted;
+
+        // 2. Explicitly tell every peer connection to update the track
+        // This is the key fix for the audio continuing to transmit
+        Object.values(peersRef.current).forEach(peer => {
+            const sender = peer._pc.getSenders().find(s => s.track.kind === 'audio');
+            if (sender) {
+                sender.replaceTrack(audioTrack);
+            }
+        });
+
+    }, [muteStatus, stream, user]);
+
     // --- Handler Functions ---
     const handleToggleMute = async (targetUserId) => {
         const isSelf = targetUserId === user._id;
@@ -282,7 +297,7 @@ function Chat() {
         });
         setNewMessage('');
     };
-    
+
     const handleLanguageChange = (e) => {
         if (userRole === 'editor') {
             updateDoc(doc(db, 'sessions', sessionId), { language: e.target.value });
@@ -327,7 +342,7 @@ function Chat() {
             setIsRunning(false);
         }
     };
-    
+
     // --- Render Logic ---
 
     if (loading) {
@@ -342,7 +357,7 @@ function Chat() {
             </div>
         );
     }
-    
+
     if (accessDenied) {
         return (
             <>
@@ -380,7 +395,7 @@ function Chat() {
                                                         <i className="bi bi-eye me-1"></i> View Only
                                                     </span>
                                                 )}
-                                                <select className="form-select form-select-sm" style={{width: 'auto'}} value={codeLanguage} onChange={handleLanguageChange}>
+                                                <select className="form-select form-select-sm" style={{ width: 'auto' }} value={codeLanguage} onChange={handleLanguageChange}>
                                                     <option value="python">Python</option>
                                                     <option value="cpp">C++</option>
                                                     <option value="java">Java</option>
@@ -473,7 +488,7 @@ function Chat() {
                                     )}
                                 </div>
                             </div>
-                            
+
                             <div className="col-lg-4 d-flex flex-column">
                                 <div className="card users-card shadow-lg mb-4">
                                     <div className="card-header users-header d-flex align-items-center justify-content-between">
@@ -497,7 +512,7 @@ function Chat() {
                                                         <i className="bi bi-person-circle me-2"></i>
                                                         {participant.name} {isSelf && "(You)"}
                                                     </div>
-                                                    
+
                                                     {sessionAccess === 'private' && stream && (
                                                         <button
                                                             className={`btn btn-sm ${isMuted ? 'text-danger' : 'text-success'}`}
@@ -505,7 +520,7 @@ function Chat() {
                                                             disabled={!isOwner && !isSelf}
                                                             title={isOwner ? (isMuted ? "Unmute" : "Mute") : (isSelf ? "Mute Yourself (Owner can unmute)" : "Owner controls audio")}
                                                         >
-                                                            <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{fontSize: '1.1rem'}}></i>
+                                                            <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{ fontSize: '1.1rem' }}></i>
                                                         </button>
                                                     )}
                                                 </li>
@@ -514,9 +529,9 @@ function Chat() {
                                     </ul>
                                     <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                                 </div>
-                                
+
                                 {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
-                                
+
                                 <div className="card chat-card shadow-lg rounded-3 flex-grow-1 mt-4">
                                     <div className="card-header chat-header d-flex align-items-center justify-content-between py-3">
                                         <h5 className="mb-0">Live Chat</h5>
