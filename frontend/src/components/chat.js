@@ -304,7 +304,7 @@ function Chat() {
                                     </select>
                                 </div>
                             </div>
-                            <div className="card-body p-0" style={{ height: '50vh' }}>
+                            <div className="card-body p-0" style={{ height: '65vh' }}>
                                 <Editor
                                     height="100%"
                                     language={codeLanguage}
@@ -322,7 +322,7 @@ function Chat() {
                                 <li className="nav-item"><button className={`nav-link ${activeTab === 'output' ? 'active' : ''}`} onClick={() => setActiveTab('output')}>Output</button></li>
                                 <li className="nav-item"><button className={`nav-link ${activeTab === 'verdict' ? 'active' : ''}`} onClick={() => setActiveTab('verdict')}>Verdict</button></li>
                             </ul>
-                            <div className="tab-content border border-top-0 p-3 rounded-bottom bg-body flex-grow-1">
+                            <div className="tab-content border border-top-0 p-2 rounded-bottom bg-body flex-grow-1">
                                 {activeTab === 'input' && (
                                     <div className="tab-pane fade show active h-100 d-flex flex-column">
                                         <textarea
