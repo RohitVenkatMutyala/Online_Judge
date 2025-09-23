@@ -232,6 +232,8 @@ function Chat() {
     useEffect(() => {
         if (stream?.getAudioTracks().length > 0) {
             const isMuted = muteStatus[user._id] ?? true;
+              // 👇 ADD THIS LINE FOR DEBUGGING 👇
+        console.log(`STATUS CHANGE: User ${user.firstname} is muted: ${isMuted}. Audio track enabled: ${!isMuted}`);
             stream.getAudioTracks()[0].enabled = !isMuted;
         }
     }, [muteStatus, stream, user._id]);
