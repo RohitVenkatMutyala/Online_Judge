@@ -39,45 +39,93 @@ function Chat() {
     const [codeLanguage, setCodeLanguage] = useState('javascript');
     const [verdicts, setVerdicts] = useState([]);
     const [TotalTime, setTime] = useState(null);
-
+    
     // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
-    const [isAudioActive, setIsAudioActive] = useState(false); // New state for mobile fix
     const peersRef = useRef({});
     const audioContainerRef = useRef(null);
     const chatMessagesEndRef = useRef(null);
-
-    // --- Hooks ---
 
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    // Main useEffect to handle session data and user presence
     useEffect(() => {
-        if (!sessionId || !user) return;
+        console.log("Debug 1: Hook started. Session ID:", sessionId, "User:", user);
+
+        if (!sessionId) {
+            console.error("Debug Fail: No Session ID found.");
+            setAccessDenied(true);
+            setLoading(false);
+            return;
+        }
+
         const sessionDocRef = doc(db, 'sessions', sessionId);
-        const enterSession = async () => { await updateDoc(sessionDocRef, { activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` }) }).catch(console.error); };
-        const leaveSession = async () => { await updateDoc(sessionDocRef, { activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` }) }).catch(console.error); };
-        enterSession();
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
-            if (!docSnap.exists()) { setAccessDenied(true); setLoading(false); return; }
-            const data = docSnap.data();
-            const isOwner = data.ownerId === user._id;
-            const hasAccess = data.access === 'public' || data.allowedEmails?.includes(user.email) || isOwner;
-            if (!hasAccess) { setAccessDenied(true); setLoading(false); return; }
+            console.log("Debug 2: onSnapshot listener fired.");
 
+            if (!docSnap.exists()) {
+                console.error("Debug Fail: Session document does not exist.");
+                setAccessDenied(true);
+                setLoading(false);
+                return;
+            }
+
+            const data = docSnap.data();
+            console.log("Debug 3: Session data loaded. Access type:", data.access);
+
+            if (data.access === 'private' && !user) {
+                console.warn("Debug Wait: Private session, waiting for user object to load...");
+                return; // Wait for user to load
+            }
+
+            const isOwner = user && data.ownerId === user._id;
+            const hasAccess = data.access === 'public' || (user && data.allowedEmails?.includes(user.email)) || isOwner;
+            
+            console.log("Debug 4: Checking access. Has Access:", hasAccess);
+
+            if (!hasAccess) {
+                console.error("Debug Fail: Access Denied.");
+                setAccessDenied(true);
+                setLoading(false);
+                return;
+            }
+            
+            console.log("Debug 5: Access granted. Updating state.");
+
+            if (user) {
+                const participantExists = data.activeParticipants?.some(p => p.id === user._id);
+                if (!participantExists) {
+                    updateDoc(sessionDocRef, {
+                        activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
+                    }).catch(console.error);
+                }
+            }
+            
             const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
-            setAccessDenied(false); setUserRole(role); setCode(data.code || '');
-            setInput(data.codeInput || ''); setSessionAccess(data.access || 'public');
-            setActiveUsers(data.activeParticipants || []); setCodeLanguage(data.language || 'javascript');
-            setMuteStatus(data.muteStatus || {}); setVerdicts(data.lastRunVerdicts || []);
-            setOutput(data.lastRunOutput || ''); setTime(data.lastRunTime || null);
+            setUserRole(role);
+            setCode(data.code || '');
+            setInput(data.codeInput || '');
+            setSessionAccess(data.access || 'public');
+            setActiveUsers(data.activeParticipants || []);
+            setCodeLanguage(data.language || 'javascript');
+            setMuteStatus(data.muteStatus || {});
+            setVerdicts(data.lastRunVerdicts || []);
+            setOutput(data.lastRunOutput || '');
+            setTime(data.lastRunTime || null);
 
             if (data.access === 'private' && !stream) {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(setStream).catch(err => toast.error("Could not access microphone."));
             }
+
+            console.log("Debug 6: State updated. Turning off loading screen.");
+            setLoading(false);
+        }, (error) => {
+            console.error("Debug Fail: Error in onSnapshot listener:", error);
+            setAccessDenied(true);
             setLoading(false);
         });
 
@@ -85,17 +133,24 @@ function Chat() {
         const unsubscribeMessages = onSnapshot(messagesQuery, qSnap => setMessages(qSnap.docs.map(d => ({ id: d.id, ...d.data() }))));
 
         return () => {
-            leaveSession();
+            if (user) {
+                updateDoc(doc(db, 'sessions', sessionId), {
+                    activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
+                }).catch(console.error);
+            }
             if (stream) { stream.getTracks().forEach(track => track.stop()); }
             Object.values(peersRef.current).forEach(peer => peer.destroy());
             unsubscribeSession();
             unsubscribeMessages();
         };
-    }, [sessionId, user]);
+    }, [sessionId, user, stream]);
 
+    // useEffect for WebRTC connections
     useEffect(() => {
         if (!stream || sessionAccess !== 'private' || !user) return;
+
         const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
+
         const createPeer = (recipientId, senderId, stream) => {
             const peer = new Peer({ initiator: true, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId, senderId, signal }));
@@ -104,15 +159,15 @@ function Chat() {
                     let audio = document.getElementById(`audio-${recipientId}`);
                     if (!audio) {
                         audio = document.createElement('audio'); audio.id = `audio-${recipientId}`;
-                        audioContainerRef.current.appendChild(audio);
+                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
                     }
                     audio.srcObject = remoteStream;
-                    if (isAudioActive) audio.play().catch(e => console.log("Autoplay was prevented"));
                 }
             });
             peer.on('close', () => { const audioElem = document.getElementById(`audio-${recipientId}`); if (audioElem) audioElem.remove(); });
             return peer;
         };
+
         const addPeer = (incoming, recipientId, stream) => {
             const peer = new Peer({ initiator: false, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId: incoming.senderId, senderId: recipientId, signal }));
@@ -121,18 +176,19 @@ function Chat() {
                     let audio = document.getElementById(`audio-${incoming.senderId}`);
                     if (!audio) {
                         audio = document.createElement('audio'); audio.id = `audio-${incoming.senderId}`;
-                        audioContainerRef.current.appendChild(audio);
+                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
                     }
-                    audio.srcObject = remoteStream;
-                    if (isAudioActive) audio.play().catch(e => console.log("Autoplay was prevented"));
+                     audio.srcObject = remoteStream;
                 }
             });
             peer.on('close', () => { const audioElem = document.getElementById(`audio-${incoming.senderId}`); if (audioElem) audioElem.remove(); });
             peer.signal(incoming.signal);
             return peer;
         };
+
         activeUsers.forEach(p => { if (p.id !== user._id && !peersRef.current[p.id]) { peersRef.current[p.id] = createPeer(p.id, user._id, stream); } });
         Object.keys(peersRef.current).forEach(peerId => { if (!activeUsers.find(p => p.id === peerId)) { peersRef.current[peerId].destroy(); delete peersRef.current[peerId]; } });
+
         const unsubscribeSignaling = onSnapshot(query(signalingColRef), snapshot => {
             snapshot.docChanges().forEach(change => {
                 if (change.type === "added") {
@@ -146,8 +202,9 @@ function Chat() {
             });
         });
         return () => unsubscribeSignaling();
-    }, [stream, activeUsers, sessionId, user, isAudioActive]);
+    }, [stream, activeUsers, sessionId, user]);
 
+    // useEffect for applying mute status to local microphone
     useEffect(() => {
         if (!stream || !user || stream.getAudioTracks().length === 0) { return; }
         const isMuted = muteStatus[user._id] ?? true;
@@ -158,17 +215,7 @@ function Chat() {
             if (sender) { sender.replaceTrack(audioTrack); }
         });
     }, [muteStatus, stream, user]);
-
-    // --- New Handler for Mobile Audio ---
-    const handleJoinAudio = () => {
-        setIsAudioActive(true);
-        if (audioContainerRef.current) {
-            const audioElements = audioContainerRef.current.getElementsByTagName('audio');
-            for (let audio of audioElements) {
-                audio.play().catch(e => console.error("Could not play audio:", e));
-            }
-        }
-    };
+    
     // --- Handler Functions ---
 
     const handleToggleMute = async (targetUserId) => {
@@ -301,18 +348,6 @@ function Chat() {
 
                     {/* Right Column: Users, Share, Chat */}
                     <div className="col-lg-4 d-flex flex-column h-100">
-                        {/* --- NEW "JOIN AUDIO" BUTTON --- */}
-                        {sessionAccess === 'private' && stream && !isAudioActive && (
-                            <div className="card shadow-sm mb-3">
-                                <div className="card-body text-center">
-                                    <p className="mb-2">Voice chat is ready.</p>
-                                    <button className="btn btn-success" onClick={handleJoinAudio}>
-                                        <i className="bi bi-headphones me-2"></i>
-                                        Join Audio
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                         <div className="card shadow-sm mb-3">
                             <div className="card-header d-flex justify-content-between">
                                 <span>Active Users ({activeUsers.length})</span>
