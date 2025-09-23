@@ -230,22 +230,23 @@ function Chat() {
     }, [stream, activeUsers, sessionId, user._id, sessionAccess]);
 
     // 4. Effect for applying mute status to your own microphone
+    // 4. Effect for applying mute status to your own microphone
     useEffect(() => {
-        // Guard clause to ensure stream and user are loaded before running
-        if (!stream || !user || !stream.getAudioTracks().length > 0) {
+        // BUG FIX: The '!' was removed from the length check to allow the code to run.
+        if (!stream || !user || stream.getAudioTracks().length === 0) {
             return;
         }
-
+        
         const isMuted = muteStatus[user._id] ?? true;
         const audioTrack = stream.getAudioTracks()[0];
-
+        
         // 1. Locally enable or disable the track
         audioTrack.enabled = !isMuted;
 
         // 2. Explicitly tell every peer connection to update the track
-        // This is the key fix for the audio continuing to transmit
         Object.values(peersRef.current).forEach(peer => {
-            const sender = peer._pc.getSenders().find(s => s.track.kind === 'audio');
+            // Added optional chaining (?.) to make this more robust
+            const sender = peer._pc.getSenders().find(s => s.track?.kind === 'audio');
             if (sender) {
                 sender.replaceTrack(audioTrack);
             }
