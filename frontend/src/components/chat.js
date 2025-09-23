@@ -51,9 +51,12 @@ function Chat() {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // ✅ FIX FOR STUCK LOADING SCREEN IS IN THIS REWRITTEN HOOK
+    // Main useEffect to handle session data and user presence
     useEffect(() => {
+        console.log("Debug 1: Hook started. Session ID:", sessionId, "User:", user);
+
         if (!sessionId) {
+            console.error("Debug Fail: No Session ID found.");
             setAccessDenied(true);
             setLoading(false);
             return;
@@ -62,34 +65,37 @@ function Chat() {
         const sessionDocRef = doc(db, 'sessions', sessionId);
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
-            // Path 1: Session document doesn't exist at all.
+            console.log("Debug 2: onSnapshot listener fired.");
+
             if (!docSnap.exists()) {
+                console.error("Debug Fail: Session document does not exist.");
                 setAccessDenied(true);
                 setLoading(false);
                 return;
             }
 
             const data = docSnap.data();
-            
-            // Path 2: Session is private, but the user object hasn't loaded yet.
-            // We must wait for the user object to check permissions.
+            console.log("Debug 3: Session data loaded. Access type:", data.access);
+
             if (data.access === 'private' && !user) {
-                // Keep showing the loading screen. The hook will re-run when `user` loads.
-                return;
+                console.warn("Debug Wait: Private session, waiting for user object to load...");
+                return; // Wait for user to load
             }
 
-            // From here, we either have a public session or a loaded user for a private one.
             const isOwner = user && data.ownerId === user._id;
             const hasAccess = data.access === 'public' || (user && data.allowedEmails?.includes(user.email)) || isOwner;
+            
+            console.log("Debug 4: Checking access. Has Access:", hasAccess);
 
-            // Path 3: User does not have access to the private session.
             if (!hasAccess) {
+                console.error("Debug Fail: Access Denied.");
                 setAccessDenied(true);
                 setLoading(false);
                 return;
             }
             
-            // Path 4: Success. User has access.
+            console.log("Debug 5: Access granted. Updating state.");
+
             if (user) {
                 const participantExists = data.activeParticipants?.some(p => p.id === user._id);
                 if (!participantExists) {
@@ -100,17 +106,26 @@ function Chat() {
             }
             
             const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
-            setAccessDenied(false); setUserRole(role); setCode(data.code || '');
-            setInput(data.codeInput || ''); setSessionAccess(data.access || 'public');
-            setActiveUsers(data.activeParticipants || []); setCodeLanguage(data.language || 'javascript');
-            setMuteStatus(data.muteStatus || {}); setVerdicts(data.lastRunVerdicts || []);
-            setOutput(data.lastRunOutput || ''); setTime(data.lastRunTime || null);
+            setUserRole(role);
+            setCode(data.code || '');
+            setInput(data.codeInput || '');
+            setSessionAccess(data.access || 'public');
+            setActiveUsers(data.activeParticipants || []);
+            setCodeLanguage(data.language || 'javascript');
+            setMuteStatus(data.muteStatus || {});
+            setVerdicts(data.lastRunVerdicts || []);
+            setOutput(data.lastRunOutput || '');
+            setTime(data.lastRunTime || null);
 
             if (data.access === 'private' && !stream) {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(setStream).catch(err => toast.error("Could not access microphone."));
             }
-            
-            // This is now guaranteed to be called on all successful or denied paths.
+
+            console.log("Debug 6: State updated. Turning off loading screen.");
+            setLoading(false);
+        }, (error) => {
+            console.error("Debug Fail: Error in onSnapshot listener:", error);
+            setAccessDenied(true);
             setLoading(false);
         });
 
@@ -128,15 +143,14 @@ function Chat() {
             unsubscribeSession();
             unsubscribeMessages();
         };
-    }, [sessionId, user, stream]); 
+    }, [sessionId, user, stream]);
 
-    // Effect for handling WebRTC connections
+    // useEffect for WebRTC connections
     useEffect(() => {
         if (!stream || sessionAccess !== 'private' || !user) return;
 
         const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
 
-        // Creates a new peer connection to call another user
         const createPeer = (recipientId, senderId, stream) => {
             const peer = new Peer({ initiator: true, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId, senderId, signal }));
@@ -144,22 +158,16 @@ function Chat() {
                 if (audioContainerRef.current) {
                     let audio = document.getElementById(`audio-${recipientId}`);
                     if (!audio) {
-                        audio = document.createElement('audio');
-                        audio.id = `audio-${recipientId}`;
-                        audio.autoplay = true;
-                        audioContainerRef.current.appendChild(audio);
+                        audio = document.createElement('audio'); audio.id = `audio-${recipientId}`;
+                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
                     }
                     audio.srcObject = remoteStream;
                 }
             });
-            peer.on('close', () => {
-                const audioElem = document.getElementById(`audio-${recipientId}`);
-                if (audioElem) audioElem.remove();
-            });
+            peer.on('close', () => { const audioElem = document.getElementById(`audio-${recipientId}`); if (audioElem) audioElem.remove(); });
             return peer;
         };
 
-        // Adds a peer connection to answer an incoming call
         const addPeer = (incoming, recipientId, stream) => {
             const peer = new Peer({ initiator: false, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId: incoming.senderId, senderId: recipientId, signal }));
@@ -167,93 +175,60 @@ function Chat() {
                 if (audioContainerRef.current) {
                     let audio = document.getElementById(`audio-${incoming.senderId}`);
                     if (!audio) {
-                        audio = document.createElement('audio');
-                        audio.id = `audio-${incoming.senderId}`;
-                        audio.autoplay = true;
-                        audioContainerRef.current.appendChild(audio);
+                        audio = document.createElement('audio'); audio.id = `audio-${incoming.senderId}`;
+                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
                     }
                      audio.srcObject = remoteStream;
                 }
             });
-            peer.on('close', () => {
-                const audioElem = document.getElementById(`audio-${incoming.senderId}`);
-                if (audioElem) audioElem.remove();
-            });
+            peer.on('close', () => { const audioElem = document.getElementById(`audio-${incoming.senderId}`); if (audioElem) audioElem.remove(); });
             peer.signal(incoming.signal);
             return peer;
         };
 
-        // Connect to new users and disconnect from users who left
-        activeUsers.forEach(p => {
-            if (p.id !== user._id && !peersRef.current[p.id]) {
-                peersRef.current[p.id] = createPeer(p.id, user._id, stream);
-            }
-        });
-        Object.keys(peersRef.current).forEach(peerId => {
-            if (!activeUsers.find(p => p.id === peerId)) {
-                peersRef.current[peerId].destroy();
-                delete peersRef.current[peerId];
-            }
-        });
+        activeUsers.forEach(p => { if (p.id !== user._id && !peersRef.current[p.id]) { peersRef.current[p.id] = createPeer(p.id, user._id, stream); } });
+        Object.keys(peersRef.current).forEach(peerId => { if (!activeUsers.find(p => p.id === peerId)) { peersRef.current[peerId].destroy(); delete peersRef.current[peerId]; } });
 
-        // Listen for signaling data to complete connections
         const unsubscribeSignaling = onSnapshot(query(signalingColRef), snapshot => {
             snapshot.docChanges().forEach(change => {
                 if (change.type === "added") {
                     const data = change.doc.data();
                     if (data.recipientId === user._id) {
                         const peer = peersRef.current[data.senderId];
-                        if (peer) {
-                            peer.signal(data.signal);
-                        } else {
-                            peersRef.current[data.senderId] = addPeer(data, user._id, stream);
-                        }
-                        deleteDoc(change.doc.ref); // Clean up signal doc
+                        if (peer) { peer.signal(data.signal); } else { peersRef.current[data.senderId] = addPeer(data, user._id, stream); }
+                        deleteDoc(change.doc.ref);
                     }
                 }
             });
         });
-
         return () => unsubscribeSignaling();
     }, [stream, activeUsers, sessionId, user]);
 
-    // Effect for applying mute status to your own microphone
+    // useEffect for applying mute status to local microphone
     useEffect(() => {
-        if (!stream || !user || stream.getAudioTracks().length === 0) return;
-
+        if (!stream || !user || stream.getAudioTracks().length === 0) { return; }
         const isMuted = muteStatus[user._id] ?? true;
         const audioTrack = stream.getAudioTracks()[0];
-        audioTrack.enabled = !isMuted; // Mute/unmute the local track
-
-        // Forcefully update the track for all connected peers
+        audioTrack.enabled = !isMuted;
         Object.values(peersRef.current).forEach(peer => {
             const sender = peer._pc.getSenders().find(s => s.track?.kind === 'audio');
-            if (sender) {
-                sender.replaceTrack(audioTrack);
-            }
+            if (sender) { sender.replaceTrack(audioTrack); }
         });
     }, [muteStatus, stream, user]);
     
     // --- Handler Functions ---
 
-    /**
-     * Toggles the mute status for a given user ID based on permissions.
-     */
     const handleToggleMute = async (targetUserId) => {
         const isSelf = targetUserId === user._id;
         const isOwner = userRole === 'editor';
         const currentMuteState = muteStatus[targetUserId] ?? true;
         const newMuteState = !currentMuteState;
-
-        // The owner can mute/unmute anyone.
         if (isOwner) {
             await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
             return;
         }
-        
-        // Non-owners can only mute themselves.
         if (isSelf) {
-            if (newMuteState === false) { // Block unmuting
+            if (newMuteState === false) {
                 toast.error("Only the session owner can unmute you.");
                 return;
             }
@@ -261,92 +236,31 @@ function Chat() {
         }
     };
 
-    /**
-     * Updates the code in Firestore if the user is an editor.
-     */
-    const handleCodeChange = (newCode) => {
-        if (userRole === 'editor') {
-            updateDoc(doc(db, 'sessions', sessionId), { code: newCode });
-        }
-    };
-
-    /**
-     * Updates the code input field in Firestore if the user is an editor.
-     */
-    const handleInputChange = (e) => {
-        const newInput = e.target.value;
-        setInput(newInput);
-        if (userRole === 'editor') {
-            updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput });
-        }
-    };
-
-    /**
-     * Formats a Firestore timestamp into a readable time string.
-     */
-    const formatTimestamp = (timestamp) => {
-        if (!timestamp) return '';
-        return timestamp.toDate().toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit'
-        });
-    };
-
-    /**
-     * Sends a new chat message to Firestore.
-     */
+    const handleCodeChange = (newCode) => { if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { code: newCode }); };
+    const handleInputChange = (e) => { const newInput = e.target.value; setInput(newInput); if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput }); };
+    const formatTimestamp = (timestamp) => !timestamp ? '' : timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!user || newMessage.trim() === '') return;
-
-        await addDoc(collection(db, 'sessions', sessionId, 'messages'), {
-            text: newMessage,
-            senderName: `${user.firstname} ${user.lastname}`,
-            senderId: user._id,
-            timestamp: serverTimestamp()
-        });
+        await addDoc(collection(db, 'sessions', sessionId, 'messages'), { text: newMessage, senderName: `${user.firstname} ${user.lastname}`, senderId: user._id, timestamp: serverTimestamp() });
         setNewMessage('');
     };
-
-    /**
-     * Sends the code and input to the compiler API and updates the session.
-     */
     const handleRun = async () => {
-        setIsRunning(true);
-        setActiveTab('output');
+        setIsRunning(true); setActiveTab('output');
         const apiLanguage = codeLanguage === 'python' ? 'py' : codeLanguage;
-
         try {
-            const res = await axios.post(`${API_COM}/run`, {
-                language: apiLanguage,
-                code,
-                input
-            });
-            const dataToUpdate = {
-                lastRunOutput: res.data.output || 'Execution finished.',
-                lastRunVerdicts: res.data.verdicts || [],
-                lastRunTime: res.data.totalTime || null,
-                lastRunTimestamp: serverTimestamp()
-            };
+            const res = await axios.post(`${API_COM}/run`, { language: apiLanguage, code, input });
+            const dataToUpdate = { lastRunOutput: res.data.output || 'Execution finished.', lastRunVerdicts: res.data.verdicts || [], lastRunTime: res.data.totalTime || null, lastRunTimestamp: serverTimestamp() };
             await updateDoc(doc(db, 'sessions', sessionId), dataToUpdate);
-        } catch (error) {
-            setOutput(error.message || 'An unexpected error occurred.');
-        } finally {
-            setIsRunning(false);
-        }
+        } catch (error) { setOutput(error.message || 'An unexpected error occurred.'); } 
+        finally { setIsRunning(false); }
     };
     
-    // --- Render Logic ---
-
-  if (loading) {
+    if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center vh-100">
                 <div className="text-center">
-                    <div 
-                        className="spinner-border text-primary mb-3" 
-                        style={{ width: '3rem', height: '3rem' }} 
-                        role="status"
-                    >
+                    <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
                     <h4>Loading Session...</h4>
@@ -355,11 +269,8 @@ function Chat() {
             </div>
         );
     }
-
-    if (accessDenied) {
-        return <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b></div></div>;
-    }
-
+    
+    if (accessDenied) { return <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b></div></div>; }
     return (
         <>
             <Navbar />
