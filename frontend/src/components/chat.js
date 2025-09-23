@@ -12,7 +12,8 @@ import {
     orderBy,
     serverTimestamp,
     arrayUnion,
-    arrayRemove
+    arrayRemove,
+    deleteDoc
 } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import Editor from '@monaco-editor/react';
@@ -32,7 +33,7 @@ function Chat() {
     const { user } = useAuth();
     const { sessionId } = useParams();
 
-    // --- All State Variables ---
+    // --- State Variables ---
     const [code, setCode] = useState('');
     const [text, setText] = useState('');
     const [activeTab, setActiveTab] = useState('input');
@@ -53,7 +54,7 @@ function Chat() {
     const [verdicts, setVerdicts] = useState([]);
     const [theme, setTheme] = useState('light');
     
-    // --- Voice Chat State and Refs ---
+    // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
     const peersRef = useRef({});
@@ -62,23 +63,19 @@ function Chat() {
 
     // --- Hooks ---
 
-    // 1. Auto-scroll chat
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // 2. Main Effect for Session Data, User Management, and Messages
     useEffect(() => {
-        if (!sessionId || !user) {
-            return;
-        }
+        if (!sessionId || !user) return;
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
 
         const enterSession = async () => {
              await updateDoc(sessionDocRef, {
                 activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-            }).catch(console.error); // Catch errors silently if the doc is not ready
+            }).catch(console.error);
         };
 
         const leaveSession = async () => {
@@ -89,28 +86,22 @@ function Chat() {
 
         enterSession();
 
-        // Listener for all session data except signaling
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (!docSnap.exists()) {
-                setAccessDenied(true);
-                setLoading(false);
-                return;
+                setAccessDenied(true); setLoading(false); return;
             }
 
             const data = docSnap.data();
             const isOwner = data.ownerId === user._id;
             const isAdmin = user.role === 'admin';
             const hasAccess = data.access === 'public' || data.allowedEmails?.includes(user.email) || isOwner || isAdmin;
-
+            
             if (!hasAccess) {
-                setAccessDenied(true);
-                setLoading(false);
-                return;
+                setAccessDenied(true); setLoading(false); return;
             }
             
             const role = (isOwner || isAdmin) ? 'editor' : (data.defaultRole || 'viewer');
             
-            // Set all states from Firestore
             setAccessDenied(false);
             setUserRole(role);
             setCode(data.code || '');
@@ -120,23 +111,19 @@ function Chat() {
             setActiveUsers(data.activeParticipants || []);
             setCodeLanguage(data.language || 'javascript');
             setDescription(data.description || '');
-            setMuteStatus(data.muteStatus || {}); // Sync mute status
+            setMuteStatus(data.muteStatus || {});
             
-            // Sync compiler results
             setOutput(data.lastRunOutput || '');
             setVerdicts(data.lastRunVerdicts || []);
             setTime(data.lastRunTime || null);
             setSolved(data.lastRunStatus || '');
 
-            // Initialize microphone only once for private sessions
             if (data.access === 'private' && !stream) {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-                    .then(currentStream => {
-                        setStream(currentStream);
-                    })
+                    .then(setStream)
                     .catch(err => {
-                        console.error("Failed to get audio stream:", err);
-                        toast.error("Could not access microphone. Voice chat disabled.");
+                        console.error("Mic access error:", err);
+                        toast.error("Could not access microphone.");
                     });
             }
             setLoading(false);
@@ -147,63 +134,80 @@ function Chat() {
             setMessages(qSnap.docs.map(d => ({ id: d.id, ...d.data() })));
         });
 
-        // Cleanup function
         return () => {
+            leaveSession();
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
             Object.values(peersRef.current).forEach(peer => peer.destroy());
-            leaveSession();
             unsubscribeSession();
             unsubscribeMessages();
         };
-    }, [sessionId, user]); // This hook depends only on session and user ID
+    }, [sessionId, user]);
 
-    // 3. Effect for Handling WebRTC Connections (runs only when the stream is ready)
     useEffect(() => {
         if (!stream || sessionAccess !== 'private') return;
 
         const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
 
-        // Function to create a new peer connection (as initiator)
         const createPeer = (recipientId, senderId, stream) => {
             const peer = new Peer({ initiator: true, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId, senderId, signal }));
             peer.on('stream', remoteStream => {
                 if (audioContainerRef.current) {
-                    const audio = document.createElement('audio');
+                    let audio = document.getElementById(`audio-${recipientId}`);
+                    if (!audio) {
+                        audio = document.createElement('audio');
+                        audio.id = `audio-${recipientId}`;
+                        audio.autoplay = true;
+                        audioContainerRef.current.appendChild(audio);
+                    }
                     audio.srcObject = remoteStream;
-                    audio.autoplay = true;
-                    audioContainerRef.current.appendChild(audio);
                 }
+            });
+            peer.on('close', () => {
+                const audioElem = document.getElementById(`audio-${recipientId}`);
+                if (audioElem) audioElem.remove();
             });
             return peer;
         };
 
-        // Function to add a peer connection (as receiver)
         const addPeer = (incoming, recipientId, stream) => {
             const peer = new Peer({ initiator: false, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId: incoming.senderId, senderId: recipientId, signal }));
             peer.on('stream', remoteStream => {
                 if (audioContainerRef.current) {
-                    const audio = document.createElement('audio');
-                    audio.srcObject = remoteStream;
-                    audio.autoplay = true;
-                    audioContainerRef.current.appendChild(audio);
+                    let audio = document.getElementById(`audio-${incoming.senderId}`);
+                    if (!audio) {
+                        audio = document.createElement('audio');
+                        audio.id = `audio-${incoming.senderId}`;
+                        audio.autoplay = true;
+                        audioContainerRef.current.appendChild(audio);
+                    }
+                     audio.srcObject = remoteStream;
                 }
+            });
+             peer.on('close', () => {
+                const audioElem = document.getElementById(`audio-${incoming.senderId}`);
+                if (audioElem) audioElem.remove();
             });
             peer.signal(incoming.signal);
             return peer;
         };
-
-        // Connect to all other users in the session
+        
         activeUsers.forEach(participant => {
             if (participant.id !== user._id && !peersRef.current[participant.id]) {
                 peersRef.current[participant.id] = createPeer(participant.id, user._id, stream);
             }
         });
+        
+        Object.keys(peersRef.current).forEach(peerId => {
+            if (!activeUsers.find(p => p.id === peerId)) {
+                peersRef.current[peerId].destroy();
+                delete peersRef.current[peerId];
+            }
+        });
 
-        // Listen for signaling messages to accept incoming connections
         const unsubscribeSignaling = onSnapshot(query(signalingColRef), snapshot => {
             snapshot.docChanges().forEach(change => {
                 if (change.type === "added") {
@@ -211,11 +215,11 @@ function Chat() {
                     if (data.recipientId === user._id) {
                         const peer = peersRef.current[data.senderId];
                         if (peer) {
-                            peer.signal(data.signal); // Complete the connection
+                            peer.signal(data.signal);
                         } else {
-                            // A new user joined and is calling you
                             peersRef.current[data.senderId] = addPeer(data, user._id, stream);
                         }
+                        deleteDoc(change.doc.ref);
                     }
                 }
             });
@@ -223,27 +227,22 @@ function Chat() {
 
         return () => unsubscribeSignaling();
 
-    }, [stream, activeUsers, sessionId, user._id, sessionAccess]); // Re-run if stream or users change
+    }, [stream, activeUsers, sessionId, user._id, sessionAccess]);
 
-    // 4. Effect for applying mute status to your own microphone
     useEffect(() => {
-        if (stream && stream.getAudioTracks().length > 0) {
-            // Default to muted (true) if the status is not explicitly set
+        if (stream?.getAudioTracks().length > 0) {
             const isMuted = muteStatus[user._id] ?? true;
             stream.getAudioTracks()[0].enabled = !isMuted;
         }
     }, [muteStatus, stream, user._id]);
-
     
     // --- Handler Functions ---
-
     const handleToggleMute = async (targetUserId) => {
         const isSelf = targetUserId === user._id;
         const isOwner = userRole === 'editor';
-        const currentMuteState = muteStatus[targetUserId] ?? true; // Default to muted
+        const currentMuteState = muteStatus[targetUserId] ?? true;
         const newMuteState = !currentMuteState;
 
-        // Rule 1: The owner can mute/unmute anyone.
         if (isOwner) {
             await updateDoc(doc(db, 'sessions', sessionId), {
                 [`muteStatus.${targetUserId}`]: newMuteState
@@ -251,14 +250,11 @@ function Chat() {
             return;
         }
 
-        // Rule 2: Non-owners can only interact with their own button.
         if (isSelf && !isOwner) {
-            // Rule 3: Non-owners can ONLY mute themselves. They cannot unmute.
-            if (newMuteState === false) { // Trying to unmute
+            if (newMuteState === false) {
                 toast.error("Only the session owner can unmute you.");
                 return;
             }
-            // If they are muting themselves, allow it.
             await updateDoc(doc(db, 'sessions', sessionId), {
                 [`muteStatus.${targetUserId}`]: true
             });
@@ -336,7 +332,7 @@ function Chat() {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
                 <div className="text-center">
-                    <div className="spinner-border text-primary mb-3" role="status">
+                    <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
                         <span className="visually-hidden">Loading...</span>
                     </div>
                     <h4>Loading Session...</h4>
@@ -363,12 +359,10 @@ function Chat() {
                 <div className="collaboration-container">
                     <div className="container-fluid">
                         <div className="row g-4">
-                            {/* ----- Left Column: Code Editor & I/O --- */}
                             <div className="col-lg-8">
                                 <div className="card editor-card shadow-lg rounded-3 mb-4">
                                     <div className={`card-header ${theme === 'dark' ? 'editor-header text-white' : 'bg-light text-dark'} py-3`}>
                                         <div className="d-flex justify-content-between align-items-center">
-                                            {/* Header Content */}
                                             <div className="d-flex align-items-center">
                                                 <i className="bi bi-code-slash me-2 fs-5"></i>
                                                 <h5 className="mb-0">Collaborative Code Editor</h5>
@@ -410,11 +404,74 @@ function Chat() {
                                     <li className="nav-item"><button className={`nav-link ${activeTab === 'verdict' ? 'active' : ''}`} onClick={() => setActiveTab('verdict')}>Verdict</button></li>
                                 </ul>
                                 <div className="tab-content border border-top-0 p-3 rounded-bottom" style={{ minHeight: '180px' }}>
-                                   {/* Tab Content Here */}
+                                    {activeTab === 'input' && (
+                                        <div className="tab-pane fade show active">
+                                            <textarea
+                                                id="inputArea"
+                                                className="form-control mb-3 text-body bg-body border border-secondary"
+                                                style={{ resize: 'vertical', minHeight: '120px' }}
+                                                rows="4"
+                                                placeholder="Enter custom input (if required)..."
+                                                value={input}
+                                                onChange={handleInputChange}
+                                            />
+                                            <button
+                                                className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-1"
+                                                onClick={handleRun}
+                                                disabled={isRunning}
+                                            >
+                                                {isRunning ? (
+                                                    <><div className="spinner-border spinner-border-sm text-primary" role="status"></div> Running...</>
+                                                ) : (
+                                                    <><i className="bi bi-play-fill"></i> Run Code</>
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                    {activeTab === 'output' && (
+                                        <div className="tab-pane fade show active">
+                                            {output ? (
+                                                <div className="card shadow-sm border-0">
+                                                    <div className="card-body">
+                                                        <pre className="mb-0" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{output}</pre>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className="text-muted">{isRunning ? 'Executing...' : 'Run code to see output.'}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                    {activeTab === 'verdict' && (
+                                        <div className="tab-pane fade show active">
+                                            {verdicts.length === 0 ? (
+                                                <p className="text-muted">Submit code against test cases to see the verdict.</p>
+                                            ) : (
+                                                <>
+                                                    <div className="mb-3">
+                                                        <div className="alert alert-secondary d-inline-block fw-semibold">
+                                                            ⏱️ Total Time:{" "}
+                                                            <span className="badge bg-dark">
+                                                                {typeof TotalTime === "number" ? `${TotalTime}ms` : "N/A"}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="d-flex flex-wrap gap-3">
+                                                        {verdicts.map((v, idx) => (
+                                                            <div key={idx} className="border rounded p-2 bg-light text-center" style={{ minWidth: '130px' }}>
+                                                                <strong>Test Case {v.testCase}</strong>
+                                                                <div className={v.verdict.includes("Passed") ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                                                    {v.verdict}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             
-                            {/* ----- Right Column: Users, Sharing, Chat --- */}
                             <div className="col-lg-4 d-flex flex-column">
                                 <div className="card users-card shadow-lg mb-4">
                                     <div className="card-header users-header d-flex align-items-center justify-content-between">
@@ -444,7 +501,7 @@ function Chat() {
                                                             className={`btn btn-sm ${isMuted ? 'text-danger' : 'text-success'}`}
                                                             onClick={() => handleToggleMute(participant.id)}
                                                             disabled={!isOwner && !isSelf}
-                                                            title={isOwner ? (isMuted ? "Unmute" : "Mute") : (isSelf ? "Mute Yourself (Only Owner Can Unmute)" : "Owner controls audio")}
+                                                            title={isOwner ? (isMuted ? "Unmute" : "Mute") : (isSelf ? "Mute Yourself (Owner can unmute)" : "Owner controls audio")}
                                                         >
                                                             <i className={`bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`} style={{fontSize: '1.1rem'}}></i>
                                                         </button>
@@ -453,10 +510,11 @@ function Chat() {
                                             );
                                         })}
                                     </ul>
-                                    {/* This hidden div will contain all the <audio> elements for remote streams */}
                                     <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                                 </div>
+                                
                                 {userRole === 'editor' && <SharingComponent sessionId={sessionId} />}
+                                
                                 <div className="card chat-card shadow-lg rounded-3 flex-grow-1 mt-4">
                                     <div className="card-header chat-header d-flex align-items-center justify-content-between py-3">
                                         <h5 className="mb-0">Live Chat</h5>
