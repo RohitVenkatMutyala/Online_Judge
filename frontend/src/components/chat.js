@@ -85,7 +85,8 @@ function Chat() {
                 let role = 'viewer';
 
                 // --- EMAIL-ONLY ACCESS LOGIC ---
-                if (data.access === 'public') {
+                if (data.access === 'public') {     
+                    
                     hasAccess = true;
                     role = data.defaultRole || 'viewer';
                 } else { // access === 'private'
