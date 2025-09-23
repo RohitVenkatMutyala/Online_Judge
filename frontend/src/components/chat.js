@@ -23,6 +23,7 @@ function Chat() {
     const { user } = useAuth();
     const { sessionId } = useParams();
 
+    // --- State Variables ---
     const [code, setCode] = useState('');
     const [activeTab, setActiveTab] = useState('input');
     const [output, setOutput] = useState('');
@@ -39,6 +40,7 @@ function Chat() {
     const [verdicts, setVerdicts] = useState([]);
     const [TotalTime, setTime] = useState(null);
     
+    // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
     const peersRef = useRef({});
@@ -157,10 +159,23 @@ function Chat() {
         const isOwner = userRole === 'editor';
         const currentMuteState = muteStatus[targetUserId] ?? true;
         const newMuteState = !currentMuteState;
-        if (isOwner) { await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState }); return; }
-        if (isSelf && !isOwner) {
-            if (newMuteState === false) { toast.error("Only the session owner can unmute you."); return; }
-            await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: true });
+
+        if (isOwner) {
+            await updateDoc(doc(db, 'sessions', sessionId), {
+                [`muteStatus.${targetUserId}`]: newMuteState
+            });
+            return;
+        }
+        
+        if (isSelf) {
+            if (newMuteState === false) { // If trying to unmute
+                toast.error("Only the session owner can unmute you.");
+                return;
+            }
+            // Otherwise, they are muting themselves (which is allowed)
+            await updateDoc(doc(db, 'sessions', sessionId), {
+                [`muteStatus.${targetUserId}`]: true
+            });
         }
     };
 
@@ -170,12 +185,7 @@ function Chat() {
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!user || newMessage.trim() === '') return;
-        await addDoc(collection(db, 'sessions', sessionId, 'messages'), {
-            text: newMessage,
-            senderName: `${user.firstname} ${user.lastname}`,
-            senderId: user._id,
-            timestamp: serverTimestamp()
-        });
+        await addDoc(collection(db, 'sessions', sessionId, 'messages'), { text: newMessage, senderName: `${user.firstname} ${user.lastname}`, senderId: user._id, timestamp: serverTimestamp() });
         setNewMessage('');
     };
     const handleRun = async () => {
@@ -196,53 +206,75 @@ function Chat() {
         <>
             <Navbar />
             <div className="chat-page-container">
-                <div className="collaboration-container">
-                    <div className="row g-4 h-100">
-                        <div className="col-lg-8 d-flex flex-column">
-                            <div className="card shadow-sm rounded-3 mb-4">
-                                <div className="card-header py-3"><div className="d-flex justify-content-between align-items-center"><h5 className="mb-0">Collaborative Code Editor</h5><select className="form-select form-select-sm" style={{width: 'auto'}} value={codeLanguage} onChange={(e) => userRole === 'editor' && updateDoc(doc(db, 'sessions', sessionId), { language: e.target.value })}><option value="python">Python</option><option value="cpp">C++</option><option value="java">Java</option><option value="javascript">JavaScript</option></select></div></div>
-                                <div className="card-body p-0" style={{ height: '50vh' }}><Editor height="100%" language={codeLanguage} theme="vs-dark" value={code} onChange={handleCodeChange} options={{ readOnly: userRole !== 'editor' }} /></div>
-                            </div>
-                            <div className="flex-grow-1 d-flex flex-column">
-                                <ul className="nav nav-tabs"><li className="nav-item"><button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} onClick={() => setActiveTab('input')}>Input</button></li><li className="nav-item"><button className={`nav-link ${activeTab === 'output' ? 'active' : ''}`} onClick={() => setActiveTab('output')}>Output</button></li><li className="nav-item"><button className={`nav-link ${activeTab === 'verdict' ? 'active' : ''}`} onClick={() => setActiveTab('verdict')}>Verdict</button></li></ul>
-                                <div className="tab-content border border-top-0 p-3 rounded-bottom bg-body flex-grow-1">
-                                    {activeTab === 'input' && (<div className="tab-pane fade show active h-100 d-flex flex-column"><textarea className="form-control mb-3 flex-grow-1" placeholder="Enter custom input..." value={input} onChange={handleInputChange} /><button className="btn btn-outline-primary" onClick={handleRun} disabled={isRunning}>{isRunning ? 'Running...' : 'Run Code'}</button></div>)}
-                                    {activeTab === 'output' && (<div className="tab-pane fade show active"><pre>{output || (isRunning ? 'Executing...' : 'Run code to see output.')}</pre></div>)}
-                                    {activeTab === 'verdict' && (<div className="tab-pane fade show active">{!verdicts || verdicts.length === 0 ? <p className="text-muted">No verdict yet.</p> : (<div><div className="mb-2">Total Time: {TotalTime}ms</div><div className="d-flex flex-wrap gap-3">{verdicts.map((v, idx) => <div key={idx} className={`border rounded p-2 text-center ${v.verdict.includes("Passed") ? "text-success" : "text-danger"}`}><strong>Test Case {v.testCase}</strong>: {v.verdict}</div>)}</div></div>)}</div>)}
+                <div className="row g-3 h-100">
+                    <div className="col-lg-8 d-flex flex-column">
+                        <div className="card shadow-sm rounded-3 mb-3">
+                            <div className="card-header py-3">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <h5 className="mb-0 d-flex align-items-center">
+                                        <i className="bi bi-code-slash me-2"></i>
+                                        Collaborative Editor
+                                        {sessionAccess === 'private' && (
+                                            <span className="badge bg-primary-subtle text-primary-emphasis rounded-pill ms-2">
+                                                <i className="bi bi-lock-fill me-1"></i> Private
+                                            </span>
+                                        )}
+                                    </h5>
+                                    <select className="form-select form-select-sm" style={{width: 'auto'}} value={codeLanguage} onChange={(e) => userRole === 'editor' && updateDoc(doc(db, 'sessions', sessionId), { language: e.target.value })}>
+                                        <option value="python">Python</option>
+                                        <option value="cpp">C++</option>
+                                        <option value="java">Java</option>
+                                        <option value="javascript">JavaScript</option>
+                                    </select>
                                 </div>
+                            </div>
+                            <div className="card-body p-0" style={{ height: '50vh' }}>
+                                <Editor height="100%" language={codeLanguage} theme="vs-dark" value={code} onChange={handleCodeChange} options={{ readOnly: userRole !== 'editor', minimap: { enabled: false } }} />
                             </div>
                         </div>
-                        <div className="col-lg-4 d-flex flex-column h-100">
-                            <div className="card shadow-sm mb-4">
-                                <div className="card-header d-flex justify-content-between"><span>Active Users ({activeUsers.length})</span><i className="bi bi-broadcast text-success"></i></div>
-                                <ul className="list-group list-group-flush">
-                                    {activeUsers.map(p => (<li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">{p.name} {p.id === user?._id && "(You)"}{sessionAccess === 'private' && stream && (<button className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`} onClick={() => handleToggleMute(p.id)} disabled={userRole !== 'editor' && p.id !== user?._id}><i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i></button>)}</li>))}
-                                </ul>
-                                <div ref={audioContainerRef} style={{ display: 'none' }}></div>
+                        <div className="flex-grow-1 d-flex flex-column">
+                            <ul className="nav nav-tabs">
+                                <li className="nav-item"><button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} onClick={() => setActiveTab('input')}>Input</button></li>
+                                <li className="nav-item"><button className={`nav-link ${activeTab === 'output' ? 'active' : ''}`} onClick={() => setActiveTab('output')}>Output</button></li>
+                                <li className="nav-item"><button className={`nav-link ${activeTab === 'verdict' ? 'active' : ''}`} onClick={() => setActiveTab('verdict')}>Verdict</button></li>
+                            </ul>
+                            <div className="tab-content border border-top-0 p-3 rounded-bottom bg-body flex-grow-1">
+                                {activeTab === 'input' && (<div className="tab-pane fade show active h-100 d-flex flex-column"><textarea className="form-control mb-3 flex-grow-1" placeholder="Enter custom input..." value={input} onChange={handleInputChange} /><button className="btn btn-primary" onClick={handleRun} disabled={isRunning}>{isRunning ? 'Running...' : 'Run Code'}</button></div>)}
+                                {activeTab === 'output' && (<div className="tab-pane fade show active"><pre>{output || (isRunning ? 'Executing...' : 'Run code to see output.')}</pre></div>)}
+                                {activeTab === 'verdict' && (<div className="tab-pane fade show active">{!verdicts || verdicts.length === 0 ? <p className="text-muted">No verdict yet.</p> : (<div><div className="mb-2">Total Time: {TotalTime}ms</div><div className="d-flex flex-wrap gap-3">{verdicts.map((v, idx) => <div key={idx} className={`border rounded p-2 text-center ${v.verdict.includes("Passed") ? "text-success" : "text-danger"}`}><strong>Test Case {v.testCase}</strong>: {v.verdict}</div>)}</div></div>)}</div>)}
                             </div>
-                            {userRole === 'editor' && <div className="mb-4"><SharingComponent sessionId={sessionId} /></div>}
-                            <div className="card shadow-sm flex-grow-1 chat-card">
-                                <div className="card-header">Live Chat</div>
-                                <div className="card-body d-flex flex-column">
-                                    <div className="chat-messages-container">
-                                        {messages.map(msg => (
-                                            <div key={msg.id} className={`chat-message ${msg.senderId === user?._id ? 'own-message' : 'other-message'}`}>
-                                                <div className="message-header">
-                                                    <span className="message-sender">{msg.senderName}</span>
-                                                    <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
-                                                </div>
-                                                <div className="message-bubble">{msg.text}</div>
+                        </div>
+                    </div>
+                    <div className="col-lg-4 d-flex flex-column h-100">
+                        <div className="card shadow-sm mb-3">
+                            <div className="card-header d-flex justify-content-between"><span>Active Users ({activeUsers.length})</span><i className="bi bi-broadcast text-success"></i></div>
+                            <ul className="list-group list-group-flush">
+                                {activeUsers.map(p => (<li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">{p.name} {p.id === user?._id && "(You)"}{sessionAccess === 'private' && stream && (<button className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`} onClick={() => handleToggleMute(p.id)} disabled={userRole !== 'editor' && p.id !== user?._id}><i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i></button>)}</li>))}
+                            </ul>
+                            <div ref={audioContainerRef} style={{ display: 'none' }}></div>
+                        </div>
+                        {userRole === 'editor' && <div className="mb-3"><SharingComponent sessionId={sessionId} /></div>}
+                        <div className="card shadow-sm flex-grow-1 chat-card">
+                            <div className="card-header">Live Chat</div>
+                            <div className="card-body d-flex flex-column">
+                                <div className="chat-messages-container">
+                                    {messages.map(msg => (
+                                        <div key={msg.id} className={`chat-message ${msg.senderId === user?._id ? 'own-message' : 'other-message'}`}>
+                                            <div className="message-header">
+                                                <span className="message-sender">{msg.senderName}</span>
+                                                <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
                                             </div>
-                                        ))}
-                                        <div ref={chatMessagesEndRef} />
-                                    </div>
-                                    <form onSubmit={handleSendMessage} className="chat-input-group">
-                                        <div className="d-flex">
-                                            <input type="text" className="form-control chat-input" placeholder="Type your message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
-                                            <button className="send-button flex-shrink-0" type="submit" disabled={!newMessage.trim()}><i className="bi bi-send-fill"></i></button>
+                                            <div className="message-bubble">{msg.text}</div>
                                         </div>
-                                    </form>
+                                    ))}
+                                    <div ref={chatMessagesEndRef} />
                                 </div>
+                                <form onSubmit={handleSendMessage} className="chat-input-group">
+                                    <div className="d-flex align-items-center">
+                                        <input type="text" className="form-control chat-input" placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
+                                        <button className="send-button flex-shrink-0" type="submit" disabled={!newMessage.trim()}><i className="bi bi-send-fill"></i></button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
