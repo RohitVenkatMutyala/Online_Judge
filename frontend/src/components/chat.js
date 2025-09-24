@@ -44,12 +44,8 @@ function Chat() {
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
     const peersRef = useRef({});
+    const audioContainerRef = useRef(null);
     const chatMessagesEndRef = useRef(null);
-
-    // NEW FEATURE: Video Chat State
-    const [videoStatus, setVideoStatus] = useState({});
-    const localVideoRef = useRef(null);
-    const peersVideoContainerRef = useRef(null);
 
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,7 +53,10 @@ function Chat() {
 
     // Main useEffect to handle session data and user presence
     useEffect(() => {
+        console.log("Debug 1: Hook started. Session ID:", sessionId, "User:", user);
+
         if (!sessionId) {
+            console.error("Debug Fail: No Session ID found.");
             setAccessDenied(true);
             setLoading(false);
             return;
@@ -66,27 +65,37 @@ function Chat() {
         const sessionDocRef = doc(db, 'sessions', sessionId);
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
+            console.log("Debug 2: onSnapshot listener fired.");
+
             if (!docSnap.exists()) {
+                console.error("Debug Fail: Session document does not exist.");
                 setAccessDenied(true);
                 setLoading(false);
                 return;
             }
 
             const data = docSnap.data();
+            console.log("Debug 3: Session data loaded. Access type:", data.access);
 
             if (data.access === 'private' && !user) {
+                console.warn("Debug Wait: Private session, waiting for user object to load...");
                 return; // Wait for user to load
             }
 
             const isOwner = user && data.ownerId === user._id;
             const hasAccess = data.access === 'public' || (user && data.allowedEmails?.includes(user.email)) || isOwner;
             
+            console.log("Debug 4: Checking access. Has Access:", hasAccess);
+
             if (!hasAccess) {
+                console.error("Debug Fail: Access Denied.");
                 setAccessDenied(true);
                 setLoading(false);
                 return;
             }
             
+            console.log("Debug 5: Access granted. Updating state.");
+
             if (user) {
                 const participantExists = data.activeParticipants?.some(p => p.id === user._id);
                 if (!participantExists) {
@@ -104,25 +113,18 @@ function Chat() {
             setActiveUsers(data.activeParticipants || []);
             setCodeLanguage(data.language || 'javascript');
             setMuteStatus(data.muteStatus || {});
-            setVideoStatus(data.videoStatus || {}); // NEW FEATURE: Sync video status from Firestore
             setVerdicts(data.lastRunVerdicts || []);
             setOutput(data.lastRunOutput || '');
             setTime(data.lastRunTime || null);
 
             if (data.access === 'private' && !stream) {
-                // NEW FEATURE: Request video and audio, then attach stream to local video element
-                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                    .then(stream => {
-                        setStream(stream);
-                        if (localVideoRef.current) {
-                            localVideoRef.current.srcObject = stream;
-                        }
-                    }).catch(err => toast.error("Could not access microphone & camera."));
+                navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(setStream).catch(err => toast.error("Could not access microphone."));
             }
 
+            console.log("Debug 6: State updated. Turning off loading screen.");
             setLoading(false);
         }, (error) => {
-            console.error("Error in onSnapshot listener:", error);
+            console.error("Debug Fail: Error in onSnapshot listener:", error);
             setAccessDenied(true);
             setLoading(false);
         });
@@ -152,48 +154,34 @@ function Chat() {
         const createPeer = (recipientId, senderId, stream) => {
             const peer = new Peer({ initiator: true, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId, senderId, signal }));
-            // NEW FEATURE: Create a <video> element for the remote stream
             peer.on('stream', remoteStream => {
-                if (peersVideoContainerRef.current) {
-                    let video = document.getElementById(`video-${recipientId}`);
-                    if (!video) {
-                        video = document.createElement('video');
-                        video.id = `video-${recipientId}`;
-                        video.autoplay = true;
-                        video.playsInline = true;
-                        peersVideoContainerRef.current.appendChild(video);
+                if (audioContainerRef.current) {
+                    let audio = document.getElementById(`audio-${recipientId}`);
+                    if (!audio) {
+                        audio = document.createElement('audio'); audio.id = `audio-${recipientId}`;
+                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
                     }
-                    video.srcObject = remoteStream;
+                    audio.srcObject = remoteStream;
                 }
             });
-            peer.on('close', () => { 
-                const videoElem = document.getElementById(`video-${recipientId}`); 
-                if (videoElem) videoElem.remove(); 
-            });
+            peer.on('close', () => { const audioElem = document.getElementById(`audio-${recipientId}`); if (audioElem) audioElem.remove(); });
             return peer;
         };
 
         const addPeer = (incoming, recipientId, stream) => {
             const peer = new Peer({ initiator: false, trickle: false, stream });
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId: incoming.senderId, senderId: recipientId, signal }));
-            // NEW FEATURE: Create a <video> element for the remote stream
             peer.on('stream', remoteStream => {
-                if (peersVideoContainerRef.current) {
-                    let video = document.getElementById(`video-${incoming.senderId}`);
-                    if (!video) {
-                        video = document.createElement('video');
-                        video.id = `video-${incoming.senderId}`;
-                        video.autoplay = true;
-                        video.playsInline = true;
-                        peersVideoContainerRef.current.appendChild(video);
+                if (audioContainerRef.current) {
+                    let audio = document.getElementById(`audio-${incoming.senderId}`);
+                    if (!audio) {
+                        audio = document.createElement('audio'); audio.id = `audio-${incoming.senderId}`;
+                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
                     }
-                    video.srcObject = remoteStream;
+                     audio.srcObject = remoteStream;
                 }
             });
-            peer.on('close', () => { 
-                const videoElem = document.getElementById(`video-${incoming.senderId}`); 
-                if (videoElem) videoElem.remove(); 
-            });
+            peer.on('close', () => { const audioElem = document.getElementById(`audio-${incoming.senderId}`); if (audioElem) audioElem.remove(); });
             peer.signal(incoming.signal);
             return peer;
         };
@@ -222,15 +210,11 @@ function Chat() {
         const isMuted = muteStatus[user._id] ?? true;
         const audioTrack = stream.getAudioTracks()[0];
         audioTrack.enabled = !isMuted;
+        Object.values(peersRef.current).forEach(peer => {
+            const sender = peer._pc.getSenders().find(s => s.track?.kind === 'audio');
+            if (sender) { sender.replaceTrack(audioTrack); }
+        });
     }, [muteStatus, stream, user]);
-
-    // NEW FEATURE: useEffect for applying video status to local camera
-    useEffect(() => {
-        if (!stream || !user || stream.getVideoTracks().length === 0) { return; }
-        const isVideoOff = videoStatus[user._id] ?? true; // Default to off
-        const videoTrack = stream.getVideoTracks()[0];
-        videoTrack.enabled = !isVideoOff;
-    }, [videoStatus, stream, user]);
     
     // --- Handler Functions ---
 
@@ -249,26 +233,6 @@ function Chat() {
                 return;
             }
             await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: true });
-        }
-    };
-
-    // NEW FEATURE: Handler to toggle video with specific permissions
-    const handleToggleVideo = async (targetUserId) => {
-        const isSelf = targetUserId === user._id;
-        const isOwner = userRole === 'editor';
-        const currentVideoState = videoStatus[targetUserId] ?? true; // Default is off
-
-        if (isSelf) {
-            // A user can always toggle their own video
-            const newVideoState = !currentVideoState;
-            await updateDoc(doc(db, 'sessions', sessionId), { [`videoStatus.${targetUserId}`]: newVideoState });
-        } else if (isOwner) {
-            // The owner can only turn a participant's video OFF
-            if (currentVideoState === false) { // only act if video is currently ON
-                await updateDoc(doc(db, 'sessions', sessionId), { [`videoStatus.${targetUserId}`]: true });
-            } else {
-                toast.info("You can only turn off a participant's video.");
-            }
         }
     };
 
@@ -307,7 +271,6 @@ function Chat() {
     }
     
     if (accessDenied) { return <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b></div></div>; }
-    
     return (
         <>
             <Navbar />
@@ -317,7 +280,7 @@ function Chat() {
                     {/* Left Column: Editor and I/O */}
                     <div className="col-lg-8 d-flex flex-column">
                         <div className="card shadow-sm rounded-3 mb-3">
-                            <div className="card-header p-2">
+                            <div className="card-header p-2"> {/* UI FIX: Reduced header padding */}
                                 <div className="d-flex justify-content-between align-items-center">
                                     <h5 className="mb-0 d-flex align-items-center fs-6">
                                         <i className="bi bi-code-slash me-2"></i>
@@ -369,7 +332,7 @@ function Chat() {
                                             onChange={handleInputChange}
                                         />
                                         <button
-                                            className="btn btn-primary btn-sm align-self-start"
+                                            className="btn btn-primary btn-sm align-self-start" // UI FIX: Smaller button
                                             onClick={handleRun}
                                             disabled={isRunning}
                                         >
@@ -385,19 +348,6 @@ function Chat() {
 
                     {/* Right Column: Users, Share, Chat */}
                     <div className="col-lg-4 d-flex flex-column h-100">
-                        {/* NEW FEATURE: Video Grid Display */}
-                        {sessionAccess === 'private' && stream && (
-                            <div className="video-grid mb-3">
-                                <div className="video-container">
-                                    <video ref={localVideoRef} muted autoPlay playsInline className="local-video"></video>
-                                    <div className="video-label">You</div>
-                                </div>
-                                <div ref={peersVideoContainerRef} className="remote-videos-container">
-                                    {/* Remote videos are added here dynamically */}
-                                </div>
-                            </div>
-                        )}
-
                         <div className="card shadow-sm mb-3">
                             <div className="card-header d-flex justify-content-between">
                                 <span>Active Users ({activeUsers.length})</span>
@@ -406,36 +356,22 @@ function Chat() {
                             <ul className="list-group list-group-flush">
                                 {activeUsers.map(p => (
                                     <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span className="fw-bold">{p.name}</span>
-                                            {p.id === user?._id && <span className="ms-2 text-muted">(You)</span>}
-                                        </div>
+                                        <span className="fw-bold">{p.name}</span> {/* UI FIX: Bolder font */}
+                                        {p.id === user?._id && <span className="ms-2">(You)</span>}
                                         {sessionAccess === 'private' && stream && (
-                                            <div className="d-flex align-items-center">
-                                                {/* NEW FEATURE: Video Button */}
-                                                <button
-                                                    className={`btn btn-sm ${videoStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
-                                                    onClick={() => handleToggleVideo(p.id)}
-                                                    disabled={userRole !== 'editor' && p.id !== user?._id}
-                                                    style={{ fontSize: '1.2rem' }}
-                                                >
-                                                    <i className={`bi ${videoStatus[p.id] ?? true ? 'bi-camera-video-off-fill' : 'bi-camera-video-fill'}`}></i>
-                                                </button>
-                                                
-                                                {/* Existing Mic Button */}
-                                                <button
-                                                    className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
-                                                    onClick={() => handleToggleMute(p.id)}
-                                                    disabled={userRole !== 'editor' && p.id !== user?._id}
-                                                    style={{ fontSize: '1.2rem' }}
-                                                >
-                                                    <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
-                                                </button>
-                                            </div>
+                                            <button
+                                                className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
+                                                onClick={() => handleToggleMute(p.id)}
+                                                disabled={userRole !== 'editor' && p.id !== user?._id}
+                                                style={{ fontSize: '1.2rem' }} // UI FIX: Larger mic icon
+                                            >
+                                                <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
+                                            </button>
                                         )}
                                     </li>
                                 ))}
                             </ul>
+                            <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                         </div>
 
                         {userRole === 'editor' && <div className="mb-3"><SharingComponent sessionId={sessionId} /></div>}
