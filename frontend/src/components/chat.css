@@ -1,35 +1,96 @@
-/* Overall page background and layout */
+/* --- 1. General Page & Layout Styles --- */
+
+:root {
+  --dark-bg-primary: #12121c; /* Main page background */
+  --dark-bg-secondary: #1e1e2f; /* Card and container background */
+  --border-color: #3a3a5a; /* Borders and dividers */
+  --text-primary: #e0e0e0; /* Main text color */
+  --text-secondary: #a9a9b3; /* Muted text for timestamps/subtitles */
+  --accent-blue: #4a69bd; /* Accent for user's own message bubble */
+  --accent-orange: #ff4b2b; /* Accent for buttons/highlights */
+}
+
 .chat-page-container {
-  background-color: #f8f9fa; /* Light grey background */
+  background-color: var(--dark-bg-primary);
+  color: var(--text-primary);
   min-height: calc(100vh - 56px); /* Full height minus navbar */
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding: 1.5rem 0;
+}
+
+/* --- 2. Card Component Overrides --- */
+
+.card {
+  background-color: var(--dark-bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px; /* Slightly more rounded corners */
+}
+
+.card-header, .card-footer {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.card-footer {
+  border-top: 1px solid var(--border-color);
+  border-bottom: none;
+}
+
+.list-group-item {
+  background-color: transparent;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+/* --- 3. Chat-Specific Styles --- */
+
+.chat-card .card-body {
+  padding: 0.5rem 1rem;
 }
 
 .chat-messages-container {
-  flex-grow: 1; /* Allows the container to fill the available space */
-  overflow-y: auto; /* Adds a scrollbar only when messages overflow */
-  max-height: 300px; /* Sets a maximum height for the chat window */
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 40vh; /* Adjusted for better responsiveness */
   display: flex;
   flex-direction: column;
+  padding: 0.5rem 0;
 }
+
 .chat-message {
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
 }
 
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+
 .message-sender {
-  font-size: 0.75rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.message-timestamp {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
 }
 
 .message-bubble {
-  padding: 0.5rem 1rem;
-  border-radius: 1.25rem;
-  max-width: 80%;
+  padding: 0.6rem 1.1rem;
+  border-radius: 18px;
+  max-width: 85%;
   word-wrap: break-word;
+  line-height: 1.4;
 }
 
 /* Style for messages sent by the current user */
@@ -38,9 +99,13 @@
 }
 
 .own-message .message-bubble {
-  background-color: #0d6efd; /* Bootstrap primary blue */
-  color: white;
-  border-top-right-radius: 0.25rem;
+  background-color: var(--accent-blue);
+  color: #ffffff;
+  border-top-right-radius: 4px;
+}
+
+.own-message .message-header {
+    justify-content: flex-end;
 }
 
 /* Style for messages received from others */
@@ -49,35 +114,56 @@
 }
 
 .other-message .message-bubble {
-  background-color: #e9ecef; /* Bootstrap light grey */
-  color: #212529;
-  border-top-left-radius: 0.25rem;
+  background-color: #313147; /* A slightly lighter dark shade */
+  color: var(--text-primary);
+  border-top-left-radius: 4px;
 }
-/* In src/components/Chat.css */
 
-/* ... (keep all your existing styles) ... */
+/* --- 4. Form & Input Styles --- */
 
-/* --- ADD THESE NEW STYLES --- */
-.message-header {
+.chat-input-group {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.chat-input {
+  background-color: #313147;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+}
+
+.chat-input:focus {
+  background-color: #313147;
+  color: var(--text-primary);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 0.2rem rgba(74, 105, 189, 0.25);
+}
+
+.chat-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.send-button {
+  background: var(--accent-blue);
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Adds space between name and time */
-  margin-bottom: 0.25rem;
+  justify-content: center;
+  margin-left: 0.5rem;
+  transition: background-color 0.2s ease;
 }
 
-.message-sender {
-  font-size: 0.8rem;
-  font-weight: 600; /* Make the name slightly bolder */
-  color: #495057;
+.send-button:hover {
+  background-color: #5a7ccb;
 }
 
-.message-timestamp {
-  font-size: 0.7rem; /* Make the timestamp smaller */
-  color: #adb5bd;   /* Make it a light grey color */
-}
-
-/* A small adjustment to the main sender class is needed
-   if it was defined before. If not, this is fine. */
-.message-sender {
-  margin-bottom: 0; /* Remove bottom margin if it existed */
+.send-button:disabled {
+  background-color: #313147;
+  cursor: not-allowed;
 }
