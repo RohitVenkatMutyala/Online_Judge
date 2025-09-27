@@ -22,6 +22,7 @@ import Theory from './components/theory';
 import Tview from './components/tview';
 import Chat from './components/chat';
 import CreateSession from './components/CreateSession';
+import PublicProfile from './components/PublicProfile'; 
 function App() {
   return (
     <ThemeProvider>
