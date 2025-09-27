@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
 import { db } from '../firebaseConfig';
-import { doc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import ReactCalendarHeatmap from 'react-calendar-heatmap';
@@ -46,18 +46,17 @@ function PublicProfile() {
             setIsLoading(true);
             setError(null);
             try {
-                // Fetch user info from Firestore
-                const userDocRef = doc(db, 'users', userId);
-                const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        setUser(docSnap.data());
-                    } else {
-                        setError("User not found.");
-                        setUser(null);
-                    }
-                });
+                // Step 1: Fetch user info from MongoDB backend
+                const userRes = await axios.get(`${API_URL}/user/${userId}`);
+                if (!userRes.data.success) {
+                    setError(userRes.data.message || "User not found.");
+                    setIsLoading(false);
+                    return;
+                }
+                const userData = userRes.data.user;
+                setUser(userData);
 
-                // Fetch problems stats
+                // Step 2: Fetch problems stats
                 const problemsRes = await axios.get(`${API_URL}/problems/user/${userId}`);
                 if (problemsRes.data.success) {
                     const problems = problemsRes.data.problems;
@@ -103,7 +102,7 @@ function PublicProfile() {
                     });
                 }
 
-                // Fetch submissions for heatmap
+                // Step 3: Fetch submissions for heatmap from Firebase
                 const submissionsQuery = query(collection(db, "submissions"), where("id", "==", userId));
                 const querySnapshot = await getDocs(submissionsQuery);
                 const submissionCounts = {};
@@ -116,8 +115,6 @@ function PublicProfile() {
                 });
                 const formattedHeatmapData = Object.entries(submissionCounts).map(([date, count]) => ({ date, count }));
                 setHeatmapData(formattedHeatmapData);
-                
-                return () => unsubscribe(); // Cleanup snapshot listener
 
             } catch (err) {
                 console.error("Error fetching public profile data:", err);
