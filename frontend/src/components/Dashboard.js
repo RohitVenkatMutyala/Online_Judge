@@ -11,7 +11,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import ActivityCalendar from 'react-activity-calendar';
-import 'react-activity-calendar/dist/style.css'; // Import calendar styles
+import 'react-activity-calendar/style.css'; // This is the correct line// Import calendar styles
 
 function Dashboard() {
     const { user } = useAuth();
