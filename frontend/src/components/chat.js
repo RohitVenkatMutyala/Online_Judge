@@ -332,12 +332,24 @@ function Chat() {
                                             value={input}
                                             onChange={handleInputChange}
                                         />
+                                        {/* Find the "Run Code" button */}
                                         <button
-                                            className="btn btn-primary btn-sm align-self-start" // UI FIX: Smaller button
+                                            className="btn btn-run-gradient btn-sm align-self-start" // <-- Added flex classes
                                             onClick={handleRun}
                                             disabled={isRunning}
+                                            style={{ width: '80px', justifyContent: 'center' }} // <-- Optional: fixed width for consistency
                                         >
-                                            {isRunning ? 'Running...' : 'Run Code'}
+                                            {isRunning ? (
+                                                <>
+                                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                    Running
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <i className="bi bi-play-fill fs-6 me-1"></i>
+                                                    Run
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 )}
