@@ -23,6 +23,8 @@ import Tview from './components/tview';
 import Chat from './components/chat';
 import CreateSession from './components/CreateSession';
 import PublicProfile from './components/PublicProfile'; 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
     <ThemeProvider>
@@ -261,6 +263,18 @@ function App() {
                 </>
               }
             />          </Routes>
+             <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
         </Router>
       </AuthProvider>
     </ThemeProvider>
