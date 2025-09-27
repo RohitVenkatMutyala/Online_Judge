@@ -83,7 +83,7 @@ function App() {
                 </>
               }
             />
-             <Route
+            <Route
               path="/funda"
               element={
                 <>
@@ -119,6 +119,7 @@ function App() {
                 </>
               }
             />
+            <Route path="/profile/:userId" element={<><Helmet><title>User Profile - Randoman</title></Helmet><PublicProfile /></>} />
             <Route
               path="/adminlogin"
               element={
@@ -146,11 +147,11 @@ function App() {
                 </>
               }
             />
-             {/* Add this new route */}
-      <Route path="/new-chat" element={<CreateSession />} />
+            {/* Add this new route */}
+            <Route path="/new-chat" element={<CreateSession />} />
 
-      {/* This is your existing route for joining a session */}
-      <Route path="/chat/:sessionId" element={<Chat />} />
+            {/* This is your existing route for joining a session */}
+            <Route path="/chat/:sessionId" element={<Chat />} />
             <Route
               path="/problem/:QID"
               element={
@@ -205,7 +206,7 @@ function App() {
                 </>
               }
             />
-               <Route
+            <Route
               path="/userproblem/:QID"
               element={
                 <>
@@ -214,12 +215,12 @@ function App() {
                 </>
               }
             />
-              <Route
+            <Route
               path="/usertheory/:QID"
               element={
                 <>
                   <Helmet><title>Fundamentals - Randoman</title></Helmet>
-                  <Tview/>
+                  <Tview />
                 </>
               }
             />
