@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from './navbar';
+import Dnav from './dnav';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Home() {
@@ -27,7 +28,7 @@ function Home() {
   }
   return (
     <>
-      <Navbar />
+      <Dnav />
 
       {/* Hero Section */}
       <div className="container-fluid py-5" style={{ backgroundColor: '#1a1a1a', minHeight: '100vh' }}>
