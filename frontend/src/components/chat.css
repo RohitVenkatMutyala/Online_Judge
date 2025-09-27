@@ -1,19 +1,22 @@
 /* --- 1. General Page & Layout Styles --- */
 
 :root {
-  --dark-bg-primary: #12121c; /* Main page background */
+  --dark-bg-primary: #12121c;   /* Main page background */
   --dark-bg-secondary: #1e1e2f; /* Card and container background */
-  --border-color: #3a3a5a; /* Borders and dividers */
-  --text-primary: #e0e0e0; /* Main text color */
-  --text-secondary: #a9a9b3; /* Muted text for timestamps/subtitles */
-  --accent-blue: #4a69bd; /* Accent for user's own message bubble */
-  --accent-orange: #ff4b2b; /* Accent for buttons/highlights */
+  --border-color: #3a3a5a;      /* Borders and dividers */
+  --text-primary: #e0e0e0;      /* Main text color */
+  --text-secondary: #a9a9b3;    /* Muted text for timestamps/subtitles */
+  --accent-blue: #4a69bd;       /* Accent for user's own message bubble & active elements */
+}
+
+body {
+  background-color: var(--dark-bg-primary); /* Ensure body background is dark */
 }
 
 .chat-page-container {
   background-color: var(--dark-bg-primary);
   color: var(--text-primary);
-  min-height: calc(100vh - 56px); /* Full height minus navbar */
+  min-height: calc(100vh - 56px);
   padding: 1.5rem 0;
 }
 
@@ -22,13 +25,13 @@
 .card {
   background-color: var(--dark-bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 8px; /* Slightly more rounded corners */
 }
 
 .card-header, .card-footer {
   background-color: rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid var(--border-color);
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .card-footer {
@@ -46,7 +49,46 @@
   border-bottom: none;
 }
 
-/* --- 3. Chat-Specific Styles --- */
+/* --- 3. I/O Tabs and Content Area (NEW) --- */
+
+.nav-tabs {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: transparent;
+  color: var(--text-primary);
+}
+
+.nav-tabs .nav-link.active {
+  background-color: var(--dark-bg-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-color: var(--border-color);
+  border-bottom-color: var(--dark-bg-secondary); 
+}
+
+.tab-content {
+  background-color: var(--dark-bg-secondary);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  padding: 1rem;
+  color: var(--text-primary);
+}
+
+.tab-content pre {
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* --- 4. Chat-Specific Styles --- */
 
 .chat-card .card-body {
   padding: 0.5rem 1rem;
@@ -55,7 +97,7 @@
 .chat-messages-container {
   flex-grow: 1;
   overflow-y: auto;
-  max-height: 40vh; /* Adjusted for better responsiveness */
+  max-height: 40vh;
   display: flex;
   flex-direction: column;
   padding: 0.5rem 0;
@@ -93,56 +135,49 @@
   line-height: 1.4;
 }
 
-/* Style for messages sent by the current user */
 .own-message {
   align-items: flex-end;
 }
-
 .own-message .message-bubble {
   background-color: var(--accent-blue);
   color: #ffffff;
   border-top-right-radius: 4px;
 }
-
 .own-message .message-header {
     justify-content: flex-end;
 }
 
-/* Style for messages received from others */
 .other-message {
   align-items: flex-start;
 }
-
 .other-message .message-bubble {
-  background-color: #313147; /* A slightly lighter dark shade */
+  background-color: #313147;
   color: var(--text-primary);
   border-top-left-radius: 4px;
 }
 
-/* --- 4. Form & Input Styles --- */
+/* --- 5. Form & Input Styles (Updated) --- */
 
-.chat-input-group {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
+/* General style for all textareas/inputs */
+.form-control {
+  background-color: var(--dark-bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
 }
 
+.form-control:focus {
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 0 0.2rem rgba(74, 105, 189, 0.25) !important;
+}
+
+.form-control::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+/* Specific style for chat input field */
 .chat-input {
-  background-color: #313147;
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
   border-radius: 20px;
   padding: 0.5rem 1rem;
-}
-
-.chat-input:focus {
-  background-color: #313147;
-  color: var(--text-primary);
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 0.2rem rgba(74, 105, 189, 0.25);
-}
-
-.chat-input::placeholder {
-  color: var(--text-secondary);
 }
 
 .send-button {
