@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
-import { Tooltip as BootstrapTooltip } from 'bootstrap'; // Aliased to avoid naming conflicts
+import { Tooltip as BootstrapTooltip } from 'bootstrap';
 import { db, storage } from '../firebaseConfig';
 import { doc, onSnapshot, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -12,14 +12,8 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import ReactCalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
-import { Tooltip as ReactTooltip } from 'react-tooltip'; // Correct named import with alias
-import 'react-tooltip/dist/react-tooltip.css'; // Add required CSS for the tooltip
-
-// To make the shareable link work, you'll need to add a new route 
-// in your main router file (e.g., App.js). It will look something like this:
-// import PublicProfile from './components/PublicProfile';
-// <Route path="/profile/:userId" element={<PublicProfile />} />
-// You will need to create the PublicProfile component to display the shared data.
+import { Tooltip as ReactTooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 function Dashboard() {
     const { user } = useAuth();
@@ -193,16 +187,35 @@ function Dashboard() {
             setIsUploading(false);
         }
     };
+    
+    const handleShare = async () => {
+        if (!user?._id || !profileImage) {
+            toast.error("User data is not available yet. Please wait a moment.");
+            return;
+        }
+        
+        try {
+            // Save public data to a new collection in Firebase
+            const publicProfileRef = doc(db, 'publicProfiles', user._id);
+            await setDoc(publicProfileRef, {
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                profileImageURL: profileImage 
+            });
 
-    const handleShare = () => {
-        if (!user?._id) return;
-        const shareUrl = `${window.location.origin}/profile/${user._id}`;
-        navigator.clipboard.writeText(shareUrl).then(() => {
-            toast.success("Public profile URL copied to clipboard!");
-        }).catch(err => {
-            console.error('Failed to copy URL: ', err);
-            toast.error("Failed to copy URL.");
-        });
+            const shareUrl = `${window.location.origin}/profile/${user._id}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                toast.success("Public profile URL copied to clipboard!");
+            }).catch(err => {
+                console.error('Failed to copy URL: ', err);
+                toast.error("Failed to copy URL.");
+            });
+
+        } catch (error) {
+            console.error("Error creating public profile:", error);
+            toast.error("Could not create shareable link. Please try again.");
+        }
     };
     
     if (!user || user.role === 'admin') {
@@ -295,20 +308,12 @@ function Dashboard() {
                                                         startDate={startDate}
                                                         endDate={today}
                                                         values={heatmapData}
-                                                        classForValue={(value) => {
-                                                            if (!value) return 'color-empty';
-                                                            return `color-github-${Math.min(4, value.count)}`;
-                                                        }}
+                                                        classForValue={(value) => `color-github-${!value ? 0 : Math.min(4, value.count)}`}
                                                         tooltipDataAttrs={value => {
-                                                            if (!value || !value.date) {
-                                                                return { 'data-tooltip-id': null };
-                                                            }
+                                                            if (!value || !value.date) return { 'data-tooltip-id': null };
                                                             const dateStr = new Date(value.date).toDateString();
                                                             const countStr = `${value.count || 0} submissions`;
-                                                            return { 
-                                                                'data-tooltip-id': 'heatmap-tooltip',
-                                                                'data-tooltip-content': `${dateStr}: ${countStr}` 
-                                                            };
+                                                            return { 'data-tooltip-id': 'heatmap-tooltip', 'data-tooltip-content': `${dateStr}: ${countStr}` };
                                                         }}
                                                     />
                                                     <ReactTooltip id="heatmap-tooltip" />
@@ -334,39 +339,27 @@ function Dashboard() {
                     </div>
                 </div>
             </div>
-
             <style>{`
+                /* Paste the same styles from your previous Dashboard.js here */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
-
                 .dashboard-container { min-height: 85vh; }
-
                 .theme-dark .dashboard-container, .theme-dark .content-column { background-color: #1e1e2f; border: 1px solid #3a3a5a; color: #fff; }
                 .theme-light .dashboard-container, .theme-light .content-column { background-color: #ffffff; border: 1px solid #dee2e6; color: #212529; }
-                
                 .profile-column { background: linear-gradient(160deg, #343a40, #1e1e2f); }
-                
-                .profile-image-container { 
-                    width: 180px; 
-                    height: 180px; 
-                    cursor: pointer; 
-                    border: 4px solid rgba(255,255,255,0.2); 
-                }
+                .profile-image-container { width: 180px; height: 180px; cursor: pointer; border: 4px solid rgba(255,255,255,0.2); }
                 .profile-image-container img { object-fit: cover; }
                 .profile-upload-label:hover .profile-overlay { background: rgba(0,0,0,0.5); }
                 .profile-upload-label:hover .profile-overlay i { opacity: 1 !important; color: white; }
                 .profile-overlay { transition: all 0.3s ease; border-radius: 50%; }
                 .profile-overlay i { opacity: 0; transition: all 0.3s ease; }
                 .user-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); color: white; }
-                
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
                 .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-                
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
-
                 .nav-card { cursor: pointer; transition: all 0.2s ease-in-out; border-radius: 0.5rem; }
                 .theme-dark .nav-card { background-color: rgba(255,255,255,0.05); }
                 .theme-light .nav-card { background-color: #f8f9fa; }
@@ -379,20 +372,14 @@ function Dashboard() {
                 .theme-dark .nav-arrow { color: #6c757d; }
                 .theme-light .nav-arrow { color: #adb5bd; }
                 .nav-card:hover .nav-arrow { transform: translateX(5px); }
-
-                /* Heatmap Styles */
                 .theme-dark .heatmap-container { background-color: transparent; border: 1px solid #3a3a5a !important; }
                 .theme-light .heatmap-container { background-color: #f8f9fa; border: 1px solid #dee2e6 !important; }
-                
                 .react-calendar-heatmap text { font-size: 10px; fill: #aaa; }
-                .theme-dark .react-calendar-heatmap .color-empty { fill: #161b22; }
-                .theme-light .react-calendar-heatmap .color-empty { fill: #ebedf0; }
-
+                .react-calendar-heatmap .color-empty, .react-calendar-heatmap .color-github-0 { fill: ${theme === 'dark' ? '#161b22' : '#ebedf0'}; }
                 .react-calendar-heatmap .color-github-1 { fill: #0e4429; }
                 .react-calendar-heatmap .color-github-2 { fill: #006d32; }
                 .react-calendar-heatmap .color-github-3 { fill: #26a641; }
                 .react-calendar-heatmap .color-github-4 { fill: #39d353; }
-                
                 @media (max-width: 991.98px) {
                     .profile-column { border-radius: 1rem 1rem 0 0; }
                     .content-column { border-radius: 0 0 1rem 1rem; }
