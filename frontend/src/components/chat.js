@@ -219,37 +219,22 @@ function Chat() {
 
     // --- Handler Functions ---
     const handleToggleMute = async (targetUserId) => {
-        const isOwner = userRole === 'editor';
         const isSelf = targetUserId === user._id;
-
-        // First, block the action if a participant targets another user
-        if (!isOwner && !isSelf) {
-            toast.error("You can only mute yourself.");
-            return;
-        }
-
+        const isOwner = userRole === 'editor';
         const currentMuteState = muteStatus[targetUserId] ?? true;
-        const newMuteState = !currentMuteState; // The state we intend to set
-
-        // Rule 1: The owner can freely mute or unmute anyone.
+        const newMuteState = !currentMuteState;
         if (isOwner) {
             await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
             return;
         }
-
-        // Rule 2: A participant can ONLY mute themselves. They cannot unmute.
         if (isSelf) {
-            // If their intended action is to UNMUTE (newMuteState becomes false), block it.
             if (newMuteState === false) {
                 toast.error("Only the session owner can unmute you.");
                 return;
             }
-
-            // Otherwise, their action is to MUTE. We use the correct state variable.
-            await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
+            await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: true });
         }
     };
-
     const handleCodeChange = (newCode) => { if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { code: newCode }); };
     const handleInputChange = (e) => { const newInput = e.target.value; setInput(newInput); if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput }); };
     const formatTimestamp = (timestamp) => !timestamp ? '' : timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -597,13 +582,8 @@ body {
                                             <button
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
-
-                                                // CORRECTED LOGIC:
-                                                // The button is disabled if you are NOT the owner AND...
-                                                // ...it's for another user OR it's for you but you are ALREADY muted.
-                                                disabled={userRole !== 'editor' && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
-
-                                                style={{ fontSize: '1.2rem' }}
+                                                disabled={userRole !== 'editor' && p.id !== user?._id}
+                                                style={{ fontSize: '1.2rem' }} // UI FIX: Larger mic icon
                                             >
                                                 <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
                                             </button>
@@ -621,7 +601,7 @@ body {
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
 
-                                                // CORRECTED LOGIC is applied here as well
+                                                // CORRECT LOGIC is applied here as well
                                                 disabled={userRole !== 'editor' && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
 
                                                 style={{ fontSize: '1.2rem' }}
