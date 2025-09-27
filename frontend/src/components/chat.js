@@ -276,7 +276,7 @@ function Chat() {
         <>
             <Navbar />
             <div className="chat-page-container">
-                  <style jsx>{`
+                <style jsx>{`
                   /* --- 1. General Page & Layout Styles --- */
 
 :root {
@@ -584,7 +584,13 @@ body {
                                             <button
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
-                                                disabled={userRole !== 'editor' && p.id !== user?._id}
+
+                                                // --- UPDATED LOGIC HERE ---
+                                                // The button is disabled if:
+                                                // 1. You are NOT the owner AND...
+                                                // 2. It's for another user OR it's for yourself but you are ALREADY muted.
+                                                disabled={userRole !== 'editor' && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
+
                                                 style={{ fontSize: '1.2rem' }}
                                             >
                                                 <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
@@ -602,7 +608,10 @@ body {
                                             <button
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
-                                                disabled={userRole !== 'editor' && p.id !== user?._id}
+
+                                                // --- UPDATED LOGIC HERE ---
+                                                disabled={userRole !== 'editor' && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
+
                                                 style={{ fontSize: '1.2rem' }}
                                             >
                                                 <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
