@@ -15,6 +15,12 @@ import 'react-calendar-heatmap/dist/styles.css';
 import { Tooltip as ReactTooltip } from 'react-tooltip'; // Correct named import with alias
 import 'react-tooltip/dist/react-tooltip.css'; // Add required CSS for the tooltip
 
+// To make the shareable link work, you'll need to add a new route 
+// in your main router file (e.g., App.js). It will look something like this:
+// import PublicProfile from './components/PublicProfile';
+// <Route path="/profile/:userId" element={<PublicProfile />} />
+// You will need to create the PublicProfile component to display the shared data.
+
 function Dashboard() {
     const { user } = useAuth();
     const { theme } = useTheme();
@@ -187,6 +193,17 @@ function Dashboard() {
             setIsUploading(false);
         }
     };
+
+    const handleShare = () => {
+        if (!user?._id) return;
+        const shareUrl = `${window.location.origin}/profile/${user._id}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            toast.success("Public profile URL copied to clipboard!");
+        }).catch(err => {
+            console.error('Failed to copy URL: ', err);
+            toast.error("Failed to copy URL.");
+        });
+    };
     
     if (!user || user.role === 'admin') {
         return <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>;
@@ -243,7 +260,10 @@ function Dashboard() {
                                         <div className="text-center">
                                             <h2 className="mb-1 fw-bold text-light">{user.firstname} {user.lastname}</h2>
                                             <p className="mb-3 text-light opacity-75">{user.email}</p>
-                                            <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill"><i className="bi bi-person-check-fill me-2"></i><span className="fw-semibold">Verified User</span></div>
+                                            <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill mb-3"><i className="bi bi-person-check-fill me-2"></i><span className="fw-semibold">Verified User</span></div>
+                                            <button className="btn btn-sm btn-outline-light rounded-pill px-3" onClick={handleShare}>
+                                                <i className="bi bi-share-fill me-1"></i> Share Profile
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
