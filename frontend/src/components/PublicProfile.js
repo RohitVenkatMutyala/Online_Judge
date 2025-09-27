@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
 import { db } from '../firebaseConfig';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import ReactCalendarHeatmap from 'react-calendar-heatmap';
@@ -31,6 +31,7 @@ function PublicProfile() {
         topics: [],
     });
     const [heatmapData, setHeatmapData] = useState([]);
+    const [recentSubmissions, setRecentSubmissions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedTopic, setSelectedTopic] = useState('All');
@@ -46,25 +47,24 @@ function PublicProfile() {
             setIsLoading(true);
             setError(null);
             try {
-                // Step 1: Fetch user info from MongoDB backend
-                const userRes = await axios.get(`${API_URL}/user/${userId}`);
-                if (!userRes.data.success) {
-                    setError(userRes.data.message || "User not found.");
+                // Step 1: Fetch public user info from Firebase
+                const publicProfileRef = doc(db, 'publicProfiles', userId);
+                const publicProfileSnap = await getDoc(publicProfileRef);
+
+                if (!publicProfileSnap.exists()) {
+                    setError("Public profile not found. The user may need to create a share link first.");
                     setIsLoading(false);
                     return;
                 }
-                const userData = userRes.data.user;
-                setUser(userData);
+                setUser(publicProfileSnap.data());
 
-                // Step 2: Fetch problems stats
+                // Step 2: Fetch problems stats from your backend
                 const problemsRes = await axios.get(`${API_URL}/problems/user/${userId}`);
                 if (problemsRes.data.success) {
                     const problems = problemsRes.data.problems;
                     const solvedProblems = problems.filter(p => p.status === 'Solved');
-
                     const topicStats = {};
                     const allTopics = new Set();
-                    
                     problems.forEach(p => {
                         (p.tag?.split(',') || []).forEach(rawTag => {
                             const tag = rawTag.trim();
@@ -78,16 +78,12 @@ function PublicProfile() {
                             if (['easy', 'medium', 'hard'].includes(difficulty)) {
                                 topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
                             }
-
-                            if (p.status === 'Solved') {
+                            if (p.status === 'Solved' && ['easy', 'medium', 'hard'].includes(difficulty)) {
                                 topicStats[tag].solved++;
-                                if (['easy', 'medium', 'hard'].includes(difficulty)) {
-                                    topicStats[tag][`${difficulty}Solved`]++;
-                                }
+                                topicStats[tag][`${difficulty}Solved`]++;
                             }
                         });
                     });
-
                     setStats({
                         total: problems.length,
                         solved: solvedProblems.length,
@@ -113,8 +109,19 @@ function PublicProfile() {
                         submissionCounts[date] = (submissionCounts[date] || 0) + 1;
                     }
                 });
-                const formattedHeatmapData = Object.entries(submissionCounts).map(([date, count]) => ({ date, count }));
-                setHeatmapData(formattedHeatmapData);
+                setHeatmapData(Object.entries(submissionCounts).map(([date, count]) => ({ date, count })));
+
+                // Step 4: Fetch recent submissions from Firebase
+                const recentSubmissionsQuery = query(collection(db, "submissions"), where("id", "==", userId), orderBy("submittedAt", "desc"), limit(5));
+                const recentSubmissionsSnapshot = await getDocs(recentSubmissionsQuery);
+                setRecentSubmissions(recentSubmissionsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        problemName: data.problemName || 'Unknown Problem',
+                        verdict: data.verdict,
+                        submittedAt: new Date(data.submittedAt).toLocaleDateString(),
+                    };
+                }));
 
             } catch (err) {
                 console.error("Error fetching public profile data:", err);
@@ -164,9 +171,7 @@ function PublicProfile() {
     if (isLoading) {
         return (
             <div className="d-flex justify-content-center align-items-center vh-100">
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
+                <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
             </div>
         );
     }
@@ -175,9 +180,7 @@ function PublicProfile() {
         return (
             <>
                 <Dnav />
-                <div className="container mt-5">
-                    <div className="alert alert-danger text-center">{error || "User data could not be loaded."}</div>
-                </div>
+                <div className="container mt-5"><div className="alert alert-danger text-center">{error || "User data could not be loaded."}</div></div>
             </>
         );
     }
@@ -210,15 +213,8 @@ function PublicProfile() {
                                         <div className="mb-5">
                                             <div className="d-flex justify-content-between align-items-center mb-3">
                                                 <h4 className="fw-semibold mb-0">Progress Overview</h4>
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={selectedTopic}
-                                                    onChange={(e) => setSelectedTopic(e.target.value)}
-                                                    style={{ width: 'auto' }}
-                                                >
-                                                    {stats.topics.map(topic => (
-                                                        <option key={topic} value={topic}>{topic}</option>
-                                                    ))}
+                                                <select className="form-select form-select-sm" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: 'auto' }}>
+                                                    {stats.topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
                                                 </select>
                                             </div>
                                             <div className="row g-3">
@@ -247,6 +243,29 @@ function PublicProfile() {
                                                 <ReactTooltip id="heatmap-tooltip" />
                                             </div>
                                         </div>
+
+                                        <div>
+                                            <h4 className="fw-semibold mb-3">Recent Activity</h4>
+                                            <div className="recent-submissions-container card">
+                                                {recentSubmissions.length > 0 ? (
+                                                    <ul className="list-group list-group-flush">
+                                                        {recentSubmissions.map((sub, index) => (
+                                                            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <span className="fw-semibold">{sub.problemName}</span>
+                                                                    <small className="d-block text-muted">{sub.submittedAt}</small>
+                                                                </div>
+                                                                <span className={`badge ${sub.verdict === 'Accepted' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
+                                                                    {sub.verdict}
+                                                                </span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <div className="card-body text-center text-muted">No recent submissions found.</div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -255,6 +274,7 @@ function PublicProfile() {
                 </div>
             </div>
             <style>{`
+                /* Paste the same styles from your Dashboard.js here */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
                 .dashboard-container { min-height: 85vh; }
@@ -278,6 +298,12 @@ function PublicProfile() {
                 .react-calendar-heatmap .color-github-2 { fill: #006d32; }
                 .react-calendar-heatmap .color-github-3 { fill: #26a641; }
                 .react-calendar-heatmap .color-github-4 { fill: #39d353; }
+                .theme-dark .recent-submissions-container { background-color: transparent; border: 1px solid #3a3a5a; }
+                .theme-light .recent-submissions-container { background-color: #fff; border: 1px solid #dee2e6; }
+                .theme-dark .list-group-item { background-color: #1e1e2f; border-bottom-color: #3a3a5a !important; color: #fff; }
+                .theme-light .list-group-item { background-color: #fff; }
+                .list-group-item:last-child { border-bottom: none; }
+                .badge { padding: 0.5em 0.75em; font-size: 0.8em; }
                 @media (max-width: 991.98px) {
                     .profile-column { border-radius: 1rem 1rem 0 0; }
                     .content-column { border-radius: 0 0 1rem 1rem; }
