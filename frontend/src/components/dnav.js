@@ -153,7 +153,7 @@ function Dnav() {
                       <div className="dropdown">
                         <a
                           href="#"
-                          className="d-block link-light text-decoration-none dropdown-toggle"
+                          className="d-block link-light text-decoration-none dropdown-toggle  no-caret"
                           data-bs-toggle="dropdown"
                           aria-expanded="false"
                         >
