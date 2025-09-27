@@ -81,7 +81,7 @@ function Home() {
                 <h2 className="display-5 fw-bold gradient-text">Why Randoman?</h2>
                 <p className="lead subtitle mx-auto">Features that set us apart from the competition.</p>
             </div>
-            <div className="row g-4">
+            <div className="row g-4 justify-content-center">
                 <div className="col-lg-4 col-md-6">
                     <InfoCard
                         icon="bi-cpu-fill"
@@ -96,12 +96,44 @@ function Home() {
                         description="Practice with problems from top companies and contests, curated by industry experts to match real-world interviews."
                     />
                 </div>
-                <div className="col-lg-4 col-md-6 mx-auto">
-                    <InfoCard
-                        icon="bi-shield-check"
-                        title="Plagiarism Detection"
-                        description="An advanced system to ensure the integrity of contests and the authenticity of your personal progress."
-                    />
+            </div>
+        </section>
+
+        {/* Products Section */}
+        <section className="container py-5">
+            <div className="text-center mb-5">
+                <h2 className="display-5 fw-bold gradient-text">Our Products</h2>
+                <p className="lead subtitle mx-auto">Discover the cutting-edge tools built for passionate developers.</p>
+            </div>
+            <div className="row justify-content-center">
+                <div className="col-lg-8 col-xl-7">
+                    <div className="product-card p-4 p-md-5">
+                        <div className="text-center mb-4">
+                            <span className="product-badge px-3 py-2 fw-semibold">
+                                <i className="bi bi-stars me-2"></i>
+                                FEATURED TOOL
+                            </span>
+                        </div>
+                        <div className="text-center mb-4">
+                            <div className="product-icon mx-auto">
+                                <i className="bi bi-tools"></i>
+                            </div>
+                            <h4 className="fw-bold mt-3 mb-1">Software Collaborative Tool</h4>
+                            <p className="opacity-75">AI-Powered UML & Code Generation</p>
+                        </div>
+                        <div className="row g-3 mb-4">
+                            <ProductFeature icon="bi-robot" title="AI-Powered Engine" description="UML-to-code & code-to-UML" />
+                            <ProductFeature icon="bi-lightning-fill" title="80% Faster Workflow" description="Minutes instead of hours" />
+                            <ProductFeature icon="bi-people-fill" title="Team Collaboration" description="Real-time editing & live preview" />
+                            <ProductFeature icon="bi-bug-fill" title="Debug & Export" description="Inline debugging & seamless sharing" />
+                        </div>
+                        <div className="text-center">
+                            <a href="https://uml.randoman.online" target="_blank" rel="noopener noreferrer" className="btn btn-lg btn-gradient-primary fw-semibold px-5 py-3 text-decoration-none">
+                                <i className="bi bi-rocket-takeoff me-2"></i>
+                                Launch Tool
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -245,6 +277,69 @@ function Home() {
           color: #8b5cf6;
         }
 
+        /* Product Card */
+        .product-card {
+            border-radius: 1rem;
+            border: 1px solid;
+            position: relative;
+            overflow: hidden;
+        }
+        .theme-dark .product-card {
+            background-color: #1e1e2f;
+            border-color: #3a3a5a;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .theme-light .product-card {
+            background-color: #ffffff;
+            border-color: #dee2e6;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .product-badge {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            color: white !important;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .product-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+        }
+
+        .feature-item {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid;
+            transition: background-color 0.3s ease;
+        }
+        .theme-dark .feature-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: #3a3a5a;
+        }
+        .theme-light .feature-item {
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+        }
+        .theme-dark .feature-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .theme-light .feature-item:hover {
+            background-color: #e9ecef;
+        }
+        .feature-item-icon {
+            font-size: 1.25rem;
+            color: #8b5cf6;
+        }
+
         /* Language Chips */
         .language-chip {
             padding: 0.75rem 1.5rem;
@@ -320,4 +415,22 @@ const LanguageChip = ({ icon, name }) => (
     </div>
 );
 
+const ProductFeature = ({ icon, title, description }) => (
+    <div className="col-md-6">
+        <div className="feature-item">
+            <div className="d-flex align-items-center">
+                <div className="feature-item-icon me-3">
+                    <i className={icon}></i>
+                </div>
+                <div>
+                    <h6 className="fw-bold mb-0">{title}</h6>
+                    <small className="opacity-75">{description}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+
 export default Home;
+
