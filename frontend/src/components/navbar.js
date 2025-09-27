@@ -239,21 +239,7 @@ function Navbar() {
                   {/* Enhanced Action Buttons */}
                   <li className="nav-item ms-lg-3">
                     <div className="d-flex gap-2 align-items-center">
-                      <button
-                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                        className="btn btn-outline-light rounded-3"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          width: '45px',
-                          height: '45px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                      </button>
+
                       {/* === NEW PROFILE DROPDOWN START === */}
                       <div className="dropdown">
                         <a
@@ -269,7 +255,10 @@ function Navbar() {
                               width="38"
                               height="38"
                               className="rounded-circle"
-                              style={{ objectFit: 'cover' }}
+                              style={{
+                                objectFit: 'cover',
+                                filter: 'blur(2px)'
+                              }}
                             />
                           ) : (
                             <i className="bi bi-person-circle text-white fs-3"></i>
@@ -285,6 +274,17 @@ function Navbar() {
                           <li><hr className="dropdown-divider" /></li>
                           <li>
                             <button
+                              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                              className="btn btn-outline-light rounded-3"
+
+                            >
+                              <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+                              Theme
+                            </button>
+                          </li>
+                          <li><hr className="dropdown-divider" /></li>
+                          <li>
+                            <button
                               className="dropdown-item d-flex align-items-center gap-2"
                               onClick={handleLogout}
                             >
@@ -296,7 +296,7 @@ function Navbar() {
                           <li>
                             <Link className="nav-link" to="/dashboard">
                               <i className="bi bi-house-fill"></i>
-                              <span>Dashboard</span>
+                              <span>  Dashboard</span>
                             </Link>
                           </li>
                         </ul>
