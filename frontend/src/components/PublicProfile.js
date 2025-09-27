@@ -27,10 +27,13 @@ function PublicProfile() {
         totalEasy: 0,
         totalMedium: 0,
         totalHard: 0,
+        byTopic: {},
+        topics: [],
     });
     const [heatmapData, setHeatmapData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedTopic, setSelectedTopic] = useState('All');
 
     useEffect(() => {
         if (!userId) {
@@ -59,6 +62,33 @@ function PublicProfile() {
                 if (problemsRes.data.success) {
                     const problems = problemsRes.data.problems;
                     const solvedProblems = problems.filter(p => p.status === 'Solved');
+
+                    const topicStats = {};
+                    const allTopics = new Set();
+                    
+                    problems.forEach(p => {
+                        (p.tag?.split(',') || []).forEach(rawTag => {
+                            const tag = rawTag.trim();
+                            if (!tag) return;
+                            allTopics.add(tag);
+                            if (!topicStats[tag]) {
+                                topicStats[tag] = { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
+                            }
+                            topicStats[tag].total++;
+                            const difficulty = p.difficulty?.toLowerCase();
+                            if (['easy', 'medium', 'hard'].includes(difficulty)) {
+                                topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
+                            }
+
+                            if (p.status === 'Solved') {
+                                topicStats[tag].solved++;
+                                if (['easy', 'medium', 'hard'].includes(difficulty)) {
+                                    topicStats[tag][`${difficulty}Solved`]++;
+                                }
+                            }
+                        });
+                    });
+
                     setStats({
                         total: problems.length,
                         solved: solvedProblems.length,
@@ -68,6 +98,8 @@ function PublicProfile() {
                         totalEasy: problems.filter(p => p.difficulty === 'Easy').length,
                         totalMedium: problems.filter(p => p.difficulty === 'Medium').length,
                         totalHard: problems.filter(p => p.difficulty === 'Hard').length,
+                        byTopic: topicStats,
+                        topics: ['All', ...Array.from(allTopics).sort()],
                     });
                 }
 
@@ -98,6 +130,22 @@ function PublicProfile() {
 
         fetchData();
     }, [userId, API_URL]);
+
+    const displayedStats = useMemo(() => {
+        if (selectedTopic === 'All') {
+            return {
+                total: stats.total,
+                solved: stats.solved,
+                easySolved: stats.easySolved,
+                mediumSolved: stats.mediumSolved,
+                hardSolved: stats.hardSolved,
+                totalEasy: stats.totalEasy,
+                totalMedium: stats.totalMedium,
+                totalHard: stats.totalHard,
+            };
+        }
+        return stats.byTopic[selectedTopic] || { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
+    }, [selectedTopic, stats]);
 
     const StatCard = ({ title, value, total, icon, color }) => (
         <div className="stat-card card h-100 p-3">
@@ -163,12 +211,24 @@ function PublicProfile() {
                                         <p className="lead text-muted mb-4">A snapshot of their coding journey.</p>
                                         
                                         <div className="mb-5">
-                                            <h4 className="fw-semibold mb-3">Progress Overview</h4>
+                                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                                <h4 className="fw-semibold mb-0">Progress Overview</h4>
+                                                <select
+                                                    className="form-select form-select-sm"
+                                                    value={selectedTopic}
+                                                    onChange={(e) => setSelectedTopic(e.target.value)}
+                                                    style={{ width: 'auto' }}
+                                                >
+                                                    {stats.topics.map(topic => (
+                                                        <option key={topic} value={topic}>{topic}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                             <div className="row g-3">
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Total Solved" value={stats.solved} total={stats.total} icon="bi-check-all" color="primary" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Easy" value={stats.easySolved} total={stats.totalEasy} icon="bi-circle-square" color="success" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Medium" value={stats.mediumSolved} total={stats.totalMedium} icon="bi-square-half" color="warning" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Hard" value={stats.hardSolved} total={stats.totalHard} icon="bi-square-fill" color="danger" /></div>
+                                                <div className="col-md-6 col-xl-3"><StatCard title="Total Solved" value={displayedStats.solved} total={displayedStats.total} icon="bi-check-all" color="primary" /></div>
+                                                <div className="col-md-6 col-xl-3"><StatCard title="Easy" value={displayedStats.easySolved} total={displayedStats.totalEasy} icon="bi-circle-square" color="success" /></div>
+                                                <div className="col-md-6 col-xl-3"><StatCard title="Medium" value={displayedStats.mediumSolved} total={displayedStats.totalMedium} icon="bi-square-half" color="warning" /></div>
+                                                <div className="col-md-6 col-xl-3"><StatCard title="Hard" value={displayedStats.hardSolved} total={displayedStats.totalHard} icon="bi-square-fill" color="danger" /></div>
                                             </div>
                                         </div>
                                         
@@ -210,6 +270,9 @@ function PublicProfile() {
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
                 .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
+                .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
+                .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
+                .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
                 .theme-dark .heatmap-container { background-color: transparent; border: 1px solid #3a3a5a !important; }
                 .theme-light .heatmap-container { background-color: #f8f9fa; border: 1px solid #dee2e6 !important; }
                 .react-calendar-heatmap text { font-size: 10px; fill: #aaa; }
