@@ -118,6 +118,7 @@ function PublicProfile() {
                     const data = doc.data();
                     return {
                         problemName: data.problemName || 'Unknown Problem',
+                        QID: data.QID || 'N/A',
                         verdict: data.verdict,
                         submittedAt: new Date(data.submittedAt).toLocaleDateString(),
                     };
