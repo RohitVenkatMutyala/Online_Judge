@@ -42,9 +42,34 @@ function Dashboard() {
     return () => unsubscribe();
   }, [user]);
 
-  const handleImageChange = async (e) => {
+ const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (!file || !user || !user._id) {
+
+    // --- 1. ADD VALIDATION CHECKS HERE ---
+
+    // First, check if a file was selected
+    if (!file) {
+      return;
+    }
+
+    // Next, check if the selected file is an image
+    const isImage = file.type.startsWith('image/');
+    if (!isImage) {
+      toast.error("Invalid file type. Please select an image.");
+      return; // Stop the function
+    }
+
+    // Finally, check if the image is under the size limit (5MB)
+    const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_SIZE_BYTES) {
+      toast.error("File is too large. Please select an image under 5MB.");
+      return; // Stop the function
+    }
+
+    // --- End of validation checks ---
+
+
+    if (!user || !user._id) {
       toast.error("Please wait a moment and try again.");
       return;
     }
@@ -58,7 +83,6 @@ function Dashboard() {
       const downloadURL = await getDownloadURL(storageRef);
       const userDocRef = doc(db, 'users', user._id);
 
-      // FIX 2: Use setDoc with { merge: true } to create or update the document
       await setDoc(userDocRef, {
         profileImageURL: downloadURL
       }, { merge: true });
@@ -72,7 +96,6 @@ function Dashboard() {
       setIsUploading(false);
     }
   };
-
   if (!user || user.role === 'admin') {
     return (
       <div className="container mt-5">
