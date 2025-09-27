@@ -39,8 +39,8 @@ function Chat() {
     const [codeLanguage, setCodeLanguage] = useState('javascript');
     const [verdicts, setVerdicts] = useState([]);
     const [TotalTime, setTime] = useState(null);
-    const [showAllUsers, setShowAllUsers] = useState(false);
-
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+    const [sessionOwnerId, setSessionOwnerId] = useState(null);
     // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
@@ -76,6 +76,7 @@ function Chat() {
             }
 
             const data = docSnap.data();
+            setSessionOwnerId(data.ownerId);
             console.log("Debug 3: Session data loaded. Access type:", data.access);
 
             if (data.access === 'private' && !user) {
@@ -219,20 +220,33 @@ function Chat() {
 
     // --- Handler Functions ---
     const handleToggleMute = async (targetUserId) => {
+        // Check against the true owner's ID, not the user's role
+        const isTrueOwner = user && user._id === sessionOwnerId;
         const isSelf = targetUserId === user._id;
-        const isOwner = userRole === 'editor';
-        const currentMuteState = muteStatus[targetUserId] ?? true;
-        const newMuteState = !currentMuteState;
-        if (isOwner) {
+
+        // Rule 1: The true owner can mute or unmute anyone.
+        if (isTrueOwner) {
+            const currentMuteState = muteStatus[targetUserId] ?? true;
+            const newMuteState = !currentMuteState;
             await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
             return;
         }
+
+        // Rule 2: A participant (not the owner) can ONLY mute themselves.
         if (isSelf) {
-            if (newMuteState === false) {
+            const isCurrentlyMuted = muteStatus[targetUserId] ?? true;
+
+            // If they are already muted, they cannot unmute. Block the action.
+            if (isCurrentlyMuted) {
                 toast.error("Only the session owner can unmute you.");
                 return;
             }
+
+            // If they are unmuted, allow them to mute themselves.
             await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: true });
+        } else {
+            // Safeguard: A participant cannot mute another participant.
+            toast.error("You do not have permission to mute other participants.");
         }
     };
     const handleCodeChange = (newCode) => { if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { code: newCode }); };
@@ -379,7 +393,50 @@ body {
   flex-direction: column;
   padding: 0.5rem 0;
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; /* Ensure it's on top of other content */
+}
 
+.modal-content {
+  background-color: var(--dark-bg-secondary, #1e1e2f); /* Using your theme color */
+  color: var(--text-primary, #e0e0e0);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #3a3a5a);
+  width: 90%;
+  max-width: 450px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-color, #3a3a5a);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  overflow-y: auto; /* This makes the user list scrollable */
+}
+
+/* Make Bootstrap's close button visible on dark backgrounds */
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
 .chat-message {
   margin-bottom: 1rem;
   display: flex;
@@ -566,44 +623,24 @@ body {
                     {/* Right Column: Users, Share, Chat */}
                     <div className="col-lg-4 d-flex flex-column h-100">
                         <div className="card shadow-sm mb-3">
+                            {/* ... inside the Active Users card ... */}
                             <div className="card-header d-flex justify-content-between">
                                 <span>Active Users ({activeUsers.length})</span>
                                 <i className="bi bi-broadcast text-success"></i>
                             </div>
-                            {/* Replace the entire <ul className="list-group list-group-flush">...</ul> block with this */}
 
                             <ul className="list-group list-group-flush">
                                 {/* Always show the first 4 users */}
                                 {activeUsers.slice(0, 4).map(p => (
                                     <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                        {/* This part remains the same */}
                                         <span className="fw-bold">{p.name}</span>
                                         {p.id === user?._id && <span className="ms-2">(You)</span>}
                                         {sessionAccess === 'private' && stream && (
                                             <button
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
-                                                disabled={userRole !== 'editor' && p.id !== user?._id}
-                                                style={{ fontSize: '1.2rem' }} // UI FIX: Larger mic icon
-                                            >
-                                                <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
-                                            </button>
-                                        )}
-                                    </li>
-                                ))}
-
-                                {/* Conditionally show the rest of the users if the list is expanded */}
-                                {showAllUsers && activeUsers.slice(4).map(p => (
-                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                        <span className="fw-bold">{p.name}</span>
-                                        {p.id === user?._id && <span className="ms-2">(You)</span>}
-                                        {sessionAccess === 'private' && stream && (
-                                            <button
-                                                className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
-                                                onClick={() => handleToggleMute(p.id)}
-
-                                                // CORRECT LOGIC is applied here as well
-                                                disabled={userRole !== 'editor' && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
-
+                                                disabled={user?._id !== sessionOwnerId && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
                                                 style={{ fontSize: '1.2rem' }}
                                             >
                                                 <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
@@ -613,17 +650,18 @@ body {
                                 ))}
                             </ul>
 
-                            {/* Add this button below the <ul> to toggle the view */}
+                            {/* This button now opens the modal */}
                             {activeUsers.length > 4 && (
                                 <div className="card-footer text-center p-1">
                                     <button
                                         className="btn btn-link btn-sm text-decoration-none"
-                                        onClick={() => setShowAllUsers(!showAllUsers)}
+                                        onClick={() => setIsUserModalOpen(true)}
                                     >
-                                        {showAllUsers ? 'Show Less' : `Show ${activeUsers.length - 4} More...`}
+                                        View All ({activeUsers.length}) Users...
                                     </button>
                                 </div>
                             )}
+
                             <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                         </div>
 
@@ -664,6 +702,43 @@ body {
 
                 </div>
             </div>
+            {/* --- User List Modal --- */}
+            {isUserModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsUserModalOpen(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h5 className="modal-title fw-bold">All Active Users</h5>
+                            <button
+                                type="button"
+                                className="btn-close btn-close-white"
+                                onClick={() => setIsUserModalOpen(false)}
+                            ></button>
+                        </div>
+                        <div className="modal-body">
+                            <ul className="list-group list-group-flush">
+                                {activeUsers.map(p => (
+                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center bg-transparent border-secondary text-white px-0">
+                                        <div>
+                                            <span className="fw-bold">{p.name}</span>
+                                            {p.id === user?._id && <span className="ms-2 text-muted small">(You)</span>}
+                                        </div>
+                                        {sessionAccess === 'private' && stream && (
+                                            <button
+                                                className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
+                                                onClick={() => handleToggleMute(p.id)}
+                                                disabled={user?._id !== sessionOwnerId && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
+                                                style={{ fontSize: '1.2rem' }}
+                                            >
+                                                <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
+                                            </button>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
