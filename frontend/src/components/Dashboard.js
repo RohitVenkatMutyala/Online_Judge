@@ -57,7 +57,11 @@ function Dashboard() {
   // --- 4. REPLACE HANDLEIMAGECHANGE WITH FIREBASE UPLOAD LOGIC ---
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (!file || !user) return;
+     if (!file || !user || !user._id) {
+      console.error("Upload failed: User is not available.");
+      toast.error("Please wait a moment and try again.");
+      return; // Stop the function here
+    }
 
     setIsUploading(true);
     toast.info("Uploading image...");
