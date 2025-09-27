@@ -221,7 +221,7 @@ function Dnav() {
                     <div className="dropdown">
                       <a
                         href="#"
-                        className="d-block link-light text-decoration-none dropdown-toggle"
+                        className="d-block link-light text-decoration-none dropdown-toggle no-caret" // <-- Add "no-caret"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                       >
@@ -270,7 +270,9 @@ function Dnav() {
           opacity: 1 !important;
           animation: rotate 2s linear infinite;
         }
-
+         .dropdown-toggle.no-caret::after {
+  display: none !important;
+}
         @keyframes rotate {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }

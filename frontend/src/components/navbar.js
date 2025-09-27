@@ -244,7 +244,7 @@ function Navbar() {
                       <div className="dropdown">
                         <a
                           href="#"
-                          className="d-block link-light text-decoration-none dropdown-toggle"
+                          className="d-block link-light text-decoration-none dropdown-toggle  no-caret"
                           data-bs-toggle="dropdown"
                           aria-expanded="false"
                         >
@@ -348,6 +348,9 @@ function Navbar() {
           opacity: 1 !important;
           animation: rotate 2s linear infinite;
         }
+          .dropdown-toggle.no-caret::after {
+  display: none !important;
+}
 
         @keyframes rotate {
           from { transform: rotate(0deg); }
