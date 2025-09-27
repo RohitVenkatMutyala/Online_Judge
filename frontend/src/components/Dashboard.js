@@ -11,7 +11,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import ActivityCalendar from 'react-activity-calendar';
-import 'react-activity-calendar/style.css'; // This is the correct line// Import calendar styles
+// REMOVED: The problematic CSS import is no longer needed.
 
 function Dashboard() {
     const { user } = useAuth();
@@ -39,6 +39,12 @@ function Dashboard() {
     const [heatmapData, setHeatmapData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTopic, setSelectedTopic] = useState('All');
+
+    // NEW: Define the heatmap theme colors explicitly
+    const explicitTheme = {
+        light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
+        dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
+    };
 
     // Effect for fetching user profile image
     useEffect(() => {
@@ -82,11 +88,15 @@ function Dashboard() {
                             }
                             topicStats[tag].total++;
                             const difficulty = p.difficulty.toLowerCase();
-                            topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
+                            if (difficulty === 'easy' || difficulty === 'medium' || difficulty === 'hard') {
+                                topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
+                            }
 
                             if (p.status === 'Solved') {
                                 topicStats[tag].solved++;
-                                topicStats[tag][`${difficulty}Solved`]++;
+                                if (difficulty === 'easy' || difficulty === 'medium' || difficulty === 'hard') {
+                                    topicStats[tag][`${difficulty}Solved`]++;
+                                }
                             }
                         });
                     });
@@ -253,7 +263,15 @@ function Dashboard() {
                                             <div className="mb-5">
                                                 <h4 className="fw-semibold mb-3">Submission Activity</h4>
                                                 <div className="card p-3 heatmap-container">
-                                                    <ActivityCalendar data={heatmapData} theme={{ light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'], dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353']}} colorScheme={theme} blockSize={12} blockMargin={4} fontSize={14} showWeekdayLabels labels={{ totalCount: `{{count}} submissions in the last year` }} />
+                                                    <ActivityCalendar 
+                                                        data={heatmapData} 
+                                                        theme={explicitTheme} // Use the explicit theme object
+                                                        blockSize={12} 
+                                                        blockMargin={4} 
+                                                        fontSize={14} 
+                                                        showWeekdayLabels 
+                                                        labels={{ totalCount: `{{count}} submissions in the last year` }} 
+                                                    />
                                                 </div>
                                             </div>
                                         </>
@@ -281,12 +299,18 @@ function Dashboard() {
                 .user-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); color: white; }
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-                .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
                 .theme-dark .heatmap-container { background-color: transparent; border: 1px solid #3a3a5a !important; }
                 .theme-light .heatmap-container { background-color: #f8f9fa; border: 1px solid #dee2e6 !important; }
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
+                
+                /* Specific styles for ActivityCalendar to override defaults */
+                .react-activity-calendar__legend-colors { margin-top: 10px !important; }
+                .theme-dark .react-activity-calendar__count, .theme-dark .react-activity-calendar__weekday { color: #a9a9b3; }
+                .theme-light .react-activity-calendar__count, .theme-light .react-activity-calendar__weekday { color: #555; }
+
                 @media (max-width: 991.98px) {
                     .profile-column { border-radius: 1rem 1rem 0 0; }
                     .content-column { border-radius: 0 0 1rem 1rem; }
