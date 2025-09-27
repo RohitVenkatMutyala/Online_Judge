@@ -274,13 +274,14 @@ function Navbar() {
                           <li><hr className="dropdown-divider" /></li>
                           <li>
                             <button
-                             className="dropdown-item d-flex align-items-center gap-2"
+                              className="dropdown-item d-flex align-items-center gap-2"
                               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                             
-
                             >
                               <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                                  Theme
+
+                              {/* This line is changed */}
+                              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+
                             </button>
                           </li>
                           <li><hr className="dropdown-divider" /></li>
@@ -295,7 +296,7 @@ function Navbar() {
                           </li>
                           <li><hr className="dropdown-divider" /></li>
                           <li>
-                            <Link  className="dropdown-item d-flex align-items-center gap-2" to="/dashboard">
+                            <Link className="dropdown-item d-flex align-items-center gap-2" to="/dashboard">
                               <i className="bi bi-house-fill"></i>
                               <span>    Dashboard</span>
                             </Link>
