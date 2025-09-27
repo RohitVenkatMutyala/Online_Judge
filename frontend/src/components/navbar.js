@@ -257,7 +257,7 @@ function Navbar() {
                               className="rounded-circle"
                               style={{
                                 objectFit: 'cover',
-                                filter: 'blur(2px)'
+                                filter: 'blur(0.5px)'
                               }}
                             />
                           ) : (
@@ -275,11 +275,11 @@ function Navbar() {
                           <li>
                             <button
                               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                              className="btn btn-outline-light rounded-3"
+                             
 
                             >
                               <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                              Theme
+                                  Theme
                             </button>
                           </li>
                           <li><hr className="dropdown-divider" /></li>
@@ -296,7 +296,7 @@ function Navbar() {
                           <li>
                             <Link className="nav-link" to="/dashboard">
                               <i className="bi bi-house-fill"></i>
-                              <span>  Dashboard</span>
+                              <span>    Dashboard</span>
                             </Link>
                           </li>
                         </ul>
