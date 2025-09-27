@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useTheme } from '../context/ThemeContext';
 import './sketchy.css';
 import Dnav from './dnav';
 import { Tooltip } from 'bootstrap';
