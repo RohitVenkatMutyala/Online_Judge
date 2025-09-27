@@ -218,24 +218,38 @@ function Chat() {
     }, [muteStatus, stream, user]);
 
     // --- Handler Functions ---
+const handleToggleMute = async (targetUserId) => {
+    const isOwner = userRole === 'editor';
+    const isSelf = targetUserId === user._id;
+    
+    // Don't do anything if a participant tries to mute/unmute someone else
+    if (!isOwner && !isSelf) {
+      toast.error("You can only mute yourself.");
+      return;
+    }
 
-    const handleToggleMute = async (targetUserId) => {
-        const isSelf = targetUserId === user._id;
-        const isOwner = userRole === 'editor';
-        const currentMuteState = muteStatus[targetUserId] ?? true;
-        const newMuteState = !currentMuteState;
-        if (isOwner) {
-            await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
-            return;
-        }
-        if (isSelf) {
-            if (newMuteState === false) {
-                toast.error("Only the session owner can unmute you.");
-                return;
-            }
-            await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: true });
-        }
-    };
+    const currentMuteState = muteStatus[targetUserId] ?? true;
+    const newMuteState = !currentMuteState; // The state we intend to set
+
+    // Rule 1: The owner can freely toggle mute for anyone.
+    if (isOwner) {
+      await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
+      return;
+    }
+
+    // Rule 2: A participant can ONLY mute themselves. They cannot unmute.
+    if (isSelf) {
+      // If their intended action is to UNMUTE (newMuteState becomes false), block it.
+      if (newMuteState === false) {
+        toast.error("Only the session owner can unmute you.");
+        return;
+      }
+      
+      // Otherwise, their action is to MUTE (newMuteState is true), which is allowed.
+      // We use the 'newMuteState' variable for correctness.
+      await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
+    }
+  };
 
     const handleCodeChange = (newCode) => { if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { code: newCode }); };
     const handleInputChange = (e) => { const newInput = e.target.value; setInput(newInput); if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput }); };
