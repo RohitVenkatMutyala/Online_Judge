@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
-import { Tooltip } from 'bootstrap';
+import { Tooltip as BootstrapTooltip } from 'bootstrap'; // Aliased to avoid naming conflicts
 import { db, storage } from '../firebaseConfig';
 import { doc, onSnapshot, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -12,7 +12,8 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import ReactCalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip as ReactTooltip } from 'react-tooltip'; // Correct named import with alias
+import 'react-tooltip/dist/react-tooltip.css'; // Add required CSS for the tooltip
 
 function Dashboard() {
     const { user } = useAuth();
@@ -135,7 +136,7 @@ function Dashboard() {
         fetchData();
         
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipTriggerList.forEach(el => new Tooltip(el));
+        tooltipTriggerList.forEach(el => new BootstrapTooltip(el));
 
     }, [user, API_URL]);
 
@@ -279,12 +280,18 @@ function Dashboard() {
                                                             return `color-github-${Math.min(4, value.count)}`;
                                                         }}
                                                         tooltipDataAttrs={value => {
-                                                            const dateStr = value.date ? new Date(value.date).toDateString() : 'No activity';
+                                                            if (!value || !value.date) {
+                                                                return { 'data-tooltip-id': null };
+                                                            }
+                                                            const dateStr = new Date(value.date).toDateString();
                                                             const countStr = `${value.count || 0} submissions`;
-                                                            return { 'data-tip': `${dateStr}: ${countStr}` };
+                                                            return { 
+                                                                'data-tooltip-id': 'heatmap-tooltip',
+                                                                'data-tooltip-content': `${dateStr}: ${countStr}` 
+                                                            };
                                                         }}
                                                     />
-                                                    <ReactTooltip />
+                                                    <ReactTooltip id="heatmap-tooltip" />
                                                 </div>
                                             </div>
 
@@ -324,7 +331,7 @@ function Dashboard() {
                 
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
+                .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
                 
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
@@ -348,19 +355,13 @@ function Dashboard() {
                 .theme-light .heatmap-container { background-color: #f8f9fa; border: 1px solid #dee2e6 !important; }
                 
                 .react-calendar-heatmap text { font-size: 10px; fill: #aaa; }
-                .react-calendar-heatmap .color-empty { fill: ${theme === 'dark' ? '#161b22' : '#ebedf0'}; }
+                .theme-dark .react-calendar-heatmap .color-empty { fill: #161b22; }
+                .theme-light .react-calendar-heatmap .color-empty { fill: #ebedf0; }
+
                 .react-calendar-heatmap .color-github-1 { fill: #0e4429; }
                 .react-calendar-heatmap .color-github-2 { fill: #006d32; }
                 .react-calendar-heatmap .color-github-3 { fill: #26a641; }
                 .react-calendar-heatmap .color-github-4 { fill: #39d353; }
-                
-                .react-tooltip {
-                    background-color: #333 !important;
-                    color: #fff !important;
-                    border-radius: 4px !important;
-                    padding: 5px 10px !important;
-                    font-size: 12px !important;
-                }
                 
                 @media (max-width: 991.98px) {
                     .profile-column { border-radius: 1rem 1rem 0 0; }
