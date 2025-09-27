@@ -34,9 +34,7 @@ function SharingComponent() {
                 <h5 className="mb-0">Share Session</h5>
             </div>
             <div className="card-body">
-                <p className="card-text text-muted small">
-                    Anyone with this link can join the session.
-                </p>
+            
                 <div className="input-group">
                     <input
                         type="text"
