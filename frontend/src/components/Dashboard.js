@@ -6,10 +6,13 @@ import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
 import { Tooltip } from 'bootstrap';
 import { db, storage } from '../firebaseConfig';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import ReactCalendarHeatmap from 'react-calendar-heatmap';
+import 'react-calendar-heatmap/dist/styles.css';
+import ReactTooltip from 'react-tooltip';
 
 function Dashboard() {
     const { user } = useAuth();
@@ -21,7 +24,7 @@ function Dashboard() {
     const [profileImage, setProfileImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
 
-    // State for Stats
+    // State for Stats and Heatmap
     const [stats, setStats] = useState({
         total: 0,
         solved: 0,
@@ -34,6 +37,7 @@ function Dashboard() {
         byTopic: {},
         topics: [],
     });
+    const [heatmapData, setHeatmapData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTopic, setSelectedTopic] = useState('All');
 
@@ -53,13 +57,14 @@ function Dashboard() {
         return () => unsubscribe();
     }, [user]);
     
-    // Effect for fetching stats data
+    // Effect for fetching stats and heatmap data
     useEffect(() => {
         if (!user?._id) return;
 
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                // Fetch problems for stats
                 const problemsRes = await axios.get(`${API_URL}/problems/user/${user._id}`, { withCredentials: true });
                 if (problemsRes.data.success) {
                     const problems = problemsRes.data.problems;
@@ -104,6 +109,21 @@ function Dashboard() {
                         topics: ['All', ...Array.from(allTopics).sort()],
                     });
                 }
+
+                // Fetch submissions for heatmap
+                const submissionsQuery = query(collection(db, "submissions"), where("id", "==", user._id));
+                const querySnapshot = await getDocs(submissionsQuery);
+                const submissionCounts = {};
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.submittedAt) { 
+                        const date = new Date(data.submittedAt).toISOString().slice(0, 10);
+                        submissionCounts[date] = (submissionCounts[date] || 0) + 1;
+                    }
+                });
+                const formattedHeatmapData = Object.entries(submissionCounts).map(([date, count]) => ({ date, count }));
+                setHeatmapData(formattedHeatmapData);
+
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
                 toast.error("Could not load your stats.");
@@ -197,6 +217,9 @@ function Dashboard() {
             </div>
         </div>
     );
+
+    const today = new Date();
+    const startDate = new Date(new Date().setDate(today.getDate() - 365));
     
     return (
         <>
@@ -244,7 +267,27 @@ function Dashboard() {
                                                 </div>
                                             </div>
                                             
-                                            {/* Navigation Links Section */}
+                                            <div className="mb-5">
+                                                <h4 className="fw-semibold mb-3">Submission Activity</h4>
+                                                <div className="heatmap-container card p-3">
+                                                    <ReactCalendarHeatmap
+                                                        startDate={startDate}
+                                                        endDate={today}
+                                                        values={heatmapData}
+                                                        classForValue={(value) => {
+                                                            if (!value) return 'color-empty';
+                                                            return `color-github-${Math.min(4, value.count)}`;
+                                                        }}
+                                                        tooltipDataAttrs={value => {
+                                                            const dateStr = value.date ? new Date(value.date).toDateString() : 'No activity';
+                                                            const countStr = `${value.count || 0} submissions`;
+                                                            return { 'data-tip': `${dateStr}: ${countStr}` };
+                                                        }}
+                                                    />
+                                                    <ReactTooltip />
+                                                </div>
+                                            </div>
+
                                             <div>
                                                 <h4 className="fw-semibold mb-3">Explore</h4>
                                                 <div className="row g-3">
@@ -281,27 +324,43 @@ function Dashboard() {
                 
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-                .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
                 
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
 
-                /* Navigation Card Styles */
                 .nav-card { cursor: pointer; transition: all 0.2s ease-in-out; border-radius: 0.5rem; }
                 .theme-dark .nav-card { background-color: rgba(255,255,255,0.05); }
                 .theme-light .nav-card { background-color: #f8f9fa; }
                 .theme-dark .nav-card:hover { background-color: rgba(255,255,255,0.1); transform: translateY(-3px); }
                 .theme-light .nav-card:hover { background-color: #e9ecef; transform: translateY(-3px); }
-                
                 .nav-icon { font-size: 1.5rem; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
                 .theme-dark .nav-icon { background-color: rgba(255,255,255,0.1); color: #fff; }
                 .theme-light .nav-icon { background-color: #e9ecef; color: #495057; }
-                
                 .nav-arrow { font-size: 1.5rem; transition: transform 0.2s ease-in-out; }
                 .theme-dark .nav-arrow { color: #6c757d; }
                 .theme-light .nav-arrow { color: #adb5bd; }
                 .nav-card:hover .nav-arrow { transform: translateX(5px); }
+
+                /* Heatmap Styles */
+                .theme-dark .heatmap-container { background-color: transparent; border: 1px solid #3a3a5a !important; }
+                .theme-light .heatmap-container { background-color: #f8f9fa; border: 1px solid #dee2e6 !important; }
+                
+                .react-calendar-heatmap text { font-size: 10px; fill: #aaa; }
+                .react-calendar-heatmap .color-empty { fill: ${theme === 'dark' ? '#161b22' : '#ebedf0'}; }
+                .react-calendar-heatmap .color-github-1 { fill: #0e4429; }
+                .react-calendar-heatmap .color-github-2 { fill: #006d32; }
+                .react-calendar-heatmap .color-github-3 { fill: #26a641; }
+                .react-calendar-heatmap .color-github-4 { fill: #39d353; }
+                
+                .react-tooltip {
+                    background-color: #333 !important;
+                    color: #fff !important;
+                    border-radius: 4px !important;
+                    padding: 5px 10px !important;
+                    font-size: 12px !important;
+                }
                 
                 @media (max-width: 991.98px) {
                     .profile-column { border-radius: 1rem 1rem 0 0; }
@@ -314,3 +373,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
