@@ -318,10 +318,20 @@ function Dashboard() {
             <style>{`
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
+
+                .dashboard-container { min-height: 85vh; }
+
                 .theme-dark .dashboard-container, .theme-dark .content-column { background-color: #1e1e2f; border: 1px solid #3a3a5a; color: #fff; }
                 .theme-light .dashboard-container, .theme-light .content-column { background-color: #ffffff; border: 1px solid #dee2e6; color: #212529; }
+                
                 .profile-column { background: linear-gradient(160deg, #343a40, #1e1e2f); }
-                .profile-image-container { width: 150px; height: 150px; cursor: pointer; border: 4px solid rgba(255,255,255,0.2); }
+                
+                .profile-image-container { 
+                    width: 180px; 
+                    height: 180px; 
+                    cursor: pointer; 
+                    border: 4px solid rgba(255,255,255,0.2); 
+                }
                 .profile-image-container img { object-fit: cover; }
                 .profile-upload-label:hover .profile-overlay { background: rgba(0,0,0,0.5); }
                 .profile-upload-label:hover .profile-overlay i { opacity: 1 !important; color: white; }
