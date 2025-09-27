@@ -10,8 +10,7 @@ import { doc, onSnapshot, setDoc, collection, query, where, getDocs } from 'fire
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import ActivityCalendar from 'react-activity-calendar';
-// REMOVED: The problematic CSS import is no longer needed.
+// All calendar-related imports have been removed.
 
 function Dashboard() {
     const { user } = useAuth();
@@ -23,7 +22,7 @@ function Dashboard() {
     const [profileImage, setProfileImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
 
-    // State for Stats and Heatmap
+    // State for Stats
     const [stats, setStats] = useState({
         total: 0,
         solved: 0,
@@ -36,15 +35,8 @@ function Dashboard() {
         byTopic: {},
         topics: [],
     });
-    const [heatmapData, setHeatmapData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTopic, setSelectedTopic] = useState('All');
-
-    // NEW: Define the heatmap theme colors explicitly
-    const explicitTheme = {
-        light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
-        dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
-    };
 
     // Effect for fetching user profile image
     useEffect(() => {
@@ -62,7 +54,7 @@ function Dashboard() {
         return () => unsubscribe();
     }, [user]);
     
-    // Effect for fetching ALL data (problems for stats, submissions for heatmap)
+    // Effect for fetching ALL data
     useEffect(() => {
         if (!user?._id) return;
 
@@ -87,7 +79,7 @@ function Dashboard() {
                                 topicStats[tag] = { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
                             }
                             topicStats[tag].total++;
-                            const difficulty = p.difficulty.toLowerCase();
+                            const difficulty = p.difficulty?.toLowerCase();
                             if (difficulty === 'easy' || difficulty === 'medium' || difficulty === 'hard') {
                                 topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
                             }
@@ -114,26 +106,6 @@ function Dashboard() {
                         topics: ['All', ...Array.from(allTopics).sort()],
                     });
                 }
-
-                // Fetch submissions for heatmap
-                const q = query(collection(db, "submissions"), where("id", "==", user._id));
-                const querySnapshot = await getDocs(q);
-                const submissionCounts = {};
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.submittedAt) { // Ensure timestamp exists
-                        const date = new Date(data.submittedAt).toISOString().slice(0, 10);
-                        submissionCounts[date] = (submissionCounts[date] || 0) + 1;
-                    }
-                });
-
-                const formattedHeatmapData = Object.entries(submissionCounts).map(([date, count]) => ({
-                    date,
-                    count,
-                    level: Math.min(4, Math.ceil(count / 2)),
-                }));
-                setHeatmapData(formattedHeatmapData);
-
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
                 toast.error("Could not load your stats.");
@@ -260,19 +232,10 @@ function Dashboard() {
                                                     <div className="col-md-6 col-xl-3"><StatCard title="Hard" value={displayedStats.hardSolved} total={displayedStats.totalHard} icon="bi-square-fill" color="danger" /></div>
                                                 </div>
                                             </div>
-                                            <div className="mb-5">
-                                                <h4 className="fw-semibold mb-3">Submission Activity</h4>
-                                                <div className="card p-3 heatmap-container">
-                                                    <ActivityCalendar 
-                                                        data={heatmapData} 
-                                                        theme={explicitTheme} // Use the explicit theme object
-                                                        blockSize={12} 
-                                                        blockMargin={4} 
-                                                        fontSize={14} 
-                                                        showWeekdayLabels 
-                                                        labels={{ totalCount: `{{count}} submissions in the last year` }} 
-                                                    />
-                                                </div>
+                                            
+                                            {/* The heatmap section has been removed to prevent the crash */}
+                                            <div className="text-center text-muted">
+                                                <p>Your submission heatmap will be displayed here in a future update.</p>
                                             </div>
                                         </>
                                         )}
@@ -300,17 +263,9 @@ function Dashboard() {
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
                 .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
-                .theme-dark .heatmap-container { background-color: transparent; border: 1px solid #3a3a5a !important; }
-                .theme-light .heatmap-container { background-color: #f8f9fa; border: 1px solid #dee2e6 !important; }
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
-                
-                /* Specific styles for ActivityCalendar to override defaults */
-                .react-activity-calendar__legend-colors { margin-top: 10px !important; }
-                .theme-dark .react-activity-calendar__count, .theme-dark .react-activity-calendar__weekday { color: #a9a9b3; }
-                .theme-light .react-activity-calendar__count, .theme-light .react-activity-calendar__weekday { color: #555; }
-
                 @media (max-width: 991.98px) {
                     .profile-column { border-radius: 1rem 1rem 0 0; }
                     .content-column { border-radius: 0 0 1rem 1rem; }
