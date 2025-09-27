@@ -8,7 +8,7 @@ import { Tooltip } from 'bootstrap';
 
 // --- 1. IMPORT FIREBASE MODULES ---
 import { db, storage } from '../firebaseConfig'; // Ensure this path is correct
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 
@@ -24,7 +24,7 @@ function Dashboard() {
 
     // Use user._id to reference the document
     const userDocRef = doc(db, 'users', user._id);
-    
+
     const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
@@ -69,11 +69,12 @@ function Dashboard() {
       const downloadURL = await getDownloadURL(storageRef);
 
       // Use user._id to reference the document
+      // 3. Create or update the user's document in Firestore with the new image URL
       const userDocRef = doc(db, 'users', user._id);
-      await updateDoc(userDocRef, {
+      await setDoc(userDocRef, {
         profileImageURL: downloadURL
-      });
-      
+      }, { merge: true }); // The { merge: true } option is crucial
+
       toast.success("Profile image updated!");
 
     } catch (error) {
@@ -134,7 +135,7 @@ function Dashboard() {
                           />
                         ) : (
                           <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary">
-                             <div className="spinner-border text-light" role="status"></div>
+                            <div className="spinner-border text-light" role="status"></div>
                           </div>
                         )}
                         <div className="profile-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
@@ -153,18 +154,18 @@ function Dashboard() {
                     />
 
                     <div className="text-center">
-                        <h2 className="mb-2 fw-bold">{user.firstname} {user.lastname}</h2>
-                        <p className="mb-3 text-light opacity-75" style={{ fontSize: "1.1rem" }}>{user.email}</p>
-                        <div
-                          className="user-badge d-inline-flex align-items-center px-4 py-2 rounded-pill"
-                          style={{
-                            background: ' linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);',
-                            boxShadow: '0 4px 15px rgba(17, 153, 142, 0.3)'
-                          }}
-                        >
-                          <i className="bi bi-person-check-fill me-2"></i>
-                          <span className="fw-semibold">Verified User</span>
-                        </div>
+                      <h2 className="mb-2 fw-bold">{user.firstname} {user.lastname}</h2>
+                      <p className="mb-3 text-light opacity-75" style={{ fontSize: "1.1rem" }}>{user.email}</p>
+                      <div
+                        className="user-badge d-inline-flex align-items-center px-4 py-2 rounded-pill"
+                        style={{
+                          background: ' linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);',
+                          boxShadow: '0 4px 15px rgba(17, 153, 142, 0.3)'
+                        }}
+                      >
+                        <i className="bi bi-person-check-fill me-2"></i>
+                        <span className="fw-semibold">Verified User</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -181,7 +182,7 @@ function Dashboard() {
                       <div className="nav-card mb-4" onClick={() => navigate("/new-chat")}>
                         <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
                           <div className="nav-icon me-4">
-                           <i className="bi bi-broadcast-pin"></i>
+                            <i className="bi bi-broadcast-pin"></i>
                           </div>
                           <div className="nav-content flex-grow-1">
                             <h4 className="mb-2 fw-bold text-white">Live Sessions</h4>
