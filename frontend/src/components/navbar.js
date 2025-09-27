@@ -257,7 +257,7 @@ function Navbar() {
                               className="rounded-circle"
                               style={{
                                 objectFit: 'cover',
-                                filter: 'blur(0.25px)'
+                                filter: 'blur(0.5px)'
                               }}
                             />
                           ) : (
