@@ -334,7 +334,7 @@ function Chat() {
                                         />
                                         {/* Find the "Run Code" button */}
                                         <button
-                                            className="btn btn-run-gradient btn-sm align-self-start" // <-- Added flex classes
+                                            className="btn btn-primary btn-sm align-self-start d-flex align-items-center" // <-- Added flex classes
                                             onClick={handleRun}
                                             disabled={isRunning}
                                             style={{ width: '80px', justifyContent: 'center' }} // <-- Optional: fixed width for consistency
