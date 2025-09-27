@@ -6,12 +6,13 @@
   padding-bottom: 1.5rem;
 }
 
-/* Chat message styles */
 .chat-messages-container {
+  flex-grow: 1; /* Allows the container to fill the available space */
+  overflow-y: auto; /* Adds a scrollbar only when messages overflow */
+  max-height: 300px; /* Sets a maximum height for the chat window */
   display: flex;
   flex-direction: column;
 }
-
 .chat-message {
   margin-bottom: 1rem;
   display: flex;

@@ -39,7 +39,8 @@ function Chat() {
     const [codeLanguage, setCodeLanguage] = useState('javascript');
     const [verdicts, setVerdicts] = useState([]);
     const [TotalTime, setTime] = useState(null);
-    
+    const [showAllUsers, setShowAllUsers] = useState(false);
+
     // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
@@ -84,7 +85,7 @@ function Chat() {
 
             const isOwner = user && data.ownerId === user._id;
             const hasAccess = data.access === 'public' || (user && data.allowedEmails?.includes(user.email)) || isOwner;
-            
+
             console.log("Debug 4: Checking access. Has Access:", hasAccess);
 
             if (!hasAccess) {
@@ -93,7 +94,7 @@ function Chat() {
                 setLoading(false);
                 return;
             }
-            
+
             console.log("Debug 5: Access granted. Updating state.");
 
             if (user) {
@@ -104,7 +105,7 @@ function Chat() {
                     }).catch(console.error);
                 }
             }
-            
+
             const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
             setUserRole(role);
             setCode(data.code || '');
@@ -178,7 +179,7 @@ function Chat() {
                         audio = document.createElement('audio'); audio.id = `audio-${incoming.senderId}`;
                         audio.autoplay = true; audioContainerRef.current.appendChild(audio);
                     }
-                     audio.srcObject = remoteStream;
+                    audio.srcObject = remoteStream;
                 }
             });
             peer.on('close', () => { const audioElem = document.getElementById(`audio-${incoming.senderId}`); if (audioElem) audioElem.remove(); });
@@ -215,7 +216,7 @@ function Chat() {
             if (sender) { sender.replaceTrack(audioTrack); }
         });
     }, [muteStatus, stream, user]);
-    
+
     // --- Handler Functions ---
 
     const handleToggleMute = async (targetUserId) => {
@@ -252,10 +253,10 @@ function Chat() {
             const res = await axios.post(`${API_COM}/run`, { language: apiLanguage, code, input });
             const dataToUpdate = { lastRunOutput: res.data.output || 'Execution finished.', lastRunVerdicts: res.data.verdicts || [], lastRunTime: res.data.totalTime || null, lastRunTimestamp: serverTimestamp() };
             await updateDoc(doc(db, 'sessions', sessionId), dataToUpdate);
-        } catch (error) { setOutput(error.message || 'An unexpected error occurred.'); } 
+        } catch (error) { setOutput(error.message || 'An unexpected error occurred.'); }
         finally { setIsRunning(false); }
     };
-    
+
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center vh-100">
@@ -269,7 +270,7 @@ function Chat() {
             </div>
         );
     }
-    
+
     if (accessDenied) { return <div className="container mt-5"><div className="alert alert-danger"><b>Access Denied.</b></div></div>; }
     return (
         <>
@@ -353,17 +354,38 @@ function Chat() {
                                 <span>Active Users ({activeUsers.length})</span>
                                 <i className="bi bi-broadcast text-success"></i>
                             </div>
+                            {/* Replace the entire <ul className="list-group list-group-flush">...</ul> block with this */}
+
                             <ul className="list-group list-group-flush">
-                                {activeUsers.map(p => (
+                                {/* Always show the first 4 users */}
+                                {activeUsers.slice(0, 4).map(p => (
                                     <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                        <span className="fw-bold">{p.name}</span> {/* UI FIX: Bolder font */}
+                                        <span className="fw-bold">{p.name}</span>
                                         {p.id === user?._id && <span className="ms-2">(You)</span>}
                                         {sessionAccess === 'private' && stream && (
                                             <button
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
                                                 disabled={userRole !== 'editor' && p.id !== user?._id}
-                                                style={{ fontSize: '1.2rem' }} // UI FIX: Larger mic icon
+                                                style={{ fontSize: '1.2rem' }}
+                                            >
+                                                <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
+                                            </button>
+                                        )}
+                                    </li>
+                                ))}
+
+                                {/* Conditionally show the rest of the users if the list is expanded */}
+                                {showAllUsers && activeUsers.slice(4).map(p => (
+                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                        <span className="fw-bold">{p.name}</span>
+                                        {p.id === user?._id && <span className="ms-2">(You)</span>}
+                                        {sessionAccess === 'private' && stream && (
+                                            <button
+                                                className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
+                                                onClick={() => handleToggleMute(p.id)}
+                                                disabled={userRole !== 'editor' && p.id !== user?._id}
+                                                style={{ fontSize: '1.2rem' }}
                                             >
                                                 <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
                                             </button>
@@ -371,11 +393,23 @@ function Chat() {
                                     </li>
                                 ))}
                             </ul>
+
+                            {/* Add this button below the <ul> to toggle the view */}
+                            {activeUsers.length > 4 && (
+                                <div className="card-footer text-center p-1">
+                                    <button
+                                        className="btn btn-link btn-sm text-decoration-none"
+                                        onClick={() => setShowAllUsers(!showAllUsers)}
+                                    >
+                                        {showAllUsers ? 'Show Less' : `Show ${activeUsers.length - 4} More...`}
+                                    </button>
+                                </div>
+                            )}
                             <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                         </div>
 
                         {userRole === 'editor' && <div className="mb-3"><SharingComponent sessionId={sessionId} /></div>}
-                        
+
                         <div className="card shadow-sm flex-grow-1 chat-card">
                             <div className="card-header">Live Chat</div>
                             <div className="card-body d-flex flex-column">
