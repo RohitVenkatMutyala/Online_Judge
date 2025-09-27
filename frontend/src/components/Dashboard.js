@@ -122,20 +122,21 @@ function Dashboard() {
                     </div>
 
                     <div className="navigation-grid">
-                      <div className="nav-card mb-4" onClick={() => navigate("/funda")}>
+                         <div className="nav-card mb-4" onClick={() => navigate("/new-chat")}>
                         <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
                           <div className="nav-icon me-4">
-                            <i className="bi bi-book-half"></i>
+                           <i className="bi bi-broadcast-pin"></i>
                           </div>
                           <div className="nav-content flex-grow-1">
-                            <h4 className="mb-2 fw-bold text-white">Fundamentals</h4>
-                            <p className="mb-0 text-light opacity-90">Master the core concepts and principles</p>
+                            <h4 className="mb-2 fw-bold text-white">Live Sessions</h4>
+                            <p className="mb-0 text-light opacity-90">Real-time collaborative coding sessions, with an integrated chat for immediate doubt clarification</p>
                           </div>
                           <div className="nav-arrow">
                             <i className="bi bi-arrow-right-circle-fill"></i>
                           </div>
                         </div>
                       </div>
+                 
 
                       <div className="nav-card mb-4" onClick={() => navigate("/problems")}>
                         <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
@@ -151,14 +152,14 @@ function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="nav-card mb-4" onClick={() => navigate("/new-chat")}>
+                        <div className="nav-card mb-4" onClick={() => navigate("/funda")}>
                         <div className="nav-card-inner d-flex align-items-center p-4 rounded-3 shadow-sm h-100">
                           <div className="nav-icon me-4">
-                           <i className="bi bi-broadcast-pin"></i>
+                            <i className="bi bi-book-half"></i>
                           </div>
                           <div className="nav-content flex-grow-1">
-                            <h4 className="mb-2 fw-bold text-white">Live Sessions</h4>
-                            <p className="mb-0 text-light opacity-90">Real-time collaborative coding sessions, with an integrated chat for immediate doubt clarification</p>
+                            <h4 className="mb-2 fw-bold text-white">Fundamentals</h4>
+                            <p className="mb-0 text-light opacity-90">Master the core concepts and principles</p>
                           </div>
                           <div className="nav-arrow">
                             <i className="bi bi-arrow-right-circle-fill"></i>
