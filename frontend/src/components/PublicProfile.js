@@ -253,7 +253,7 @@ function PublicProfile() {
                                                         {recentSubmissions.map((sub, index) => (
                                                             <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
                                                                 <div>
-                                                                    <span className="fw-semibold">{sub.QID}</span>
+                                                                   <span>QID: <span className="fw-semibold">{sub.QID}</span></span>
                                                                     <small className="d-block text-muted">{sub.submittedAt}</small>
                                                                 </div>
                                                                 <span className={`badge ${sub.verdict === 'Passed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
