@@ -191,14 +191,7 @@ function Navbar() {
                     </>
                   ) : (
                     <>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/dashboard" style={navLinkStyle}
-                          onMouseEnter={(e) => handleNavLinkHover(e, true)}
-                          onMouseLeave={(e) => handleNavLinkHover(e, false)}>
-                          <i className="bi bi-house-fill"></i>
-                          <span>Dashboard</span>
-                        </Link>
-                      </li>
+
                       <li className="nav-item">
                         <Link className="nav-link" to="/problems" style={navLinkStyle}
                           onMouseEnter={(e) => handleNavLinkHover(e, true)}
@@ -246,7 +239,21 @@ function Navbar() {
                   {/* Enhanced Action Buttons */}
                   <li className="nav-item ms-lg-3">
                     <div className="d-flex gap-2 align-items-center">
-
+                      <button
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        className="btn btn-outline-light rounded-3"
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          width: '45px',
+                          height: '45px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+                      </button>
                       {/* === NEW PROFILE DROPDOWN START === */}
                       <div className="dropdown">
                         <a
@@ -285,26 +292,19 @@ function Navbar() {
                               Logout
                             </button>
                           </li>
+                          <li><hr className="dropdown-divider" /></li>
+                          <li>
+                            <Link className="nav-link" to="/dashboard">
+                              <i className="bi bi-house-fill"></i>
+                              <span>Dashboard</span>
+                            </Link>
+                          </li>
                         </ul>
                       </div>
                       {/* === NEW PROFILE DROPDOWN END === */}
 
                       {/* Theme Toggle (Unchanged, but now next to the dropdown) */}
-                      <button
-                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                        className="btn btn-outline-light rounded-3"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          width: '45px',
-                          height: '45px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                      </button>
+
                     </div>
                   </li>
                 </>
