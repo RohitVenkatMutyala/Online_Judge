@@ -6,11 +6,10 @@ import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
 import { Tooltip } from 'bootstrap';
 import { db, storage } from '../firebaseConfig';
-import { doc, onSnapshot, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-// All calendar-related imports have been removed.
 
 function Dashboard() {
     const { user } = useAuth();
@@ -54,14 +53,13 @@ function Dashboard() {
         return () => unsubscribe();
     }, [user]);
     
-    // Effect for fetching ALL data
+    // Effect for fetching stats data
     useEffect(() => {
         if (!user?._id) return;
 
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                // Fetch problems for stats
                 const problemsRes = await axios.get(`${API_URL}/problems/user/${user._id}`, { withCredentials: true });
                 if (problemsRes.data.success) {
                     const problems = problemsRes.data.problems;
@@ -80,13 +78,13 @@ function Dashboard() {
                             }
                             topicStats[tag].total++;
                             const difficulty = p.difficulty?.toLowerCase();
-                            if (difficulty === 'easy' || difficulty === 'medium' || difficulty === 'hard') {
+                            if (['easy', 'medium', 'hard'].includes(difficulty)) {
                                 topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
                             }
 
                             if (p.status === 'Solved') {
                                 topicStats[tag].solved++;
-                                if (difficulty === 'easy' || difficulty === 'medium' || difficulty === 'hard') {
+                                if (['easy', 'medium', 'hard'].includes(difficulty)) {
                                     topicStats[tag][`${difficulty}Solved`]++;
                                 }
                             }
@@ -186,6 +184,19 @@ function Dashboard() {
             </div>
         </div>
     );
+
+    const NavCard = ({ title, description, icon, path }) => (
+        <div className="nav-card" onClick={() => navigate(path)}>
+            <div className="d-flex align-items-center p-4 rounded-3 h-100">
+                <div className="nav-icon me-4"><i className={`bi ${icon}`}></i></div>
+                <div className="flex-grow-1">
+                    <h5 className="mb-1 fw-bold">{title}</h5>
+                    <p className="mb-0 small text-muted">{description}</p>
+                </div>
+                <div className="nav-arrow"><i className="bi bi-arrow-right-circle-fill"></i></div>
+            </div>
+        </div>
+    );
     
     return (
         <>
@@ -233,9 +244,16 @@ function Dashboard() {
                                                 </div>
                                             </div>
                                             
-                                            {/* The heatmap section has been removed to prevent the crash */}
-                                            <div className="text-center text-muted">
-                                                <p>Your submission heatmap will be displayed here in a future update.</p>
+                                            {/* Navigation Links Section */}
+                                            <div>
+                                                <h4 className="fw-semibold mb-3">Explore</h4>
+                                                <div className="row g-3">
+                                                    <div className="col-12"><NavCard title="Live Sessions" description="Collaborative coding with integrated chat" icon="bi-broadcast-pin" path="/new-chat" /></div>
+                                                    <div className="col-12"><NavCard title="Solve Problems" description="Practice coding with our curated problem sets" icon="bi-puzzle-fill" path="/problems" /></div>
+                                                    <div className="col-12"><NavCard title="Fundamentals" description="Master the core concepts and principles" icon="bi-book-half" path="/funda" /></div>
+                                                    <div className="col-12"><NavCard title="Contests" description="Explore real-world examples and use cases" icon="bi-collection-fill" path="/contexts" /></div>
+                                                    <div className="col-12"><NavCard title="Submissions" description="Review your previous solutions and progress" icon="bi-check2-square" path="/sub" /></div>
+                                                </div>
                                             </div>
                                         </>
                                         )}
@@ -260,12 +278,31 @@ function Dashboard() {
                 .profile-overlay { transition: all 0.3s ease; border-radius: 50%; }
                 .profile-overlay i { opacity: 0; transition: all 0.3s ease; }
                 .user-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); color: white; }
+                
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
+                .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+                
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
+
+                /* Navigation Card Styles */
+                .nav-card { cursor: pointer; transition: all 0.2s ease-in-out; border-radius: 0.5rem; }
+                .theme-dark .nav-card { background-color: rgba(255,255,255,0.05); }
+                .theme-light .nav-card { background-color: #f8f9fa; }
+                .theme-dark .nav-card:hover { background-color: rgba(255,255,255,0.1); transform: translateY(-3px); }
+                .theme-light .nav-card:hover { background-color: #e9ecef; transform: translateY(-3px); }
+                
+                .nav-icon { font-size: 1.5rem; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+                .theme-dark .nav-icon { background-color: rgba(255,255,255,0.1); color: #fff; }
+                .theme-light .nav-icon { background-color: #e9ecef; color: #495057; }
+                
+                .nav-arrow { font-size: 1.5rem; transition: transform 0.2s ease-in-out; }
+                .theme-dark .nav-arrow { color: #6c757d; }
+                .theme-light .nav-arrow { color: #adb5bd; }
+                .nav-card:hover .nav-arrow { transform: translateX(5px); }
+                
                 @media (max-width: 991.98px) {
                     .profile-column { border-radius: 1rem 1rem 0 0; }
                     .content-column { border-radius: 0 0 1rem 1rem; }
