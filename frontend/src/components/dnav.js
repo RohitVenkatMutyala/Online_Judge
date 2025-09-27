@@ -11,7 +11,7 @@ function Dnav() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
-   const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
     // If there's no user, do nothing
@@ -74,16 +74,16 @@ function Dnav() {
     <>
       {/* Enhanced Navigation Bar */}
       <nav className="navbar navbar-expand-lg sticky-top shadow-lg"
-           style={{
-             background: 'linear-gradient(135deg, #1a1d23 0%, #20232a 50%, #2c3e50 100%)',
-             backdropFilter: 'blur(10px)',
-             borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-           }}>
+        style={{
+          background: 'linear-gradient(135deg, #1a1d23 0%, #20232a 50%, #2c3e50 100%)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
         <div className="container-fluid px-4">
 
           {/* === MODIFIED LOGO SECTION START === */}
           <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-3 py-2">
-       
+
             <span
               className="fw-bold"
               style={{
@@ -144,106 +144,121 @@ function Dnav() {
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
               {user ? (
                 <>
-                  
+
                   {/* Enhanced Action Buttons */}
-                    <li className="nav-item ms-lg-3">
-                                  <div className="d-flex gap-2 align-items-center">
-              
-                                    {/* === NEW PROFILE DROPDOWN START === */}
-                                    <div className="dropdown">
-                                      <a
-                                        href="#"
-                                        className="d-block link-light text-decoration-none dropdown-toggle"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
-                                      >
-                                        {profileImage ? (
-                                          <img
-                                            src={profileImage}
-                                            alt="User"
-                                            width="38"
-                                            height="38"
-                                            className="rounded-circle"
-                                            style={{
-                                              objectFit: 'cover',
-                                              filter: 'blur(0.5px)'
-                                            }}
-                                          />
-                                        ) : (
-                                          <i className="bi bi-person-circle text-white fs-3"></i>
-                                        )}
-                                      </a>
-                                      <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2">
-                                        <li>
-                                          <div className="dropdown-item-text text-white">
-                                            <strong>{user.firstname} {user.lastname}</strong>
-                                            <div className="small opacity-75">{user.email}</div>
-                                          </div>
-                                        </li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li>
-                                          <button
-                                           className="dropdown-item d-flex align-items-center gap-2"
-                                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                           
-              
-                                          >
-                                            <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                                                Theme
-                                          </button>
-                                        </li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li>
-                                          <button
-                                            className="dropdown-item d-flex align-items-center gap-2"
-                                            onClick={handleLogout}
-                                          >
-                                            <i className="bi bi-box-arrow-right"></i>
-                                            Logout
-                                          </button>
-                                        </li>
-                                   
-                                      </ul>
-                                    </div>
-                                    {/* === NEW PROFILE DROPDOWN END === */}
-              
-                                    {/* Theme Toggle (Unchanged, but now next to the dropdown) */}
-              
-                                  </div>
-                                </li>
+                  <li className="nav-item ms-lg-3">
+                    <div className="d-flex gap-2 align-items-center">
+
+                      {/* === NEW PROFILE DROPDOWN START === */}
+                      <div className="dropdown">
+                        <a
+                          href="#"
+                          className="d-block link-light text-decoration-none dropdown-toggle"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          {profileImage ? (
+                            <img
+                              src={profileImage}
+                              alt="User"
+                              width="38"
+                              height="38"
+                              className="rounded-circle"
+                              style={{
+                                objectFit: 'cover',
+                                filter: 'blur(0.5px)'
+                              }}
+                            />
+                          ) : (
+                            <i className="bi bi-person-circle text-white fs-3"></i>
+                          )}
+                        </a>
+                        <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2">
+                          <li>
+                            <div className="dropdown-item-text text-white">
+                              <strong>{user.firstname} {user.lastname}</strong>
+                              <div className="small opacity-75">{user.email}</div>
+                            </div>
+                          </li>
+                          <li><hr className="dropdown-divider" /></li>
+                          <li>
+                            <button
+                              className="dropdown-item d-flex align-items-center gap-2"
+                              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+
+
+                            >
+                              <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+                              Theme
+                            </button>
+                          </li>
+                          <li><hr className="dropdown-divider" /></li>
+                          <li>
+                            <button
+                              className="dropdown-item d-flex align-items-center gap-2"
+                              onClick={handleLogout}
+                            >
+                              <i className="bi bi-box-arrow-right"></i>
+                              Logout
+                            </button>
+                          </li>
+
+                        </ul>
+                      </div>
+                      {/* === NEW PROFILE DROPDOWN END === */}
+
+                      {/* Theme Toggle (Unchanged, but now next to the dropdown) */}
+
+                    </div>
+                  </li>
                 </>
               ) : (
-                <li className="nav-item">
-                  <Link
-                    className="btn rounded-3 px-4 py-2"
-                    to="/login"
-                    style={{
-                      background: 'linear-gradient(135deg, #11998e, #38ef7d)',
-                      border: 'none',
-                      color: 'white',
-                      fontWeight: '600',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = 'linear-gradient(135deg, #f12711, #f5af19)';
-                      e.target.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
-                      e.target.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    <i className="bi bi-person-fill me-2"></i>
-                    Login
-                  </Link>
+                <li className="nav-item ms-lg-3">
+                  <div className="d-flex gap-2 align-items-center">
+
+                    {/* === NEW LOGIN DROPDOWN START === */}
+                    <div className="dropdown">
+                      <a
+                        href="#"
+                        className="d-block link-light text-decoration-none dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                        {/* Default icon for logged-out state */}
+                        <i className="bi bi-person-circle text-white fs-3"></i>
+                      </a>
+                      <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2">
+                        <li>
+                          <Link
+                            className="dropdown-item d-flex align-items-center gap-2"
+                            to="/login"
+                          >
+                            <i className="bi bi-box-arrow-in-right"></i>
+                            Login
+                          </Link>
+                        </li>
+                        <li><hr className="dropdown-divider" /></li>
+                        <li>
+                          <button
+                            className="dropdown-item d-flex align-items-center gap-2"
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                          >
+                            <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+                            Theme
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    {/* === NEW LOGIN DROPDOWN END === */}
+
+                  </div>
                 </li>
               )}
             </ul>
           </div>
         </div>
-      
-      </nav> 
+
+      </nav>
 
       {/* CSS for additional logo effects */}
       <style>{`
