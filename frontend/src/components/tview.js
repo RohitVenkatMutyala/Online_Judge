@@ -599,7 +599,7 @@ const Tview = () => {
                       data-bs-trigger="hover focus"
                       data-bs-placement="left"
                       data-bs-html="true"
-                      data-bs-title="<i class='bi bi-robot me-2'></i> AI Assistant Help"
+                      data-bs-title="<i class='bi bi-robot me-2'></i> Randoman AI Assistant Help"
                       data-bs-content="<div class='p-1 text-start'><p class='mb-0'>Simply highlight any text on this page, and the 'Ask Randoman AI' button will appear automatically to give you a more detailed explanation.</p></div>"
                     >
                       <i
