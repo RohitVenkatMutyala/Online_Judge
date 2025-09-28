@@ -50,11 +50,11 @@ function Dashboard() {
     
     // State for AI Resume Reviewer
     const [resumeText, setResumeText] = useState('');
-    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [showResumeModal, setShowResumeModal] = useState(false);
     const [isReviewing, setIsReviewing] = useState(false);
     const [reviewFeedback, setReviewFeedback] = useState('');
     const [latestReview, setLatestReview] = useState(null);
-    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [viewingHistory, setViewingHistory] = useState(false);
 
     // Effect for fetching latest resume review on load
     useEffect(() => {
@@ -111,10 +111,8 @@ function Dashboard() {
                 if (problemsRes.data.success) {
                     const problems = problemsRes.data.problems;
                     const solvedProblems = problems.filter(p => p.status === 'Solved');
-
                     const topicStats = {};
                     const allTopics = new Set();
-
                     problems.forEach(p => {
                         (p.tag?.split(',') || []).forEach(rawTag => {
                             const tag = rawTag.trim();
@@ -128,7 +126,6 @@ function Dashboard() {
                             if (['easy', 'medium', 'hard'].includes(difficulty)) {
                                 topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
                             }
-
                             if (p.status === 'Solved') {
                                 topicStats[tag].solved++;
                                 if (['easy', 'medium', 'hard'].includes(difficulty)) {
@@ -137,7 +134,6 @@ function Dashboard() {
                             }
                         });
                     });
-
                     setStats({
                         total: problems.length,
                         solved: solvedProblems.length,
@@ -164,7 +160,6 @@ function Dashboard() {
                 });
                 const formattedHeatmapData = Object.entries(submissionCounts).map(([date, count]) => ({ date, count }));
                 setHeatmapData(formattedHeatmapData);
-
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
                 toast.error("Could not load your stats.");
@@ -172,7 +167,6 @@ function Dashboard() {
                 setIsLoading(false);
             }
         };
-
         fetchData();
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         tooltipTriggerList.forEach(el => new BootstrapTooltip(el));
@@ -209,7 +203,6 @@ function Dashboard() {
             toast.error("Please wait a moment and try again.");
             return;
         }
-
         setIsUploading(true);
         toast.info("Uploading image...");
         const storageRef = ref(storage, `profile_images/${user._id}`);
@@ -260,7 +253,6 @@ function Dashboard() {
             toast.warn("Please enter valid URLs.");
             return;
         }
-
         const toastId = toast.loading("Updating links...");
         const publicProfileDocRef = doc(db, 'publicProfiles', user._id);
         try {
@@ -268,7 +260,6 @@ function Dashboard() {
                 githubLink: tempGithub,
                 linkedinLink: tempLinkedin
             }, { merge: true });
-
             toast.update(toastId, { render: "Links updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
             setShowLinkModal(false);
         } catch (error) {
@@ -282,11 +273,8 @@ function Dashboard() {
             toast.warn("Please paste your resume text into the box first.");
             return;
         }
-
-        setShowReviewModal(true);
         setIsReviewing(true);
         setReviewFeedback("Connecting to AI Reviewer...");
-
         const prompt = `Act as an expert technical recruiter and resume reviewer for a software engineering role. Analyze the following resume text, providing constructive, actionable feedback. Structure your review with sections for: 
         1. **Overall Impression**: A brief summary.
         2. **Strengths**: 2-3 key strengths of the resume.
@@ -301,7 +289,6 @@ function Dashboard() {
             const response = await axios.post(`${API_URL}/help`, { code: prompt, QID: 2 });
             const result = response.data.result || "The AI could not provide a review at this time.";
             setReviewFeedback(result);
-
             const reviewDocRef = doc(db, 'resumeReviews', user._id);
             const newReview = {
                 feedback: result,
@@ -310,7 +297,6 @@ function Dashboard() {
             };
             await setDoc(reviewDocRef, newReview);
             setLatestReview(newReview);
-            
         } catch (error) {
             console.error("AI Resume Review error:", error);
             setReviewFeedback("An error occurred while contacting the AI service. Please try again later.");
@@ -318,6 +304,13 @@ function Dashboard() {
         } finally {
             setIsReviewing(false);
         }
+    };
+
+    const resetAndCloseResumeModal = () => {
+        setShowResumeModal(false);
+        setResumeText('');
+        setReviewFeedback('');
+        setViewingHistory(false);
     };
 
     if (!user || user.role === 'admin') {
@@ -373,7 +366,6 @@ function Dashboard() {
                                         </label>
                                         <input type="file" id="profileUpload" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} disabled={isUploading} />
                                     </div>
-
                                     <div className="col-12 col-md">
                                         <h1 className="fw-bold mb-1">Welcome Back, {user.firstname}!</h1>
                                         <p className="lead text-muted mb-2">{user.email}</p>
@@ -439,7 +431,7 @@ function Dashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="mb-5">
+                                        <div>
                                             <h4 className="fw-semibold mb-3">Explore</h4>
                                             <div className="row g-3">
                                                 <div className="col-12"><NavCard title="Live Sessions" description="Collaborative coding with integrated chat" icon="bi-broadcast-pin" path="/new-chat" /></div>
@@ -447,39 +439,6 @@ function Dashboard() {
                                                 <div className="col-12"><NavCard title="Fundamentals" description="Master the core concepts and principles" icon="bi-book-half" path="/funda" /></div>
                                                 <div className="col-12"><NavCard title="Contests" description="Explore real-world examples and use cases" icon="bi-collection-fill" path="/contexts" /></div>
                                                 <div className="col-12"><NavCard title="Submissions" description="Review your previous solutions and progress" icon="bi-check2-square" path="/sub" /></div>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 className="fw-semibold mb-3">AI Tools</h4>
-                                            <div className="resume-card card">
-                                                <div className="card-body p-4">
-                                                    <div className="d-flex align-items-center mb-3">
-                                                        <div className="nav-icon me-3"><i className="bi bi-file-earmark-person-fill"></i></div>
-                                                        <div className="flex-grow-1">
-                                                            <h5 className="mb-1 fw-bold">Randoman AI Resume Reviewer</h5>
-                                                            <p className="mb-0 small text-muted">Paste your resume text below for instant feedback.</p>
-                                                        </div>
-                                                        {latestReview && (
-                                                            <button className="btn btn-outline-secondary btn-sm" onClick={() => setShowHistoryModal(true)}>
-                                                                <i className="bi bi-clock-history me-1"></i> View Latest Review
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <textarea
-                                                        className="form-control resume-textarea"
-                                                        rows="8"
-                                                        placeholder="Paste the full text of your resume here..."
-                                                        value={resumeText}
-                                                        onChange={(e) => setResumeText(e.target.value)}
-                                                    ></textarea>
-                                                    <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview} disabled={isReviewing}>
-                                                        {isReviewing ? 
-                                                            <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing...</> : 
-                                                            <><i className="bi bi-magic me-2"></i>Review with Randoman AI</>
-                                                        }
-                                                    </button>
-                                                </div>
                                             </div>
                                         </div>
                                     </>
@@ -490,8 +449,17 @@ function Dashboard() {
                 </div>
             </div>
 
+            <button
+                className="btn btn-primary rounded-circle shadow-lg floating-ai-btn"
+                onClick={() => setShowResumeModal(true)}
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+                title="Randoman AI Resume Reviewer"
+            >
+                <i className="bi bi-robot fs-4"></i>
+            </button>
+
             <style>{`
-                /* ... Existing styles ... */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
                 .dashboard-container { min-height: 85vh; }
@@ -510,7 +478,7 @@ function Dashboard() {
                 .btn-share:hover { transform: translateY(-2px); background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; border-color: transparent; }
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
+                .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
@@ -542,20 +510,22 @@ function Dashboard() {
                 .theme-light .btn-edit-profile { background: #e9ecef; color: #495057; border-color: #dee2e6; }
                 .btn-edit-profile:hover { background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; border-color: transparent; transform: translateY(-2px); }
                 .markdown-content { white-space: pre-wrap; word-wrap: break-word; }
-                .theme-dark .resume-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
-                .theme-light .resume-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
+                .floating-ai-btn { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; z-index: 1050; display: flex; align-items: center; justify-content: center; }
                 .theme-dark .resume-textarea { background-color: #161b22; color: #fff; border-color: #3a3a5a; }
                 .theme-light .resume-textarea { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .resume-textarea:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
             `}</style>
             
-            {showReviewModal && (
+            {showResumeModal && (
                 <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                         <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
                             <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold"><i className="bi bi-robot me-2"></i> Randoman AI Resume Feedback</h5>
-                                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowReviewModal(false)}></button>
+                                <h5 className="modal-title fw-bold">
+                                    <i className="bi bi-robot me-2"></i> 
+                                    {viewingHistory ? "Latest Review History" : "AI Resume Reviewer"}
+                                </h5>
+                                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
                             </div>
                             <div className="modal-body">
                                 {isReviewing ? (
@@ -563,8 +533,49 @@ function Dashboard() {
                                         <div className="spinner-border text-primary" role="status"></div>
                                         <p className="mt-3 fw-semibold">{reviewFeedback}</p>
                                     </div>
+                                ) : reviewFeedback ? (
+                                    <>
+                                        <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => { setReviewFeedback(''); setResumeText(''); }}>
+                                            <i className="bi bi-arrow-left"></i> Review Another Resume
+                                        </button>
+                                        <div className="markdown-content"><ReactMarkdown>{reviewFeedback}</ReactMarkdown></div>
+                                    </>
+                                ) : viewingHistory ? (
+                                    <>
+                                         <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => setViewingHistory(false)}>
+                                            <i className="bi bi-arrow-left"></i> Back to Reviewer
+                                        </button>
+                                        {latestReview ? (
+                                            <div>
+                                                <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
+                                                <hr/>
+                                                <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
+                                            </div>
+                                        ) : (
+                                            <p>No review history found.</p>
+                                        )}
+                                    </>
                                 ) : (
-                                    <div className="markdown-content"><ReactMarkdown>{reviewFeedback}</ReactMarkdown></div>
+                                    <>
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <p className="mb-0 text-muted">Paste your resume text below for instant feedback.</p>
+                                            {latestReview && (
+                                                <button className="btn btn-link text-decoration-none btn-sm" onClick={() => setViewingHistory(true)}>
+                                                    View Latest Review <i className="bi bi-clock-history"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                        <textarea
+                                            className="form-control resume-textarea"
+                                            rows="12"
+                                            placeholder="Paste the full text of your resume here..."
+                                            value={resumeText}
+                                            onChange={(e) => setResumeText(e.target.value)}
+                                        ></textarea>
+                                        <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview}>
+                                            <i className="bi bi-magic me-2"></i>Review with Randoman AI
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -572,24 +583,6 @@ function Dashboard() {
                 </div>
             )}
             
-            {showHistoryModal && latestReview && (
-                 <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-                    <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
-                            <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold"><i className="bi bi-clock-history me-2"></i> Latest Resume Review</h5>
-                                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowHistoryModal(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                               <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
-                               <hr/>
-                               <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {showLinkModal && (
                 <div className="modal show fade" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
