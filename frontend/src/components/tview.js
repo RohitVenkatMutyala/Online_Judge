@@ -96,7 +96,7 @@ const Tview = () => {
     setExplanation('Getting a detailed explanation from the Randoman AI ....');
 
     // Manipulate the prompt to ask for a theory explanation
-    const prompt = `Explain the following concept in simple terms with clear examples. Do not provide code unless it is essential for the explanation: "${selectedText}"`;
+    const prompt = `Explain the following concept in simple terms with clear examples. Do not provide code and any score unless it is essential for the explanation: "${selectedText}"`;
 
     try {
       // Using the same '/help' endpoint, but with the new theory-focused prompt
