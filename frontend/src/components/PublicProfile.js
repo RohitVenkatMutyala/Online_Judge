@@ -12,29 +12,68 @@ import 'react-calendar-heatmap/dist/styles.css';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
+// Badge Definitions for Streaks
+const STREAK_BADGES = [
+    { days: 7, name: 'Weekly Warrior', icon: 'bi-calendar-week-fill', color: 'success' },
+    { days: 21, name: 'Consistent Coder', icon: 'bi-moon-stars-fill', color: 'info' },
+    { days: 49, name: 'Habitual Hacker', icon: 'bi-shield-check', color: 'primary' },
+    { days: 75, name: 'Elite Engineer', icon: 'bi-trophy-fill', color: 'warning' },
+    { days: 81, name: 'Legendary Loremaster', icon: 'bi-gem', color: 'danger' },
+];
+
 function PublicProfile() {
     const { userId } = useParams();
     const { theme } = useTheme();
     const API_URL = process.env.REACT_APP_SERVER_API;
 
     const [user, setUser] = useState(null);
-    const [stats, setStats] = useState({
-        total: 0,
-        solved: 0,
-        easySolved: 0,
-        mediumSolved: 0,
-        hardSolved: 0,
-        totalEasy: 0,
-        totalMedium: 0,
-        totalHard: 0,
-        byTopic: {},
-        topics: [],
-    });
+    const [stats, setStats] = useState({ /* ... */ });
     const [heatmapData, setHeatmapData] = useState([]);
     const [recentSubmissions, setRecentSubmissions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedTopic, setSelectedTopic] = useState('All');
+
+    // State for Streaks and Badges
+    const [streakInfo, setStreakInfo] = useState({ current: 0, longest: 0 });
+    const [awardedBadges, setAwardedBadges] = useState([]);
+
+    // Streak Calculation Logic
+    const calculateStreaks = (submissionDates) => {
+        if (submissionDates.length === 0) return { current: 0, longest: 0 };
+        const uniqueDates = [...new Set(submissionDates)].sort();
+        if (uniqueDates.length === 0) return { current: 0, longest: 0 };
+
+        let longestStreak = 0;
+        let currentStreak = 1;
+        
+        for (let i = 1; i < uniqueDates.length; i++) {
+            const currentDate = new Date(uniqueDates[i]);
+            const prevDate = new Date(uniqueDates[i-1]);
+            const diffTime = currentDate - prevDate;
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                currentStreak++;
+            } else {
+                longestStreak = Math.max(longestStreak, currentStreak);
+                currentStreak = 1;
+            }
+        }
+        longestStreak = Math.max(longestStreak, currentStreak);
+
+        let activeCurrentStreak = 0;
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        const lastSubmissionDateStr = uniqueDates[uniqueDates.length - 1];
+
+        if (lastSubmissionDateStr === today.toISOString().slice(0, 10) || lastSubmissionDateStr === yesterday.toISOString().slice(0, 10)) {
+            activeCurrentStreak = currentStreak;
+        }
+
+        return { current: activeCurrentStreak, longest: longestStreak };
+    };
 
     useEffect(() => {
         if (!userId) {
@@ -42,14 +81,12 @@ function PublicProfile() {
             setIsLoading(false);
             return;
         }
-
         const fetchData = async () => {
             setIsLoading(true);
             setError(null);
             try {
                 const publicProfileRef = doc(db, 'publicProfiles', userId);
                 const publicProfileSnap = await getDoc(publicProfileRef);
-
                 if (!publicProfileSnap.exists()) {
                     setError("Public profile not found or is private.");
                     setIsLoading(false);
@@ -99,21 +136,27 @@ function PublicProfile() {
                 const submissionsQuery = query(collection(db, "submissions"), where("id", "==", userId));
                 const querySnapshot = await getDocs(submissionsQuery);
                 const submissionCounts = {};
+                const submissionDates = [];
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.submittedAt) {
                         const date = new Date(data.submittedAt).toISOString().slice(0, 10);
                         submissionCounts[date] = (submissionCounts[date] || 0) + 1;
+                        submissionDates.push(date);
                     }
                 });
                 setHeatmapData(Object.entries(submissionCounts).map(([date, count]) => ({ date, count })));
-
+                
+                // Calculate and set streaks/badges
+                const calculatedStreaks = calculateStreaks(submissionDates);
+                setStreakInfo(calculatedStreaks);
+                setAwardedBadges(STREAK_BADGES.filter(badge => calculatedStreaks.longest >= badge.days));
+                
                 const recentSubmissionsQuery = query(collection(db, "submissions"), where("id", "==", userId), orderBy("submittedAt", "desc"), limit(5));
                 const recentSubmissionsSnapshot = await getDocs(recentSubmissionsQuery);
                 setRecentSubmissions(recentSubmissionsSnapshot.docs.map(doc => {
                     const data = doc.data();
                     return {
-                        problemName: data.problemName || 'Unknown Problem',
                         QID: data.QID || 'N/A',
                         verdict: data.verdict,
                         submittedAt: new Date(data.submittedAt).toLocaleDateString(),
@@ -127,32 +170,20 @@ function PublicProfile() {
                 setIsLoading(false);
             }
         };
-
         fetchData();
     }, [userId, API_URL]);
 
     const displayedStats = useMemo(() => {
-        if (selectedTopic === 'All') {
-            return {
-                total: stats.total,
-                solved: stats.solved,
-                easySolved: stats.easySolved,
-                mediumSolved: stats.mediumSolved,
-                hardSolved: stats.hardSolved,
-                totalEasy: stats.totalEasy,
-                totalMedium: stats.totalMedium,
-                totalHard: stats.totalHard,
-            };
-        }
+        if (selectedTopic === 'All') return {
+            total: stats.total, solved: stats.solved, easySolved: stats.easySolved, mediumSolved: stats.mediumSolved, hardSolved: stats.hardSolved, totalEasy: stats.totalEasy, totalMedium: stats.totalMedium, totalHard: stats.totalHard,
+        };
         return stats.byTopic[selectedTopic] || { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
     }, [selectedTopic, stats]);
 
     const StatCard = ({ title, value, total, icon, color }) => (
         <div className="stat-card card h-100 p-3">
             <div className="d-flex align-items-center">
-                <div className={`icon-container text-${color} bg-${color}-subtle me-3`}>
-                    <i className={`bi ${icon} fs-4`}></i>
-                </div>
+                <div className={`icon-container text-${color} bg-${color}-subtle me-3`}><i className={`bi ${icon} fs-4`}></i></div>
                 <div>
                     <p className="text-muted mb-0">{title}</p>
                     <h4 className="fw-bold mb-0">{value} / {total}</h4>
@@ -160,26 +191,12 @@ function PublicProfile() {
             </div>
         </div>
     );
-
+    
     const today = new Date();
     const startDate = new Date(new Date().setDate(today.getDate() - 365));
 
-    if (isLoading) {
-        return (
-            <div className="d-flex justify-content-center align-items-center vh-100">
-                <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
-            </div>
-        );
-    }
-
-    if (error || !user) {
-        return (
-            <>
-                <Dnav />
-                <div className="container mt-5"><div className="alert alert-danger text-center">{error || "User data could not be loaded."}</div></div>
-            </>
-        );
-    }
+    if (isLoading) return <div className="d-flex justify-content-center align-items-center vh-100"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>;
+    if (error || !user) return <><Dnav /><div className="container mt-5"><div className="alert alert-danger text-center">{error || "User data could not be loaded."}</div></div></>;
 
     return (
         <>
@@ -188,7 +205,6 @@ function PublicProfile() {
                 <div className="row g-4 justify-content-center">
                     <div className="col-12 col-xl-11">
                         <div className="dashboard-container rounded-4 overflow-hidden p-4 p-lg-5">
-                            {/* --- START: UNIFIED HEADER ROW --- */}
                             <div className="row g-4 align-items-center mb-5">
                                 <div className="col-12 col-md-auto">
                                     <div className="profile-image-container rounded-circle shadow-lg overflow-hidden position-relative mx-auto">
@@ -198,28 +214,15 @@ function PublicProfile() {
                                 <div className="col-12 col-md">
                                     <h1 className="fw-bold mb-1">{user.firstname} {user.lastname}</h1>
                                     <p className="lead text-muted mb-2">{user.email}</p>
-                                    <div className="d-flex align-items-center gap-2">
-                                        <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill">
-                                            <i className="bi bi-person-check-fill me-2"></i>
-                                            <span className="fw-semibold small">Verified User</span>
-                                        </div>
+                                    <div className="d-flex align-items-center flex-wrap gap-2">
+                                        <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill"><i className="bi bi-person-check-fill me-2"></i><span className="fw-semibold small">Verified User</span></div>
                                         <div className="vr d-none d-sm-block mx-2"></div>
-                                        {user.githubLink && (
-                                            <a href={user.githubLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View GitHub Profile">
-                                                <i className="bi bi-github fs-4"></i>
-                                            </a>
-                                        )}
-                                        {user.linkedinLink && (
-                                            <a href={user.linkedinLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View LinkedIn Profile">
-                                                <i className="bi bi-linkedin fs-4"></i>
-                                            </a>
-                                        )}
+                                        {user.githubLink && <a href={user.githubLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View GitHub Profile"><i className="bi bi-github fs-4"></i></a>}
+                                        {user.linkedinLink && <a href={user.linkedinLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View LinkedIn Profile"><i className="bi bi-linkedin fs-4"></i></a>}
                                     </div>
                                 </div>
                             </div>
-                            {/* --- END: UNIFIED HEADER ROW --- */}
 
-                            {/* --- START: STATS AND ACTIVITY CONTENT --- */}
                             <div className="mb-5">
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <h4 className="fw-semibold mb-0">Progress Overview</h4>
@@ -235,21 +238,35 @@ function PublicProfile() {
                                 </div>
                             </div>
 
+                            {/* Achievements & Streaks Section */}
+                            <div className="mb-5">
+                                <h4 className="fw-semibold mb-3">Achievements & Streaks</h4>
+                                <div className="row g-3">
+                                    <div className="col-md-6">
+                                        <div className="streak-card card h-100 p-3"><div className="d-flex align-items-center"><div className="icon-container text-danger bg-danger-subtle me-3"><i className="bi bi-fire fs-4"></i></div><div><p className="text-muted mb-0">Current Streak</p><h4 className="fw-bold mb-0">{streakInfo.current} Days</h4></div></div></div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="streak-card card h-100 p-3"><div className="d-flex align-items-center"><div className="icon-container text-warning bg-warning-subtle me-3"><i className="bi bi-trophy-fill fs-4"></i></div><div><p className="text-muted mb-0">Longest Streak</p><h4 className="fw-bold mb-0">{streakInfo.longest} Days</h4></div></div></div>
+                                    </div>
+                                </div>
+                                {awardedBadges.length > 0 && (
+                                    <div className="mt-4">
+                                        <h5 className="fw-semibold mb-3">Badges Earned</h5>
+                                        <div className="d-flex flex-wrap gap-3">
+                                            {awardedBadges.map(badge => (
+                                                <div key={badge.name} className={`badge-card text-center p-3 rounded-3 bg-${badge.color}-subtle`} data-bs-toggle="tooltip" title={`${badge.name} - ${badge.days} Day Streak`}>
+                                                    <i className={`${badge.icon} fs-2 text-${badge.color}`}></i>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="mb-5">
                                 <h4 className="fw-semibold mb-3">Submission Activity</h4>
                                 <div className="heatmap-container card p-3">
-                                    <ReactCalendarHeatmap
-                                        startDate={startDate}
-                                        endDate={today}
-                                        values={heatmapData}
-                                        classForValue={(value) => `color-github-${!value ? 0 : Math.min(4, value.count)}`}
-                                        tooltipDataAttrs={value => {
-                                            if (!value || !value.date) return { 'data-tooltip-id': null };
-                                            const dateStr = new Date(value.date).toDateString();
-                                            const countStr = `${value.count || 0} submissions`;
-                                            return { 'data-tooltip-id': 'heatmap-tooltip', 'data-tooltip-content': `${dateStr}: ${countStr}` };
-                                        }}
-                                    />
+                                    <ReactCalendarHeatmap startDate={startDate} endDate={today} values={heatmapData} classForValue={(value) => `color-github-${!value ? 0 : Math.min(4, value.count)}`} tooltipDataAttrs={value => { if (!value || !value.date) return null; const dateStr = new Date(value.date).toDateString(); const countStr = `${value.count || 0} submissions`; return { 'data-tooltip-id': 'heatmap-tooltip', 'data-tooltip-content': `${dateStr}: ${countStr}` }; }} />
                                     <ReactTooltip id="heatmap-tooltip" />
                                 </div>
                             </div>
@@ -261,13 +278,8 @@ function PublicProfile() {
                                         <ul className="list-group list-group-flush">
                                             {recentSubmissions.map((sub, index) => (
                                                 <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <span>QID: <span className="fw-semibold">{sub.QID}</span></span>
-                                                        <small className="d-block text-muted">{sub.submittedAt}</small>
-                                                    </div>
-                                                    <span className={`badge ${sub.verdict === 'Passed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
-                                                        {sub.verdict}
-                                                    </span>
+                                                    <div><span>QID: <span className="fw-semibold">{sub.QID}</span></span><small className="d-block text-muted">{sub.submittedAt}</small></div>
+                                                    <span className={`badge ${sub.verdict === 'Passed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>{sub.verdict}</span>
                                                 </li>
                                             ))}
                                         </ul>
@@ -276,12 +288,12 @@ function PublicProfile() {
                                     )}
                                 </div>
                             </div>
-                            {/* --- END: STATS AND ACTIVITY CONTENT --- */}
                         </div>
                     </div>
                 </div>
             </div>
             <style>{`
+                /* Your existing styles from Dashboard.js */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
                 .dashboard-container { min-height: 85vh; }
@@ -293,7 +305,7 @@ function PublicProfile() {
                 .user-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); color: white; }
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
+                .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
@@ -315,6 +327,23 @@ function PublicProfile() {
                 .social-link:hover { color: #3b82f6; transform: scale(1.1); }
                 .theme-light .social-link { color: #6c757d; }
                 .theme-light .social-link:hover { color: #000; }
+                
+                /* New Styles for Streaks and Badges */
+                .theme-dark .streak-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
+                .theme-light .streak-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
+                .badge-card {
+                    width: 80px;
+                    height: 80px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                    transition: transform 0.2s ease-in-out;
+                    cursor: pointer;
+                }
+                .badge-card:hover {
+                    transform: scale(1.1);
+                }
             `}</style>
         </>
     );
