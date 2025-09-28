@@ -11,7 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-// Helper to get today's date string for Firestore keys, matching your example
+// Helper to get today's date string for Firestore keys
 const getTodayDate = () => {
   const today = new Date();
   return today.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
@@ -19,7 +19,7 @@ const getTodayDate = () => {
 
 // Boilerplate code for each language
 const boilerplates = {
-  cpp: `#include <iostream>\n\nint main() {\n    // Your code here\n    std::cout << "Hello, World!";\n    return 0;\n}`,
+  cpp: `#include <iostream>\n using namespace std;\n\nint main() {\n    // Your code here\n    std::cout << "Hello, World!";\n    return 0;\n}`,
   py: `# Your code here\nprint("Hello, World!")`,
   java: `public class Main {\n    public static void main(String[] args) {\n        // Your code here\n        System.out.println("Hello, World!");\n    }\n}`
 };
@@ -43,7 +43,6 @@ const Solve = () => {
   const [activeTab, setActiveTab] = useState('input');
   const [TotalTime, setTime] = useState();
 
-  // NEW: State for the AI Debugger feature, matching your Submission.js
   const editorRef = useRef(null);
   const [isDebugging, setIsDebugging] = useState(false);
   const [debugResponse, setDebugResponse] = useState('');
@@ -51,9 +50,8 @@ const Solve = () => {
   const [helpCount, setHelpCount] = useState(0);
   const today = getTodayDate();
 
-  // NEW: Initialize Bootstrap Tooltips on component mount
+  // Initialize Bootstrap Tooltips
   useEffect(() => {
-    // This check ensures Bootstrap's JS is loaded before trying to use it
     if (typeof window.bootstrap !== 'undefined') {
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -62,7 +60,7 @@ const Solve = () => {
     }
   }, []);
 
-  // NEW: Fetch and manage daily AI help count from Firestore
+  // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
     const fetchHelpCount = async () => {
       if (!user?._id || !db) return;
@@ -82,7 +80,7 @@ const Solve = () => {
     fetchHelpCount();
   }, [user, db, today]);
 
-  // NEW: Function to update the help count in Firestore
+  // Function to update the help count in Firestore
   const updateHelpCount = async () => {
     if (!user?._id || !db) return;
     const helpDocRef = doc(db, "helpCounts", `${user._id}_${today}`);
@@ -95,22 +93,19 @@ const Solve = () => {
     }
   };
 
-  // UPDATED: Load code based on user, problem, AND language
+  // Load code based on user, problem, AND language
   useEffect(() => {
     const fetchUserData = async () => {
       if (user && QID && language) {
         try {
-          // UPDATED: Document ID now includes the language for specific saving
           const docId = `${user._id}-${QID}-${language}`;
           const docRef = doc(db, "codeSubmissions", docId);
           const docSnap = await getDoc(docRef);
-
           if (docSnap.exists()) {
             const data = docSnap.data();
             setCode(data.code || boilerplates[language]);
             setInput(data.input || '');
           } else {
-            // NEW: Set boilerplate if no code is found for this language
             setCode(boilerplates[language]);
             setInput('');
           }
@@ -120,7 +115,7 @@ const Solve = () => {
       }
     };
     fetchUserData();
-  }, [QID, user, language]); // UPDATED: Added language to dependency array
+  }, [QID, user, language]);
 
   // Fetch problem
   useEffect(() => {
@@ -135,7 +130,7 @@ const Solve = () => {
     fetchProblem();
   }, [QID, API_URL]);
 
-  // UPDATED: Save code to a language-specific document
+  // Save code to a language-specific document
   const saveToFirebase = async (newData) => {
     if (user && QID && language) {
       try {
@@ -160,8 +155,7 @@ const Solve = () => {
   };
 
   const handleLanguageChange = (e) => {
-    const newLang = e.target.value;
-    setLanguage(newLang);
+    setLanguage(e.target.value);
   };
 
   const handleinput = (e) => {
@@ -170,7 +164,7 @@ const Solve = () => {
     saveToFirebase({ input: val });
   };
 
-  // NEW: Handler for the AI Debugger, modeled after your Submission.js
+  // UPDATED: AI Debug handler now ALWAYS makes a new request
   const handleAIDebug = async (codeToDebug) => {
     if (helpCount >= 20) {
       alert("❌ Daily help limit of 20 reached!");
@@ -179,32 +173,28 @@ const Solve = () => {
 
     setIsDebugging(true);
     setShowDebugModal(true);
-    setDebugResponse('Checking for saved help...');
+    setDebugResponse('Getting a fresh suggestion from the AI...');
 
     try {
+      // ALWAYS make a new API request, caching is removed
+      const response = await axios.post(`${API_URL}/help`, { code: codeToDebug, QID });
+      const result = response.data.result || "No suggestion was returned from the AI.";
+
+      // Save the NEW response to Firestore for logging/history (overwriting old one)
       const helpResponsesRef = collection(db, "helpResponses");
       const helpId = `${user._id}-${QID}-${language}`;
       const helpDocRef = doc(helpResponsesRef, helpId);
-      const helpDoc = await getDoc(helpDocRef);
+      await setDoc(helpDocRef, {
+        userId: user._id,
+        QID: QID,
+        language: language,
+        response: result,
+        timestamp: new Date().toISOString()
+      });
 
-      if (helpDoc.exists()) {
-        setDebugResponse(helpDoc.data().response);
-      } else {
-        setDebugResponse('Getting new suggestion from AI...');
-        const response = await axios.post(`${API_URL}/help`, { code: codeToDebug, QID });
-        const result = response.data.result || "No suggestion was returned from the AI.";
+      setDebugResponse(result);
+      await updateHelpCount(); // Increment usage count only on new requests
 
-        await setDoc(helpDocRef, {
-          userId: user._id,
-          QID: QID,
-          language: language,
-          response: result,
-          timestamp: new Date().toISOString()
-        });
-
-        setDebugResponse(result);
-        await updateHelpCount();
-      }
     } catch (err) {
       console.error("❌ AI Debug error:", err);
       setDebugResponse("⚠️ Error retrieving help from AI or Firestore.");
@@ -213,7 +203,7 @@ const Solve = () => {
     }
   };
 
-  // NEW: Function to add the AI Debug action to the editor's right-click menu
+  // Add the AI Debug action to the editor's right-click menu
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
     editor.addAction({
@@ -222,7 +212,6 @@ const Solve = () => {
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1.5,
       run: function (ed) {
-        // FIX: Always get the most current code directly from the editor instance
         const selectedText = ed.getModel().getValueInRange(ed.getSelection());
         const currentCodeInEditor = ed.getValue();
         handleAIDebug(selectedText || currentCodeInEditor);
@@ -426,6 +415,7 @@ const Solve = () => {
           </div>
         </div>
       </div>
+      {/* AI Debugger Modal */}
       {showDebugModal && (
         <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
           <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -436,7 +426,10 @@ const Solve = () => {
               </div>
               <div className="modal-body">
                 {isDebugging ? (
-                  <div className="text-center py-5"><div className="spinner-border text-warning" role="status"></div><p className="mt-3 fw-semibold">{debugResponse}</p></div>
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-warning" role="status"></div>
+                    <p className="mt-3 fw-semibold">{debugResponse}</p>
+                  </div>
                 ) : (
                   <div className="markdown-content">
                     <ReactMarkdown
