@@ -16,6 +16,16 @@ import { Tooltip as ReactTooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import ReactMarkdown from "react-markdown";
 
+// --- ADD THIS NEW BLOCK: Badge Definitions ---
+const STREAK_BADGES = [
+    { days: 7, name: 'Weekly Warrior', icon: 'bi-calendar-week-fill', color: 'success' },
+    { days: 21, name: 'Consistent Coder', icon: 'bi-moon-stars-fill', color: 'info' },
+    { days: 49, name: 'Habitual Hacker', icon: 'bi-shield-check', color: 'primary' },
+    { days: 75, name: 'Elite Engineer', icon: 'bi-trophy-fill', color: 'warning' },
+    { days: 81, name: 'Legendary Loremaster', icon: 'bi-gem', color: 'danger' },
+];
+// --- END OF NEW BLOCK ---
+
 function Dashboard() {
     const { user } = useAuth();
     const { theme } = useTheme();
@@ -32,22 +42,16 @@ function Dashboard() {
     const [tempLinkedin, setTempLinkedin] = useState('');
 
     // State for Stats and Heatmap
-    const [stats, setStats] = useState({
-        total: 0,
-        solved: 0,
-        easySolved: 0,
-        mediumSolved: 0,
-        hardSolved: 0,
-        totalEasy: 0,
-        totalMedium: 0,
-        totalHard: 0,
-        byTopic: {},
-        topics: [],
-    });
+    const [stats, setStats] = useState({ /* ... */ });
     const [heatmapData, setHeatmapData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTopic, setSelectedTopic] = useState('All');
-    
+
+    // --- ADD THIS NEW BLOCK: State for Streaks and Badges ---
+    const [streakInfo, setStreakInfo] = useState({ current: 0, longest: 0 });
+    const [awardedBadges, setAwardedBadges] = useState([]);
+    // --- END OF NEW BLOCK ---
+
     // State for AI Resume Reviewer
     const [resumeText, setResumeText] = useState('');
     const [showResumeModal, setShowResumeModal] = useState(false);
@@ -56,7 +60,7 @@ function Dashboard() {
     const [latestReview, setLatestReview] = useState(null);
     const [viewingHistory, setViewingHistory] = useState(false);
 
-    // Effect for fetching latest resume review on load
+    // Effect for fetching latest resume review
     useEffect(() => {
         if (!user?._id) return;
         const fetchLatestReview = async () => {
@@ -69,16 +73,14 @@ function Dashboard() {
         fetchLatestReview();
     }, [user]);
 
-    // Effect for fetching user profile data (image from 'users', links from 'publicProfiles')
+    // Effect for fetching user profile data
     useEffect(() => {
         if (!user?._id) return;
-
         const userDocRef = doc(db, 'users', user._id);
         const userUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
             const seed = `${user.firstname} ${user.lastname}`;
             if (docSnap.exists()) {
-                const userData = docSnap.data();
-                setProfileImage(userData.profileImageURL || `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
+                setProfileImage(docSnap.data().profileImageURL || `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
             } else {
                 setProfileImage(`https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
             }
@@ -100,66 +102,131 @@ function Dashboard() {
         return () => { userUnsubscribe(); publicProfileUnsubscribe(); };
     }, [user]);
 
+    // --- ADD THIS NEW BLOCK: Streak Calculation Logic ---
+    const calculateStreaks = (submissionDates) => {
+        if (submissionDates.length === 0) {
+            return { current: 0, longest: 0 };
+        }
+
+        const uniqueDates = [...new Set(submissionDates)].sort();
+        if (uniqueDates.length === 0) {
+            return { current: 0, longest: 0 };
+        }
+
+        let longestStreak = 0;
+        let currentStreak = 0;
+        
+        // Calculate longest streak
+        for (let i = 0; i < uniqueDates.length; i++) {
+            if (i === 0) {
+                currentStreak = 1;
+            } else {
+                const currentDate = new Date(uniqueDates[i]);
+                const prevDate = new Date(uniqueDates[i - 1]);
+                const diffTime = currentDate - prevDate;
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    currentStreak++;
+                } else {
+                    longestStreak = Math.max(longestStreak, currentStreak);
+                    currentStreak = 1;
+                }
+            }
+        }
+        longestStreak = Math.max(longestStreak, currentStreak);
+
+        // Calculate current streak
+        let activeCurrentStreak = 0;
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        
+        const todayStr = today.toISOString().slice(0, 10);
+        const yesterdayStr = yesterday.toISOString().slice(0, 10);
+        
+        const lastSubmissionDateStr = uniqueDates[uniqueDates.length - 1];
+        
+        if (lastSubmissionDateStr === todayStr || lastSubmissionDateStr === yesterdayStr) {
+            activeCurrentStreak = currentStreak;
+        }
+
+        return { current: activeCurrentStreak, longest: longestStreak };
+    };
+    // --- END OF NEW BLOCK ---
+
     // Effect for fetching stats and heatmap data
     useEffect(() => {
         if (!user?._id) return;
-
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                // Fetch problems and calculate stats (existing logic)
                 const problemsRes = await axios.get(`${API_URL}/problems/user/${user._id}`, { withCredentials: true });
                 if (problemsRes.data.success) {
+                  // ... (your existing stats calculation logic remains here)
                     const problems = problemsRes.data.problems;
-                    const solvedProblems = problems.filter(p => p.status === 'Solved');
-                    const topicStats = {};
-                    const allTopics = new Set();
-                    problems.forEach(p => {
-                        (p.tag?.split(',') || []).forEach(rawTag => {
-                            const tag = rawTag.trim();
-                            if (!tag) return;
-                            allTopics.add(tag);
-                            if (!topicStats[tag]) {
-                                topicStats[tag] = { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
-                            }
-                            topicStats[tag].total++;
-                            const difficulty = p.difficulty?.toLowerCase();
-                            if (['easy', 'medium', 'hard'].includes(difficulty)) {
-                                topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
-                            }
-                            if (p.status === 'Solved') {
-                                topicStats[tag].solved++;
-                                if (['easy', 'medium', 'hard'].includes(difficulty)) {
-                                    topicStats[tag][`${difficulty}Solved`]++;
-                                }
-                            }
-                        });
-                    });
-                    setStats({
-                        total: problems.length,
-                        solved: solvedProblems.length,
-                        easySolved: solvedProblems.filter(p => p.difficulty === 'Easy').length,
-                        mediumSolved: solvedProblems.filter(p => p.difficulty === 'Medium').length,
-                        hardSolved: solvedProblems.filter(p => p.difficulty === 'Hard').length,
-                        totalEasy: problems.filter(p => p.difficulty === 'Easy').length,
-                        totalMedium: problems.filter(p => p.difficulty === 'Medium').length,
-                        totalHard: problems.filter(p => p.difficulty === 'Hard').length,
-                        byTopic: topicStats,
-                        topics: ['All', ...Array.from(allTopics).sort()],
-                    });
+                    const solvedProblems = problems.filter(p => p.status === 'Solved');
+                    const topicStats = {};
+                    const allTopics = new Set();
+                    problems.forEach(p => {
+                        (p.tag?.split(',') || []).forEach(rawTag => {
+                            const tag = rawTag.trim();
+                            if (!tag) return;
+                            allTopics.add(tag);
+                            if (!topicStats[tag]) {
+                                topicStats[tag] = { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
+                            }
+                            topicStats[tag].total++;
+                            const difficulty = p.difficulty?.toLowerCase();
+                            if (['easy', 'medium', 'hard'].includes(difficulty)) {
+                                topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
+                            }
+
+                            if (p.status === 'Solved') {
+                                topicStats[tag].solved++;
+                                if (['easy', 'medium', 'hard'].includes(difficulty)) {
+                                    topicStats[tag][`${difficulty}Solved`]++;
+                                }
+                            }
+                        });
+                    });
+                    setStats({
+                        total: problems.length,
+                        solved: solvedProblems.length,
+                        easySolved: solvedProblems.filter(p => p.difficulty === 'Easy').length,
+                        mediumSolved: solvedProblems.filter(p => p.difficulty === 'Medium').length,
+                        hardSolved: solvedProblems.filter(p => p.difficulty === 'Hard').length,
+                        totalEasy: problems.filter(p => p.difficulty === 'Easy').length,
+                        totalMedium: problems.filter(p => p.difficulty === 'Medium').length,
+                        totalHard: problems.filter(p => p.difficulty === 'Hard').length,
+                        byTopic: topicStats,
+                        topics: ['All', ...Array.from(allTopics).sort()],
+                    });
                 }
 
+                // Fetch submissions for heatmap
                 const submissionsQuery = query(collection(db, "submissions"), where("id", "==", user._id));
                 const querySnapshot = await getDocs(submissionsQuery);
                 const submissionCounts = {};
+                const submissionDates = [];
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.submittedAt) {
                         const date = new Date(data.submittedAt).toISOString().slice(0, 10);
                         submissionCounts[date] = (submissionCounts[date] || 0) + 1;
+                        submissionDates.push(date);
                     }
                 });
                 const formattedHeatmapData = Object.entries(submissionCounts).map(([date, count]) => ({ date, count }));
                 setHeatmapData(formattedHeatmapData);
+
+                // --- ADD THIS NEW BLOCK: Calculate and set streaks/badges ---
+                const calculatedStreaks = calculateStreaks(submissionDates);
+                setStreakInfo(calculatedStreaks);
+                setAwardedBadges(STREAK_BADGES.filter(badge => calculatedStreaks.longest >= badge.days));
+                // --- END OF NEW BLOCK ---
+
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
                 toast.error("Could not load your stats.");
@@ -167,154 +234,160 @@ function Dashboard() {
                 setIsLoading(false);
             }
         };
+
         fetchData();
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         tooltipTriggerList.forEach(el => new BootstrapTooltip(el));
     }, [user, API_URL]);
 
+    // All your other functions (displayedStats, handleImageChange, handleShare, handleUpdateLinks, handleResumeReview, etc.) remain unchanged.
+    // ...
     const displayedStats = useMemo(() => {
-        if (selectedTopic === 'All') {
-            return {
-                total: stats.total,
-                solved: stats.solved,
-                easySolved: stats.easySolved,
-                mediumSolved: stats.mediumSolved,
-                hardSolved: stats.hardSolved,
-                totalEasy: stats.totalEasy,
-                totalMedium: stats.totalMedium,
-                totalHard: stats.totalHard,
-            };
-        }
-        return stats.byTopic[selectedTopic] || { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
-    }, [selectedTopic, stats]);
+    if (selectedTopic === 'All') {
+      return {
+        total: stats.total,
+        solved: stats.solved,
+        easySolved: stats.easySolved,
+        mediumSolved: stats.mediumSolved,
+        hardSolved: stats.hardSolved,
+        totalEasy: stats.totalEasy,
+        totalMedium: stats.totalMedium,
+        totalHard: stats.totalHard,
+      };
+    }
+    return stats.byTopic[selectedTopic] || { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
+  }, [selectedTopic, stats]);
 
-    const handleImageChange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (!file.type.startsWith('image/')) {
-            toast.error("Invalid file type. Please select an image.");
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            toast.error("File is too large. Please select an image under 5MB.");
-            return;
-        }
-        if (!user?._id) {
-            toast.error("Please wait a moment and try again.");
-            return;
-        }
-        setIsUploading(true);
-        toast.info("Uploading image...");
-        const storageRef = ref(storage, `profile_images/${user._id}`);
-        try {
-            await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(storageRef);
-            await setDoc(doc(db, 'users', user._id), { profileImageURL: downloadURL }, { merge: true });
-            await setDoc(doc(db, 'publicProfiles', user._id), { profileImageURL: downloadURL }, { merge: true });
-            toast.success("Profile image updated!");
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            toast.error("Failed to update profile image.");
-        } finally {
-            setIsUploading(false);
-        }
-    };
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error("Invalid file type. Please select an image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error("File is too large. Please select an image under 5MB.");
+      return;
+    }
+    if (!user?._id) {
+      toast.error("Please wait a moment and try again.");
+      return;
+    }
 
-    const handleShare = async () => {
-        if (!user?._id) return;
-        try {
-            const publicProfileRef = doc(db, 'publicProfiles', user._id);
-            await setDoc(publicProfileRef, {
-                firstname: user.firstname,
-                lastname: user.lastname,
-                email: user.email,
-                profileImageURL: profileImage,
-                githubLink: githubLink,
-                linkedinLink: linkedinLink
-            }, { merge: true });
-            const shareUrl = `${window.location.origin}/profile/${user._id}`;
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                toast.success("Public profile URL copied to clipboard!");
-            }).catch(err => {
-                toast.error("Failed to copy URL.");
-            });
-        } catch (error) {
-            toast.error("Could not create shareable link.");
-        }
-    };
+    setIsUploading(true);
+    toast.info("Uploading image...");
+    const storageRef = ref(storage, `profile_images/${user._id}`);
+    try {
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      await setDoc(doc(db, 'users', user._id), { profileImageURL: downloadURL }, { merge: true });
+      await setDoc(doc(db, 'publicProfiles', user._id), { profileImageURL: downloadURL }, { merge: true });
+      toast.success("Profile image updated!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to update profile image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
-    const handleUpdateLinks = async () => {
-        if (!user?._id) {
-            toast.error("User not found. Please try again.");
-            return;
-        }
-        const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-        if ((tempGithub && !urlPattern.test(tempGithub)) || (tempLinkedin && !urlPattern.test(tempLinkedin))) {
-            toast.warn("Please enter valid URLs.");
-            return;
-        }
-        const toastId = toast.loading("Updating links...");
-        const publicProfileDocRef = doc(db, 'publicProfiles', user._id);
-        try {
-            await setDoc(publicProfileDocRef, {
-                githubLink: tempGithub,
-                linkedinLink: tempLinkedin
-            }, { merge: true });
-            toast.update(toastId, { render: "Links updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
-            setShowLinkModal(false);
-        } catch (error) {
-            console.error("Error updating links:", error);
-            toast.update(toastId, { render: "Failed to update links.", type: "error", isLoading: false, autoClose: 3000 });
-        }
-    };
+  const handleShare = async () => {
+    if (!user?._id) return;
+    try {
+      const publicProfileRef = doc(db, 'publicProfiles', user._id);
+      await setDoc(publicProfileRef, {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        profileImageURL: profileImage,
+        githubLink: githubLink,
+        linkedinLink: linkedinLink
+      }, { merge: true });
+      const shareUrl = `${window.location.origin}/profile/${user._id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast.success("Public profile URL copied to clipboard!");
+      }).catch(err => {
+        toast.error("Failed to copy URL.");
+      });
+    } catch (error) {
+      toast.error("Could not create shareable link.");
+    }
+  };
 
-    const handleResumeReview = async () => {
-        if (!resumeText.trim()) {
-            toast.warn("Please paste your resume text into the box first.");
-            return;
-        }
-        setIsReviewing(true);
-        setReviewFeedback("Connecting to AI Reviewer...");
-        const prompt = `Act as an expert technical recruiter and resume reviewer for a software engineering role. Analyze the following resume text, providing constructive, actionable feedback. Structure your review with sections for: 
-        1. **Overall Impression**: A brief summary.
-        2. **Strengths**: 2-3 key strengths of the resume.
-        3. **Areas for Improvement**: Detailed suggestions on clarity, impact (using metrics), project descriptions, and technical skills. Provide specific examples of how to rephrase bullet points.
-        4. **Final Polish**: Tips on formatting and language.
-        5. **Additional Resources**: Links to relevant articles, tools, or examples for further improvement.
-        6. **Common Mistakes**: Highlight frequent errors found in resumes and how to avoid them.
-        7. **ATS Optimization**: Advice on keywords and formatting to pass Applicant Tracking Systems.
-        8. **ATS Score**: Provide an estimated ATS score out of 100 based on the content and formatting.
-        Here is the resume:
-        ---
-        ${resumeText}`;
+  const handleUpdateLinks = async () => {
+    if (!user?._id) {
+      toast.error("User not found. Please try again.");
+      return;
+    }
+    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+    if ((tempGithub && !urlPattern.test(tempGithub)) || (tempLinkedin && !urlPattern.test(tempLinkedin))) {
+      toast.warn("Please enter valid URLs.");
+      return;
+    }
 
-        try {
-            const response = await axios.post(`${API_URL}/help`, { code: prompt, QID: 2 });
-            const result = response.data.result || "The AI could not provide a review at this time.";
-            setReviewFeedback(result);
-            const reviewDocRef = doc(db, 'resumeReviews', user._id);
-            const newReview = {
-                feedback: result,
-                reviewedAt: new Date().toISOString(),
-                userId: user._id
-            };
-            await setDoc(reviewDocRef, newReview);
-            setLatestReview(newReview);
-        } catch (error) {
-            console.error("AI Resume Review error:", error);
-            setReviewFeedback("An error occurred while contacting the AI service. Please try again or try later.");
-            toast.error("Failed to get resume review.");
-        } finally {
-            setIsReviewing(false);
-        }
-    };
+    const toastId = toast.loading("Updating links...");
+    const publicProfileDocRef = doc(db, 'publicProfiles', user._id);
+    try {
+      await setDoc(publicProfileDocRef, {
+        githubLink: tempGithub,
+        linkedinLink: tempLinkedin
+      }, { merge: true });
+      toast.update(toastId, { render: "Links updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
+      setShowLinkModal(false);
+    } catch (error) {
+      console.error("Error updating links:", error);
+      toast.update(toastId, { render: "Failed to update links.", type: "error", isLoading: false, autoClose: 3000 });
+    }
+  };
 
-    const resetAndCloseResumeModal = () => {
-        setShowResumeModal(false);
-        setResumeText('');
-        setReviewFeedback('');
-        setViewingHistory(false);
-    };
+  const handleResumeReview = async () => {
+    if (!resumeText.trim()) {
+      toast.warn("Please paste your resume text into the box first.");
+      return;
+    }
+    setIsReviewing(true);
+    setReviewFeedback("Connecting to AI Reviewer...");
+    const prompt = `Act as an expert technical recruiter and resume reviewer for a software engineering role. Analyze the following resume text, providing constructive, actionable feedback. Structure your review with sections for: 
+    1. **Overall Impression**: A brief summary.
+    2. **Strengths**: 2-3 key strengths of the resume.
+    3. **Areas for Improvement**: Detailed suggestions on clarity, impact (using metrics), project descriptions, and technical skills. Provide specific examples of how to rephrase bullet points.
+    4. **Final Polish**: Tips on formatting and language.
+    5. **Additional Resources**: Links to relevant articles, tools, or examples for further improvement.
+    6. **Common Mistakes**: Highlight frequent errors found in resumes and how to avoid them.
+    7. **ATS Optimization**: Advice on keywords and formatting to pass Applicant Tracking Systems.
+    8. **ATS Score**: Provide an estimated ATS score out of 100 based on the content and formatting.
+    Here is the resume:
+    ---
+    ${resumeText}`;
+
+    try {
+      const response = await axios.post(`${API_URL}/help`, { code: prompt, QID: 2 });
+      const result = response.data.result || "The AI could not provide a review at this time.";
+      setReviewFeedback(result);
+      const reviewDocRef = doc(db, 'resumeReviews', user._id);
+      const newReview = {
+        feedback: result,
+        reviewedAt: new Date().toISOString(),
+        userId: user._id
+      };
+      await setDoc(reviewDocRef, newReview);
+      setLatestReview(newReview);
+    } catch (error) {
+      console.error("AI Resume Review error:", error);
+      setReviewFeedback("An error occurred while contacting the AI service. Please try again or try later.");
+      toast.error("Failed to get resume review.");
+    } finally {
+      setIsReviewing(false);
+    }
+  };
+
+  const resetAndCloseResumeModal = () => {
+    setShowResumeModal(false);
+    setResumeText('');
+    setReviewFeedback('');
+    setViewingHistory(false);
+  };
+    // ...
 
     if (!user || user.role === 'admin') {
         return <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>;
@@ -369,6 +442,7 @@ function Dashboard() {
                                         </label>
                                         <input type="file" id="profileUpload" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} disabled={isUploading} />
                                     </div>
+
                                     <div className="col-12 col-md">
                                         <h1 className="fw-bold mb-1">Welcome Back, {user.firstname}!</h1>
                                         <p className="lead text-muted mb-2">{user.email}</p>
@@ -400,6 +474,7 @@ function Dashboard() {
 
                                 {isLoading ? <div className="text-center py-5"><div className="spinner-border" role="status"></div></div> : (
                                     <>
+                                        {/* Existing Progress Overview */}
                                         <div className="mb-5">
                                             <div className="d-flex justify-content-between align-items-center mb-3">
                                                 <h4 className="fw-semibold mb-0">Progress Overview</h4>
@@ -415,6 +490,54 @@ function Dashboard() {
                                             </div>
                                         </div>
 
+                                        {/* --- ADD THIS NEW BLOCK: Achievements & Streaks Section --- */}
+                                        <div className="mb-5">
+                                            <h4 className="fw-semibold mb-3">Achievements & Streaks</h4>
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <div className="streak-card card h-100 p-3">
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="icon-container text-danger bg-danger-subtle me-3">
+                                                                <i className="bi bi-fire fs-4"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-muted mb-0">Current Streak</p>
+                                                                <h4 className="fw-bold mb-0">{streakInfo.current} Days</h4>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <div className="streak-card card h-100 p-3">
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="icon-container text-warning bg-warning-subtle me-3">
+                                                                <i className="bi bi-trophy-fill fs-4"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-muted mb-0">Longest Streak</p>
+                                                                <h4 className="fw-bold mb-0">{streakInfo.longest} Days</h4>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {awardedBadges.length > 0 && (
+                                                <div className="mt-4">
+                                                    <h5 className="fw-semibold mb-3">Badges Earned</h5>
+                                                    <div className="d-flex flex-wrap gap-3">
+                                                        {awardedBadges.map(badge => (
+                                                            <div key={badge.name} className={`badge-card text-center p-3 rounded-3 bg-${badge.color}-subtle`} data-bs-toggle="tooltip" title={`${badge.name} - ${badge.days} Day Streak`}>
+                                                                <i className={`${badge.icon} fs-2 text-${badge.color}`}></i>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {/* --- END OF NEW BLOCK --- */}
+
+
+                                        {/* Existing Submission Activity */}
                                         <div className="mb-5">
                                             <h4 className="fw-semibold mb-3">Submission Activity</h4>
                                             <div className="heatmap-container card p-3">
@@ -434,6 +557,7 @@ function Dashboard() {
                                             </div>
                                         </div>
 
+                                        {/* Existing Explore Section */}
                                         <div>
                                             <h4 className="fw-semibold mb-3">Explore</h4>
                                             <div className="row g-3">
@@ -462,7 +586,9 @@ function Dashboard() {
                 <i className="bi bi-robot fs-4"></i>
             </button>
 
+            {/* --- ADD THIS NEW BLOCK: CSS Styles for Badges and Streaks --- */}
             <style>{`
+                /* ... Existing styles ... */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
                 .dashboard-container { min-height: 85vh; }
@@ -517,75 +643,93 @@ function Dashboard() {
                 .theme-dark .resume-textarea { background-color: #161b22; color: #fff; border-color: #3a3a5a; }
                 .theme-light .resume-textarea { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .resume-textarea:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
+
+                .theme-dark .streak-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
+                .theme-light .streak-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
+                
+                .badge-card {
+                    width: 80px;
+                    height: 80px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                    transition: transform 0.2s ease-in-out;
+                    cursor: pointer;
+                }
+                .badge-card:hover {
+                    transform: scale(1.1);
+                }
             `}</style>
             
-            {showResumeModal && (
-                <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-                    <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
-                            <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold">
-                                    <i className="bi bi-robot me-2"></i> 
-                                    {viewingHistory ? "Latest Review History" : "Randoman AI Resume Reviewer"}
-                                </h5>
-                                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
-                            </div>
-                            <div className="modal-body">
-                                {isReviewing ? (
-                                    <div className="text-center py-5">
-                                        <div className="spinner-border text-primary" role="status"></div>
-                                        <p className="mt-3 fw-semibold">{reviewFeedback}</p>
-                                    </div>
-                                ) : reviewFeedback ? (
-                                    <>
-                                        <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => { setReviewFeedback(''); setResumeText(''); }}>
-                                            <i className="bi bi-arrow-left"></i> Review Another Resume
-                                        </button>
-                                        <div className="markdown-content"><ReactMarkdown>{reviewFeedback}</ReactMarkdown></div>
-                                    </>
-                                ) : viewingHistory ? (
-                                    <>
-                                         <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => setViewingHistory(false)}>
-                                            <i className="bi bi-arrow-left"></i> Back to Reviewer
-                                        </button>
-                                        {latestReview ? (
-                                            <div>
-                                                <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
-                                                <hr/>
-                                                <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
-                                            </div>
-                                        ) : (
-                                            <p>No review history found.</p>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="d-flex justify-content-between align-items-center mb-3">
-                                            <p className="mb-0 text-muted">Paste your resume text below for instant feedback.</p>
-                                            {latestReview && (
-                                                <button className="btn btn-link text-decoration-none btn-sm" onClick={() => setViewingHistory(true)}>
-                                                    View Latest Review <i className="bi bi-clock-history"></i>
-                                                </button>
-                                            )}
-                                        </div>
-                                        <textarea
-                                            className="form-control resume-textarea"
-                                            rows="12"
-                                            placeholder="Paste the full text of your resume here..."
-                                            value={resumeText}
-                                            onChange={(e) => setResumeText(e.target.value)}
-                                        ></textarea>
-                                        <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview}>
-                                            <i className="bi bi-magic me-2"></i>Review with Randoman AI
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
+            {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
+            {/* ... Your existing modal JSX code ... */}
+             {showResumeModal && (
+                <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
+                    <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title fw-bold">
+                                    <i className="bi bi-robot me-2"></i> 
+                                    {viewingHistory ? "Latest Review History" : "Randoman AI Resume Reviewer"}
+                                </h5>
+                                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
+                            </div>
+                            <div className="modal-body">
+                                {isReviewing ? (
+                                    <div className="text-center py-5">
+                                        <div className="spinner-border text-primary" role="status"></div>
+                                        <p className="mt-3 fw-semibold">{reviewFeedback}</p>
+                                    </div>
+                                ) : reviewFeedback ? (
+                                    <>
+                                        <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => { setReviewFeedback(''); setResumeText(''); }}>
+                                            <i className="bi bi-arrow-left"></i> Review Another Resume
+                                        </button>
+                                        <div className="markdown-content"><ReactMarkdown>{reviewFeedback}</ReactMarkdown></div>
+                                    </>
+                                ) : viewingHistory ? (
+                                    <>
+                                         <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => setViewingHistory(false)}>
+                                            <i className="bi bi-arrow-left"></i> Back to Reviewer
+                                        </button>
+                                        {latestReview ? (
+                                            <div>
+                                                <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
+                                                <hr/>
+                                                <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
+                                            </div>
+                                        ) : (
+                                            <p>No review history found.</p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <p className="mb-0 text-muted">Paste your resume text below for instant feedback.</p>
+                                            {latestReview && (
+                                                <button className="btn btn-link text-decoration-none btn-sm" onClick={() => setViewingHistory(true)}>
+                                                    View Latest Review <i className="bi bi-clock-history"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                        <textarea
+                                            className="form-control resume-textarea"
+                                            rows="12"
+                                            placeholder="Paste the full text of your resume here..."
+                                            value={resumeText}
+                                            onChange={(e) => setResumeText(e.target.value)}
+                                        ></textarea>
+                                        <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview}>
+                                            <i className="bi bi-magic me-2"></i>Review with Randoman AI
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {showLinkModal && (
                 <div className="modal show fade" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
@@ -601,28 +745,14 @@ function Dashboard() {
                                     <label htmlFor="githubLinkInput" className="form-label text-muted">GitHub Profile URL</label>
                                     <div className="input-group">
                                         <span className="input-group-text"><i className="bi bi-github"></i></span>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="githubLinkInput"
-                                            placeholder="https://github.com/username"
-                                            value={tempGithub}
-                                            onChange={(e) => setTempGithub(e.target.value)}
-                                        />
+                                        <input type="text" className="form-control" id="githubLinkInput" placeholder="https://github.com/username" value={tempGithub} onChange={(e) => setTempGithub(e.target.value)} />
                                     </div>
                                 </div>
                                 <div>
                                     <label htmlFor="linkedinLinkInput" className="form-label text-muted">LinkedIn Profile URL</label>
                                     <div className="input-group">
                                         <span className="input-group-text"><i className="bi bi-linkedin"></i></span>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="linkedinLinkInput"
-                                            placeholder="https://linkedin.com/in/username"
-                                            value={tempLinkedin}
-                                            onChange={(e) => setTempLinkedin(e.target.value)}
-                                        />
+                                        <input type="text" className="form-control" id="linkedinLinkInput" placeholder="https://linkedin.com/in/username" value={tempLinkedin} onChange={(e) => setTempLinkedin(e.target.value)} />
                                     </div>
                                 </div>
                             </div>
