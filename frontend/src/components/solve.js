@@ -372,7 +372,7 @@ const Solve = () => {
                   theme="vs-dark"
                   onChange={handleCodeChange}
                   onMount={handleEditorDidMount}
-                  options={{ fontSize: 14, minimap: { enabled: false }, tabSize: 2, automaticLayout: true, contextmenu: true }}
+                  options={{ fontSize: 16, minimap: { enabled: false }, tabSize: 2, automaticLayout: true, contextmenu: true }}
                 />
               </div>
             </div>
