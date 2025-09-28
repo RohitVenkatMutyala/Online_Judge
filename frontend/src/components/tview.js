@@ -603,7 +603,7 @@ const Tview = () => {
                       data-bs-content="<div class='p-1 text-start'><p class='mb-0'>Simply highlight any text on this page, and the 'Ask Randoman AI' button will appear automatically to give you a more detailed explanation.</p></div>"
                     >
                       <i
-                        className="bi bi-info-circle-fill text-white"
+                        className="bi bi-robot me-2"
                         style={{ cursor: 'pointer', fontSize: '1.5rem', opacity: '0.7' }}
                       ></i>
                     </span>
@@ -614,7 +614,7 @@ const Tview = () => {
                 {/* Tutorial Body */}
                 <div className="card-body p-5">
                   <div className="tutorial-content">
-                   // ADD THIS UPDATED BLOCK IN ITS PLACE
+                   
                     <ReactMarkdown
                       children={problem.description}
                       components={{
