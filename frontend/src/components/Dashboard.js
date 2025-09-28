@@ -671,7 +671,7 @@ function Dashboard() {
                             <div className="modal-header border-0">
                                 <h5 className="modal-title fw-bold">
                                     <i className="bi bi-robot me-2"></i> 
-                                    {viewingHistory ? "Latest Review History" : "Randoman AI Resume Reviewer"}
+                                    {viewingHistory ? "Latest Review History" :"Randoman AI "}
                                 </h5>
                                 <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
                             </div>
@@ -709,7 +709,7 @@ function Dashboard() {
                                             <p className="mb-0 text-muted">Paste your resume text below for instant feedback.</p>
                                             {latestReview && (
                                                 <button className="btn btn-link text-decoration-none btn-sm" onClick={() => setViewingHistory(true)}>
-                                                    View Latest Review <i className="bi bi-clock-history"></i>
+                                                     View Latest Review <i className="bi bi-clock-history"></i>
                                                 </button>
                                             )}
                                         </div>
