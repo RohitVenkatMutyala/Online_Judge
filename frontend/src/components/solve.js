@@ -11,7 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { increment } from "firebase/firestore";
-import { Tooltip , Popover } from "bootstrap";
+import { Tooltip, Popover } from "bootstrap";
 
 // Helper to get today's date string for Firestore keys
 const getTodayDate = () => {
@@ -229,17 +229,36 @@ const Solve = () => {
   };
 
   // Add the AI Debug action to the editor's right-click menu
+  // ADD THIS NEW FUNCTION IN THE SAME SPOT
+
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
+
+    // ACTION 1: This appears ONLY when text is selected.
     editor.addAction({
-      id: 'ai-debug-action',
-      label: 'Debug using  Randoman AI model 1.1',
+      id: 'ask-randoman-ai-selection',
+      label: 'Ask Randoman AI', // <-- Your desired text for selections
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1.5,
+      // This is the key: it only shows the item if text is selected.
+      precondition: 'editorHasSelection',
       run: function (ed) {
         const selectedText = ed.getModel().getValueInRange(ed.getSelection());
+        handleAIDebug(selectedText); // Send only the selected text
+      },
+    });
+
+    // ACTION 2: This appears ONLY when NO text is selected.
+    editor.addAction({
+      id: 'debug-file-with-randoman-ai',
+      label: 'Debug file with Randoman AI', // A clear label for the whole file
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 1.6, // Slightly different order to be safe
+      // This is the key: it only shows if there is no selection.
+      precondition: '!editorHasSelection',
+      run: function (ed) {
         const currentCodeInEditor = ed.getValue();
-        handleAIDebug(selectedText || currentCodeInEditor);
+        handleAIDebug(currentCodeInEditor); // Send the entire file's code
       },
     });
   }
@@ -385,7 +404,7 @@ const Solve = () => {
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
                 {/* START: Enhanced Popover Icon */}
-                     <span
+                <span
                   tabIndex="0"
                   data-bs-toggle="popover"
                   data-bs-trigger="hover focus"
