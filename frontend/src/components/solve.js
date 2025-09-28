@@ -55,23 +55,28 @@ const Solve = () => {
   // FINAL FIX: Robust initializer for all Bootstrap components
   // ADD THIS CORRECTED BLOCK AT LINE 67
 
+  // This hook should be in your component to initialize Bootstrap
   useEffect(() => {
-    // This code will only run AFTER the 'problem' data has been loaded.
-    // This is the key: it guarantees the icon exists on the page.
-    if (problem) {
-      // Initialize all Bootstrap tooltips that allow HTML content
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, {
-        html: true // Explicitly enable HTML in the JS initializer
+    if (problem) { // Ensures the elements exist on the page
+
+      // Initialize Popovers
+      const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+      const popoverList = [...popoverTriggerList].map(el => new window.bootstrap.Popover(el, {
+        trigger: 'hover focus',
+        html: true,
       }));
 
-      // This is a crucial cleanup step for React. It prevents memory leaks
-      // by destroying the tooltips when the component updates or unmounts.
+      // Initialize Tooltips (if you have any others)
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      const tooltipList = [...tooltipTriggerList].map(el => new window.bootstrap.Tooltip(el));
+
+      // Cleanup function to prevent memory leaks
       return () => {
+        popoverList.forEach(popover => popover.dispose());
         tooltipList.forEach(tooltip => tooltip.dispose());
       };
     }
-  }, [problem]); // The dependency [problem] tells the hook to run when the problem data arrives.
+  }, [problem]);
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
@@ -374,18 +379,29 @@ const Solve = () => {
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
-                <i
-                  className="bi bi-question-circle me-2 fs-5"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  title="<p>Get instant help with your code. Here's how:</p>
-                  <ul>
-                    <li><strong>For the whole file:</strong> Simply right-click anywhere in the editor.</li>
-                    <li><strong>For a specific part:</strong> Select the code snippet you need help with, then right-click.</li>
-                    <li><strong>For specific requests:</strong> Write your query as a comment (e.g., '// Only give me the corrected code') and select it along with your code.</li>
+                {/* START: Enhanced Popover Icon */}
+                <span
+                  tabIndex="0"
+                  className="d-flex align-items-center"
+                  data-bs-toggle="popover"
+                  data-bs-trigger="hover focus"
+                  data-bs-placement="left"
+                  data-bs-html="true"
+                  data-bs-title="<i class='bi bi-robot me-2'></i> AI Debugger Assistant"
+                  data-bs-content="<div class='p-1'><p>Get instant help with your code. Here's how:</p>
+                  <ul class='mb-2'>
+                    <li><strong>Full File:</strong> Right-click anywhere in the editor.</li>
+                    <li><strong>Specific Snippet:</strong> Select the code you need help with, then right-click.</li>
+                    <li><strong>Specific Request:</strong> Write a query in a comment and select it with your code.</li>
                   </ul>
-                  <p class='mt-2 mb-0'>Finally, choose 'Debug using AI' from the menu.</p>" data-bs-html="true"
-                ></i>
+                  <p class='mb-0'>Finally, choose 'Debug using AI' from the menu.</p></div>"
+                >
+                  <i
+                    className="bi bi-info-circle-fill text-info"
+                    style={{ cursor: 'pointer', fontSize: '1.2rem' }}
+                  ></i>
+                </span>
+                {/* END: Enhanced Popover Icon */}
               </div>
               <div className="card-body p-0">
                 <Editor
