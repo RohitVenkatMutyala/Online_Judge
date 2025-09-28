@@ -219,7 +219,9 @@ function Dashboard() {
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
-        profileImageURL: profileImage
+        profileImageURL: profileImage,
+        githubLink: tempGithub,
+        linkedinLink: tempLinkedin
       });
 
       const shareUrl = `${window.location.origin}/profile/${user._id}`;
