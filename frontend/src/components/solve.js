@@ -10,7 +10,7 @@ import { collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { increment } from "firebase/firestore"; 
+import { increment } from "firebase/firestore";
 
 // Helper to get today's date string for Firestore keys
 const getTodayDate = () => {
@@ -88,8 +88,8 @@ const Solve = () => {
     try {
       await updateDoc(helpDocRef, {
         count: increment(1) // Atomically increments the value on the server
-    });
-    setHelpCount(prevCount => prevCount + 1); // Also update local state correctly
+      });
+      setHelpCount(prevCount => prevCount + 1); // Also update local state correctly
     } catch (err) {
       console.error("Error updating help count:", err);
     }
@@ -236,6 +236,21 @@ const Solve = () => {
       setIsRunning(false);
     }
   };
+  // Inside your component...
+  useEffect(() => {
+    // Ensure Bootstrap's JS is loaded
+    if (typeof window.bootstrap !== 'undefined') {
+      const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+      const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new window.bootstrap.Popover(popoverTriggerEl);
+      });
+
+      // Cleanup function to destroy popovers when the component unmounts
+      return () => {
+        popoverList.forEach(popover => popover.dispose());
+      };
+    }
+  }, []); // Empty dependency array ensures this runs only once
 
   const handlesubmit = async () => {
     setIsSubmitting(true);
@@ -362,7 +377,25 @@ const Solve = () => {
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
-                <i className="bi bi-info-circle-fill text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Right-click your code to get help from the AI Debugger."></i>
+                <span
+                  tabIndex="0" // Makes the span focusable for accessibility
+                  data-bs-toggle="popover"
+                  data-bs-trigger="hover focus"
+                  data-bs-placement="left"
+                  data-bs-html="true"
+                  data-bs-title="<i class='bi bi-robot me-2'></i> AI Debugger Assistant"
+                  data-bs-content="<p>Get instant help with your code. Here's how:</p>
+                  <ul>
+                    <li><strong>For the whole file:</strong> Simply right-click anywhere in the editor.</li>
+                    <li><strong>For a specific part:</strong> Select the code snippet you need help with, then right-click.</li>
+                  </ul>
+                  <p class='mt-2 mb-0'>Choose 'Debug using AI' from the menu.</p>"
+                >
+                  <i
+                    className="bi bi-info-circle-fill text-warning"
+                    style={{ cursor: 'pointer', fontSize: '1.2rem' }}
+                  ></i>
+                </span>
               </div>
               <div className="card-body p-0">
                 <Editor
