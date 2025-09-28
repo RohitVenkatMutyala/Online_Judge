@@ -233,7 +233,7 @@ const Solve = () => {
     editorRef.current = editor;
     editor.addAction({
       id: 'ai-debug-action',
-      label: 'Debug using AI',
+      label: 'Debug using  Randoman AI model 1.1',
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1.5,
       run: function (ed) {
@@ -391,13 +391,14 @@ const Solve = () => {
                   data-bs-trigger="hover focus"
                   data-bs-placement="left"
                   data-bs-html="true"
-                  data-bs-title="<i class='bi bi-robot me-2'></i> AI Debugger Assistant"
+                  data-bs-title="<i class='bi bi-robot me-2'></i> Randoman AI Debugger Assistant"
                   data-bs-content="<div class='p-1'><p>Get instant help with your code:</p>
                     <ul class='mb-2'>
                       <li><strong>Full File:</strong> Right-click anywhere.</li>
                       <li><strong>Specific Snippet:</strong> Select code, then right-click.</li>
+                       <li><strong>For specific requests:</strong> Write your query as a comment (e.g., '// Only give me the corrected code') and select it along with your code.</li>
                     </ul>
-                    <p class='mb-0'>Choose 'Debug using AI' from the menu.</p></div>"
+                    <p class='mb-0'>Choose 'Debug using Randoman AI model 1.1' from the menu.</p></div>"
                 >
                   <i
                     className="bi bi-info-circle-fill text-info"
