@@ -6,7 +6,7 @@ import Navbar from './navbar';
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-
+import { Tooltip, Popover } from "bootstrap";
 
 const Tview = () => {
   const API_URL = process.env.REACT_APP_SERVER_API;
