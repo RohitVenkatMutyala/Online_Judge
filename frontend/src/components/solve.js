@@ -427,7 +427,7 @@ const Solve = () => {
                   data-bs-content="<div class='p-1'><p>Get instant help with your code:</p>
                     <ul class='mb-2'>
                       <li><strong>Full File:</strong> Right-click anywhere.</li>
-                      <li><strong>Specific Snippet:</strong> Select code to see the 'Ask AI' button.</li>
+                      <li><strong>Specific Snippet:</strong> Select code to see the 'Ask Randoman AI' button.</li>
                        <li><strong>For specific requests:</strong> Write your query as a comment (e.g., '// Only give me the corrected code') and select it along with your code.</li>
                     </ul>
                     </div>"
@@ -497,7 +497,7 @@ const Solve = () => {
           <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
               <div className="modal-header border-0">
-                <h5 className="modal-title fw-bold"><i className="bi bi-robot me-2" style={{ color: '#ff4b2b' }}></i> AI Debugger <span className="badge bg-secondary ms-2">{helpCount}/20 Used</span></h5>
+                <h5 className="modal-title fw-bold"><i className="bi bi-robot me-2" style={{ color: '#ff4b2b' }}></i> Randoman AI Debugger <span className="badge bg-secondary ms-2">{helpCount}/20 Used</span></h5>
                 <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowDebugModal(false)}></button>
               </div>
               <div className="modal-body">
@@ -510,7 +510,13 @@ const Solve = () => {
                       <div className="col-md-6 border-end">
                         <h6 className="fw-bold mb-2">Your Code</h6>
                         <div className="bg-dark rounded p-2" style={{maxHeight: '60vh', overflowY: 'auto'}}>
-                          <SyntaxHighlighter style={oneDark} language={language === 'py' ? 'python' : language} PreTag="div">
+                          <SyntaxHighlighter
+                            style={oneDark}
+                            language={language === 'py' ? 'python' : language}
+                            PreTag="div"
+                            // FIX: Add codeTagProps to prevent line rendering glitches
+                            codeTagProps={{ style: { display: 'block', lineHeight: '1.5em' } }}
+                          >
                             {String(originalCodeForDiff).replace(/\n$/, "")}
                           </SyntaxHighlighter>
                         </div>
@@ -518,15 +524,23 @@ const Solve = () => {
 
                       {/* AI Suggestion Column */}
                       <div className="col-md-6">
-                        <h6 className="fw-bold mb-2">AI Suggestion</h6>
-                        <div className="markdown-content" style={{maxHeight: '60vh', overflowY: 'auto'}}>
+                        <h6 className="fw-bold mb-2">Randoman AI Suggestion</h6>
+                        {/* FIX: Add inline styles for better text wrapping and add padding */}
+                        <div className="markdown-content" style={{maxHeight: '60vh', overflowY: 'auto', whiteSpace: 'pre-wrap', wordWrap: 'break-word', paddingLeft: '1rem'}}>
                           <ReactMarkdown
                             children={debugResponse}
                             components={{
                               code({ node, inline, className, children, ...props }) {
                                 const match = /language-(\w+)/.exec(className || "");
                                 return !inline && match ? (
-                                  <SyntaxHighlighter style={oneDark} language={match[1]} PreTag="div" {...props}>
+                                  <SyntaxHighlighter
+                                    style={oneDark}
+                                    language={match[1]}
+                                    PreTag="div"
+                                    // FIX: Add codeTagProps here as well
+                                    codeTagProps={{ style: { display: 'block', lineHeight: '1.5em' } }}
+                                    {...props}
+                                  >
                                     {String(children).replace(/\n$/, "")}
                                   </SyntaxHighlighter>
                                 ) : (<code className={`${className} bg-secondary-subtle p-1 rounded`} {...props}>{children}</code>);
