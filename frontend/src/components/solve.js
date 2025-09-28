@@ -55,28 +55,33 @@ const Solve = () => {
   // FINAL FIX: Robust initializer for all Bootstrap components
   // ADD THIS CORRECTED BLOCK AT LINE 67
 
-  // This hook should be in your component to initialize Bootstrap
   useEffect(() => {
-    if (problem) { // Ensures the elements exist on the page
+    if (problem) {
+      let popoverInstances = [];
+      let tooltipInstances = [];
 
-      // Initialize Popovers
-      const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-      const popoverList = [...popoverTriggerList].map(el => new window.bootstrap.Popover(el, {
-        trigger: 'hover focus',
-        html: true,
-      }));
+      // Use a small delay to ensure the DOM is fully rendered and painted.
+      const timer = setTimeout(() => {
+        // Initialize Popovers
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        popoverInstances = [...popoverTriggerList].map(el => new Popover(el, {
+          trigger: 'hover focus',
+          html: true,
+        }));
 
-      // Initialize Tooltips (if you have any others)
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-      const tooltipList = [...tooltipTriggerList].map(el => new window.bootstrap.Tooltip(el));
+        // Initialize Tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipInstances = [...tooltipTriggerList].map(el => new Tooltip(el));
+      }, 100); // 100ms delay is a safe bet
 
-      // Cleanup function to prevent memory leaks
+      // Cleanup function
       return () => {
-        popoverList.forEach(popover => popover.dispose());
-        tooltipList.forEach(tooltip => tooltip.dispose());
+        clearTimeout(timer);
+        popoverInstances.forEach(popover => popover.dispose());
+        tooltipInstances.forEach(tooltip => tooltip.dispose());
       };
     }
-  }, [problem]);
+  }, [problem]); // Dependency array ensures this runs when the component is ready
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
@@ -380,21 +385,19 @@ const Solve = () => {
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
                 {/* START: Enhanced Popover Icon */}
-                <span
+                     <span
                   tabIndex="0"
-                  className="d-flex align-items-center"
                   data-bs-toggle="popover"
                   data-bs-trigger="hover focus"
                   data-bs-placement="left"
                   data-bs-html="true"
                   data-bs-title="<i class='bi bi-robot me-2'></i> AI Debugger Assistant"
-                  data-bs-content="<div class='p-1'><p>Get instant help with your code. Here's how:</p>
-                  <ul class='mb-2'>
-                    <li><strong>Full File:</strong> Right-click anywhere in the editor.</li>
-                    <li><strong>Specific Snippet:</strong> Select the code you need help with, then right-click.</li>
-                    <li><strong>Specific Request:</strong> Write a query in a comment and select it with your code.</li>
-                  </ul>
-                  <p class='mb-0'>Finally, choose 'Debug using AI' from the menu.</p></div>"
+                  data-bs-content="<div class='p-1'><p>Get instant help with your code:</p>
+                    <ul class='mb-2'>
+                      <li><strong>Full File:</strong> Right-click anywhere.</li>
+                      <li><strong>Specific Snippet:</strong> Select code, then right-click.</li>
+                    </ul>
+                    <p class='mb-0'>Choose 'Debug using AI' from the menu.</p></div>"
                 >
                   <i
                     className="bi bi-info-circle-fill text-info"
