@@ -10,6 +10,7 @@ import { collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { increment } from "firebase/firestore"; 
 
 // Helper to get today's date string for Firestore keys
 const getTodayDate = () => {
@@ -85,9 +86,10 @@ const Solve = () => {
     if (!user?._id || !db) return;
     const helpDocRef = doc(db, "helpCounts", `${user._id}_${today}`);
     try {
-      const newCount = helpCount + 1;
-      await updateDoc(helpDocRef, { count: newCount });
-      setHelpCount(newCount);
+      await updateDoc(helpDocRef, {
+        count: increment(1) // Atomically increments the value on the server
+    });
+    setHelpCount(prevCount => prevCount + 1); // Also update local state correctly
     } catch (err) {
       console.error("Error updating help count:", err);
     }
