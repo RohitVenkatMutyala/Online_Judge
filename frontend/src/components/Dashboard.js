@@ -523,7 +523,7 @@ function Dashboard() {
                             <div className="modal-header border-0">
                                 <h5 className="modal-title fw-bold">
                                     <i className="bi bi-robot me-2"></i> 
-                                    {viewingHistory ? "Latest Review History" : "AI Resume Reviewer"}
+                                    {viewingHistory ? "Latest Review History" : "Randoman AI Resume Reviewer"}
                                 </h5>
                                 <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
                             </div>
