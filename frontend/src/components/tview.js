@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
+
 const Tview = () => {
   const API_URL = process.env.REACT_APP_SERVER_API;
   const { QID } = useParams();
@@ -71,6 +72,20 @@ const Tview = () => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [problem]); // Re-run this effect when the problem data is loaded
+  useEffect(() => {
+    if (problem) {
+      const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+      const popoverList = [...popoverTriggerList].map(el => new Popover(el, {
+        trigger: 'hover focus',
+        html: true,
+      }));
+
+      // Cleanup function to prevent memory leaks
+      return () => {
+        popoverList.forEach(popover => popover.dispose());
+      };
+    }
+  }, [problem]);
 
   // --- Function to call the AI for an explanation ---
   const handleExplainTheory = async (selectedText) => {
@@ -566,23 +581,72 @@ const Tview = () => {
             <div className="col-lg-10 col-xl-8">
               <div className="tutorial-card">
                 {/* Tutorial Header */}
-                <div className="card-header border-0 p-5 pb-0 bg-gradient-custom text-white rounded-top-4">
+                {/* Tutorial Header - CORRECTED */}
+                <div className="card-header border-0 p-5 pb-0 bg-gradient-custom text-white rounded-top-4 position-relative">
+
+                  {/* Centered Title */}
                   <div className="text-center mb-4">
-                    <h1 className="fw-bold mb-3 display-5 text-dark">
+                    <h1 className="fw-bold mb-0 display-5 text-white">
                       {problem.name}
                     </h1>
-                    <p className="lead text-light opacity-75">
-
-                    </p>
                   </div>
+
+                  {/* Absolutely Positioned Help Icon */}
+                  <div style={{ position: 'absolute', top: '2.5rem', right: '2rem' }}>
+                    <span
+                      tabIndex="0"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-placement="left"
+                      data-bs-html="true"
+                      data-bs-title="<i class='bi bi-robot me-2'></i> AI Assistant Help"
+                      data-bs-content="<div class='p-1 text-start'><p class='mb-0'>Simply highlight any text on this page, and the 'Ask Randoman AI' button will appear automatically to give you a more detailed explanation.</p></div>"
+                    >
+                      <i
+                        className="bi bi-info-circle-fill text-white"
+                        style={{ cursor: 'pointer', fontSize: '1.5rem', opacity: '0.7' }}
+                      ></i>
+                    </span>
+                  </div>
+
                 </div>
 
                 {/* Tutorial Body */}
                 <div className="card-body p-5">
                   <div className="tutorial-content">
-                    <ReactMarkdown>
-                      {problem.description}
-                    </ReactMarkdown>
+                   // ADD THIS UPDATED BLOCK IN ITS PLACE
+                    <ReactMarkdown
+                      children={problem.description}
+                      components={{
+                        // This function customizes how all `code` elements are rendered
+                        code({ node, inline, className, children, ...props }) {
+                          const match = /language-(\w+)/.exec(className || "");
+
+                          // This part handles large code BLOCKS (like ```cpp ... ```)
+                          // It uses the SyntaxHighlighter for proper coloring.
+                          if (!inline && match) {
+                            return (
+                              <SyntaxHighlighter
+                                style={oneDark}
+                                language={match[1]}
+                                PreTag="div"
+                                {...props}
+                              >
+                                {String(children).replace(/\n$/, "")}
+                              </SyntaxHighlighter>
+                            );
+                          }
+
+                          // THIS IS THE FIX: It handles INLINE code (`code`).
+                          // It applies a light background and dark text for high contrast, making it readable.
+                          return (
+                            <code className="bg-light text-dark rounded px-1" {...props}>
+                              {children}
+                            </code>
+                          );
+                        }
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -598,7 +662,7 @@ const Tview = () => {
             <div className="modal-content bg-dark text-light">
               <div className="modal-header border-0">
                 <h5 className="modal-title fw-bold">
-                  <i className="bi bi-robot me-2 text-info"></i> AI Explanation
+                  <i className="bi bi-robot me-2 text-info"></i>  Randoman AI Explanation
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowExplainModal(false)}></button>
               </div>
