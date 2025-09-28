@@ -387,25 +387,18 @@ const Solve = () => {
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
-                <span
-                  tabIndex="0" // Makes the span focusable for accessibility
-                  data-bs-toggle="popover"
-                  data-bs-trigger="hover focus"
-                  data-bs-placement="left"
-                  data-bs-html="true"
-                  data-bs-title="<i class='bi bi-robot me-2'></i> AI Debugger Assistant"
-                  data-bs-content="<p>Get instant help with your code. Here's how:</p>
+               <i
+                          className="bi bi-question-circle me-2 fs-5"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="<p>Get instant help with your code. Here's how:</p>
                   <ul>
                     <li><strong>For the whole file:</strong> Simply right-click anywhere in the editor.</li>
                     <li><strong>For a specific part:</strong> Select the code snippet you need help with, then right-click.</li>
+                    <li><strong>For specific requests:</strong> Write your query as a comment (e.g., '// Only give me the corrected code') and select it along with your code.</li>
                   </ul>
-                  <p class='mt-2 mb-0'>Choose 'Debug using AI' from the menu.</p>"
-                >
-                  <i
-                    className="bi bi-info-circle-fill text-warning"
-                    style={{ cursor: 'pointer', fontSize: '1.2rem' }}
-                  ></i>
-                </span>
+                  <p class='mt-2 mb-0'>Finally, choose 'Debug using AI' from the menu.</p>" data-bs-html="true"
+                        ></i>
               </div>
               <div className="card-body p-0">
                 <Editor
