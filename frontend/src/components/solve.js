@@ -51,6 +51,9 @@ const Solve = () => {
   const [showDebugModal, setShowDebugModal] = useState(false);
   const [helpCount, setHelpCount] = useState(0);
   const today = getTodayDate();
+  
+  // State to hold the position and text for the floating AI button
+  const [selectionDetails, setSelectionDetails] = useState(null);
 
   // Robust initializer for Bootstrap components
   useEffect(() => {
@@ -220,27 +223,34 @@ const Solve = () => {
     }
   };
 
-  // ### THIS IS THE CORRECTED PART ###
-  // Add the AI Debug action to the editor's right-click menu
+  // ### THIS IS THE NEW IMPLEMENTATION ###
+  // Sets up the listener for the floating "Ask AI" button.
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
 
-    // A single, reliable action that intelligently checks for a selection
-    editor.addAction({
-      id: 'ask-randoman-ai-universal',
-      label: 'Ask Randoman AI',
-      contextMenuGroupId: 'navigation',
-      contextMenuOrder: 1.5,
-      // This function determines if the menu item should be shown.
-      // It will only show if the user has selected text.
-      keybindingContext: 'editorHasSelection',
-      run: function (ed) {
-        const selectedText = ed.getModel().getValueInRange(ed.getSelection());
-        // We add a check to ensure we don't send empty strings to the AI
-        if (selectedText) {
-          handleAIDebug(selectedText);
+    // Listen for changes in the cursor selection
+    editor.onDidChangeCursorSelection((e) => {
+      const selection = e.selection;
+      const selectedText = editor.getModel().getValueInRange(selection);
+
+      // Only show the button if there's a real selection
+      if (selectedText) {
+        const editorDomNode = editor.getDomNode();
+        if (editorDomNode) {
+          const editorRect = editorDomNode.getBoundingClientRect();
+          const selectionEndPosition = editor.getPosition();
+          const contentWidgetPosition = editor.getScrolledVisiblePosition(selectionEndPosition);
+
+          // Calculate position for the button
+          const top = editorRect.top + contentWidgetPosition.top - 40; // Position above the cursor
+          const left = editorRect.left + contentWidgetPosition.left;
+
+          setSelectionDetails({ text: selectedText, top, left });
         }
-      },
+      } else {
+        // If there's no selection, hide the button
+        setSelectionDetails(null);
+      }
     });
   }
 
@@ -381,7 +391,23 @@ const Solve = () => {
                 </div>
               </div>
             </div>
-            <div className="card shadow border-0 mb-3">
+            {/* ### THIS IS WHERE THE FLOATING BUTTON WILL BE RENDERED ### */}
+            <div className="card shadow border-0 mb-3 position-relative">
+              {selectionDetails && (
+                <button
+                  className="btn btn-dark btn-sm"
+                  style={{
+                    position: 'absolute',
+                    top: `${selectionDetails.top}px`,
+                    left: `${selectionDetails.left}px`,
+                    zIndex: 10,
+                    transform: 'translateY(-100%)', // Position above the cursor line
+                  }}
+                  onClick={() => handleAIDebug(selectionDetails.text)}
+                >
+                  <i className="bi bi-robot me-2"></i> Ask Randoman AI
+                </button>
+              )}
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
                 <span
@@ -390,17 +416,17 @@ const Solve = () => {
                   data-bs-trigger="hover focus"
                   data-bs-placement="left"
                   data-bs-html="true"
-                  data-bs-title="<i class='bi bi-robot me-2'></i> Randoman AI Debugger Assistant"
+                  data-bs-title="<i class='bi bi-robot me-2'></i> Randoman AI Assistant"
                   data-bs-content="<div class='p-1'><p>Get instant help with your code:</p>
                     <ul class='mb-2'>
                       <li><strong>Full File:</strong> Right-click anywhere.</li>
-                      <li><strong>Specific Snippet:</strong> Select code, then right-click.</li>
+                      <li><strong>Specific Snippet:</strong> Select code to see the 'Ask AI' button.</li>
                        <li><strong>For specific requests:</strong> Write your query as a comment (e.g., '// Only give me the corrected code') and select it along with your code.</li>
                     </ul>
-                    <p class='mb-0'>Choose 'Ask Randoman AI' from the menu.</p></div>"
+                    </div>"
                 >
                   <i
-                    className="bi bi-info-circle-fill text-info"
+                    className="bi bi-robot me-2"
                     style={{ cursor: 'pointer', fontSize: '1.2rem' }}
                   ></i>
                 </span>
