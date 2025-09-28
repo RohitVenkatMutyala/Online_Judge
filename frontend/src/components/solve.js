@@ -199,11 +199,11 @@ const Solve = () => {
 
     setIsDebugging(true);
     setShowDebugModal(true);
-    setDebugResponse('Getting a fresh suggestion from the AI...');
+    setDebugResponse('Getting a fresh suggestion from the Randoman AI...');
 
     try {
       const response = await axios.post(`${API_URL}/help`, { code: codeToDebug, QID });
-      const result = response.data.result || "No suggestion was returned from the AI.";
+      const result = response.data.result || "No suggestion was returned from the Randoman AI.";
 
       const helpResponsesRef = collection(db, "helpResponses");
       const helpId = `${user._id}-${QID}-${language}`;
