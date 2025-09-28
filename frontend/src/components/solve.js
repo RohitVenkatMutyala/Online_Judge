@@ -53,10 +53,25 @@ const Solve = () => {
   const today = getTodayDate();
 
   // FINAL FIX: Robust initializer for all Bootstrap components
- useEffect(() => {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltipTriggerList.forEach(el => new Tooltip(el));
-  }, []);
+  // ADD THIS CORRECTED BLOCK AT LINE 67
+
+  useEffect(() => {
+    // This code will only run AFTER the 'problem' data has been loaded.
+    // This is the key: it guarantees the icon exists on the page.
+    if (problem) {
+      // Initialize all Bootstrap tooltips that allow HTML content
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, {
+        html: true // Explicitly enable HTML in the JS initializer
+      }));
+
+      // This is a crucial cleanup step for React. It prevents memory leaks
+      // by destroying the tooltips when the component updates or unmounts.
+      return () => {
+        tooltipList.forEach(tooltip => tooltip.dispose());
+      };
+    }
+  }, [problem]); // The dependency [problem] tells the hook to run when the problem data arrives.
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
@@ -359,18 +374,18 @@ const Solve = () => {
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
-               <i
-                          className="bi bi-question-circle me-2 fs-5"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          title="<p>Get instant help with your code. Here's how:</p>
+                <i
+                  className="bi bi-question-circle me-2 fs-5"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="<p>Get instant help with your code. Here's how:</p>
                   <ul>
                     <li><strong>For the whole file:</strong> Simply right-click anywhere in the editor.</li>
                     <li><strong>For a specific part:</strong> Select the code snippet you need help with, then right-click.</li>
                     <li><strong>For specific requests:</strong> Write your query as a comment (e.g., '// Only give me the corrected code') and select it along with your code.</li>
                   </ul>
                   <p class='mt-2 mb-0'>Finally, choose 'Debug using AI' from the menu.</p>" data-bs-html="true"
-                        ></i>
+                ></i>
               </div>
               <div className="card-body p-0">
                 <Editor
