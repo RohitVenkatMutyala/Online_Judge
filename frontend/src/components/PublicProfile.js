@@ -165,7 +165,7 @@ function PublicProfile() {
             </div>
         </div>
     );
-    
+
     const today = new Date();
     const startDate = new Date(new Date().setDate(today.getDate() - 365));
 
@@ -203,6 +203,28 @@ function PublicProfile() {
                                             <h2 className="mb-1 fw-bold text-light">{user.firstname} {user.lastname}</h2>
                                             <p className="mb-3 text-light opacity-75">{user.email}</p>
                                             <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill"><i className="bi bi-person-check-fill me-2"></i><span className="fw-semibold">Verified User</span></div>
+                                            <div className="d-flex justify-content-center gap-3 mt-4">
+                                                {user.githubLink && (
+                                                    <a
+                                                        href={user.githubLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="social-link-public"
+                                                    >
+                                                        <i className="bi bi-github fs-4"></i>
+                                                    </a>
+                                                )}
+                                                {user.linkedinLink && (
+                                                    <a
+                                                        href={user.linkedinLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="social-link-public"
+                                                    >
+                                                        <i className="bi bi-linkedin fs-4"></i>
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -210,7 +232,7 @@ function PublicProfile() {
                                     <div className="p-4 p-lg-5">
                                         <h1 className="fw-bold mb-2">{user.firstname}'s Profile</h1>
                                         <p className="lead text-muted mb-4">A snapshot of their coding journey.</p>
-                                        
+
                                         <div className="mb-5">
                                             <div className="d-flex justify-content-between align-items-center mb-3">
                                                 <h4 className="fw-semibold mb-0">Progress Overview</h4>
@@ -225,7 +247,7 @@ function PublicProfile() {
                                                 <div className="col-md-6 col-xl-3"><StatCard title="Hard" value={displayedStats.hardSolved} total={displayedStats.totalHard} icon="bi-square-fill" color="danger" /></div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="mb-5">
                                             <h4 className="fw-semibold mb-3">Submission Activity</h4>
                                             <div className="heatmap-container card p-3">
@@ -253,7 +275,7 @@ function PublicProfile() {
                                                         {recentSubmissions.map((sub, index) => (
                                                             <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
                                                                 <div>
-                                                                   <span>QID: <span className="fw-semibold">{sub.QID}</span></span>
+                                                                    <span>QID: <span className="fw-semibold">{sub.QID}</span></span>
                                                                     <small className="d-block text-muted">{sub.submittedAt}</small>
                                                                 </div>
                                                                 <span className={`badge ${sub.verdict === 'Passed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
@@ -310,6 +332,22 @@ function PublicProfile() {
                     .content-column { border-radius: 0 0 1rem 1rem; }
                     .profile-section { padding-bottom: 2rem !important; }
                 }
+                    /* --- ADD THESE NEW STYLES --- */
+.social-link-public {
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.2s ease-in-out;
+}
+.social-link-public:hover {
+    color: #fff;
+    transform: scale(1.1);
+}
+/* --- END OF NEW STYLES --- */
+
+@media (max-width: 991.98px) {
+    .profile-column { border-radius: 1rem 1rem 0 0; }
+    .content-column { border-radius: 0 0 1rem 1rem; }
+    .profile-section { padding-bottom: 2rem !important; }
+}
             `}</style>
         </>
     );
