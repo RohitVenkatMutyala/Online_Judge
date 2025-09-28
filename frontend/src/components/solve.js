@@ -52,14 +52,30 @@ const Solve = () => {
   const today = getTodayDate();
 
   // Initialize Bootstrap Tooltips
+  // CORRECTED: Initializes BOTH Tooltips and Popovers
   useEffect(() => {
     if (typeof window.bootstrap !== 'undefined') {
+      // 1. Initialize all tooltips
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltipTriggerList.map(function (tooltipTriggerEl) {
+      const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new window.bootstrap.Tooltip(tooltipTriggerEl);
       });
+
+      // 2. Initialize all popovers
+      const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+      const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new window.bootstrap.Popover(popoverTriggerEl, {
+          trigger: 'hover focus' // Ensures it works on hover
+        });
+      });
+
+      // Cleanup function to destroy both when the component unmounts
+      return () => {
+        tooltipList.forEach(tooltip => tooltip.dispose());
+        popoverList.forEach(popover => popover.dispose());
+      };
     }
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once after the component mounts
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
