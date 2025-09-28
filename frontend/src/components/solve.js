@@ -51,9 +51,10 @@ const Solve = () => {
   const [showDebugModal, setShowDebugModal] = useState(false);
   const [helpCount, setHelpCount] = useState(0);
   const today = getTodayDate();
-
-  // State to hold the position and text for the floating AI button
+  
   const [selectionDetails, setSelectionDetails] = useState(null);
+  // State to store the user's original code for the diff view
+  const [originalCodeForDiff, setOriginalCodeForDiff] = useState('');
 
   // Robust initializer for Bootstrap components
   useEffect(() => {
@@ -187,11 +188,14 @@ const Solve = () => {
 
   // AI Debug handler
   const handleAIDebug = async (codeToDebug) => {
-    if (!codeToDebug) return; // Prevent sending empty requests
+    if (!codeToDebug) return;
     if (helpCount >= 20) {
       alert("❌ Daily help limit of 20 reached!");
       return;
     }
+
+    // Store the original code to show in the side-by-side view
+    setOriginalCodeForDiff(codeToDebug);
 
     setIsDebugging(true);
     setShowDebugModal(true);
@@ -223,31 +227,23 @@ const Solve = () => {
     }
   };
 
-  // ### THIS IS THE NEW IMPLEMENTATION ###
-  // Sets up the listener for the floating "Ask AI" button.
-  // ADD THIS CORRECTED FUNCTION IN THE SAME SPOT (around line 294)
-
+  // Sets up listeners and fixes rendering glitches.
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
 
     editor.onDidChangeCursorSelection(() => {
       const selectedText = editor.getModel().getValueInRange(editor.getSelection());
-
-      // Only proceed if there is a selection
+      
       if (selectedText && !editor.getSelection().isEmpty()) {
         const selection = editor.getSelection();
-        // Get the screen coordinates for the start of the selection
         const contentWidgetPosition = editor.getScrolledVisiblePosition({
           lineNumber: selection.startLineNumber,
           column: selection.startColumn
         });
 
-        // The editor container is the direct parent of the editor's DOM node
         const editorContainer = editor.getDomNode().parentElement;
         if (contentWidgetPosition && editorContainer) {
-          // Calculate the top position relative to the card, including the header's height
           const top = editorContainer.offsetTop + contentWidgetPosition.top;
-          // Calculate the left position, adding some padding from the side
           const left = editorContainer.offsetLeft + contentWidgetPosition.left + 15;
 
           setSelectionDetails({
@@ -257,10 +253,13 @@ const Solve = () => {
           });
         }
       } else {
-        // If the selection is cleared, hide the button
         setSelectionDetails(null);
       }
     });
+
+    setTimeout(() => {
+      editor.layout();
+    }, 100);
   }
 
   const handleRun = async () => {
@@ -400,7 +399,6 @@ const Solve = () => {
                 </div>
               </div>
             </div>
-            {/* ### THIS IS WHERE THE FLOATING BUTTON WILL BE RENDERED ### */}
             <div className="card shadow border-0 mb-3 position-relative">
               {selectionDetails && (
                 <button
@@ -410,7 +408,7 @@ const Solve = () => {
                     top: `${selectionDetails.top}px`,
                     left: `${selectionDetails.left}px`,
                     zIndex: 10,
-                    transform: 'translateY(-100%)', // Position above the cursor line
+                    transform: 'translateY(-100%)',
                   }}
                   onClick={() => handleAIDebug(selectionDetails.text)}
                 >
@@ -506,18 +504,38 @@ const Solve = () => {
                 {isDebugging ? (
                   <div className="text-center py-5"><div className="spinner-border text-warning" role="status"></div><p className="mt-3 fw-semibold">{debugResponse}</p></div>
                 ) : (
-                  <div className="markdown-content">
-                    <ReactMarkdown
-                      children={debugResponse}
-                      components={{
-                        code({ node, inline, className, children, ...props }) {
-                          const match = /language-(\w+)/.exec(className || "");
-                          return !inline && match ? (
-                            <SyntaxHighlighter style={oneDark} language={match[1]} PreTag="div" {...props}>{String(children).replace(/\n$/, "")}</SyntaxHighlighter>
-                          ) : (<code className={`${className} bg-secondary-subtle p-1 rounded`} {...props}>{children}</code>);
-                        },
-                      }}
-                    />
+                  <div className="container-fluid">
+                    <div className="row">
+                      {/* Original Code Column */}
+                      <div className="col-md-6 border-end">
+                        <h6 className="fw-bold mb-2">Your Code</h6>
+                        <div className="bg-dark rounded p-2" style={{maxHeight: '60vh', overflowY: 'auto'}}>
+                          <SyntaxHighlighter style={oneDark} language={language === 'py' ? 'python' : language} PreTag="div">
+                            {String(originalCodeForDiff).replace(/\n$/, "")}
+                          </SyntaxHighlighter>
+                        </div>
+                      </div>
+
+                      {/* AI Suggestion Column */}
+                      <div className="col-md-6">
+                        <h6 className="fw-bold mb-2">AI Suggestion</h6>
+                        <div className="markdown-content" style={{maxHeight: '60vh', overflowY: 'auto'}}>
+                          <ReactMarkdown
+                            children={debugResponse}
+                            components={{
+                              code({ node, inline, className, children, ...props }) {
+                                const match = /language-(\w+)/.exec(className || "");
+                                return !inline && match ? (
+                                  <SyntaxHighlighter style={oneDark} language={match[1]} PreTag="div" {...props}>
+                                    {String(children).replace(/\n$/, "")}
+                                  </SyntaxHighlighter>
+                                ) : (<code className={`${className} bg-secondary-subtle p-1 rounded`} {...props}>{children}</code>);
+                              },
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
