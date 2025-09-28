@@ -52,39 +52,10 @@ const Solve = () => {
   const today = getTodayDate();
 
   // FINAL FIX: Robust initializer for all Bootstrap components
-  useEffect(() => {
-    // Define variables to hold the created instances
-    let tooltipInstances = [];
-    let popoverInstances = [];
-
-    // Use a timer to delay initialization until the DOM is definitely ready
-    const timer = setTimeout(() => {
-      if (typeof window.bootstrap !== 'undefined') {
-        // Clean up any stray elements from previous renders
-        document.querySelectorAll('.tooltip, .popover').forEach(el => el.remove());
-
-        // Initialize tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipInstances = [...tooltipTriggerList].map(el => new window.bootstrap.Tooltip(el));
-
-        // Initialize popovers with the correct trigger
-        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-        popoverInstances = [...popoverTriggerList].map(el => new window.bootstrap.Popover(el, {
-          trigger: 'hover focus'
-        }));
-      }
-    }, 100); // 100ms delay
-
-    // This is the correct cleanup function for the useEffect hook
-    return () => {
-      clearTimeout(timer); // Clear the timer if the component unmounts before it fires
-      
-      // Dispose of all created instances to prevent memory leaks
-      tooltipInstances.forEach(tooltip => tooltip.dispose());
-      popoverInstances.forEach(popover => popover.dispose());
-    };
-    
-  }, [problem]); // Re-run when the main problem data loads
+ useEffect(() => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new Tooltip(el));
+  }, []);
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
