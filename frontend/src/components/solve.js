@@ -20,7 +20,7 @@ const getTodayDate = () => {
 
 // Boilerplate code for each language
 const boilerplates = {
-  cpp: `#include <iostream>\n\nint main() {\n    // Your code here\n    std::cout << "Hello, World!";\n    return 0;\n}`,
+  cpp: `#include <iostream>\n using namespace std;\n\nint main() {\n    // Your code here\n    std::cout << "Hello, World!";\n    return 0;\n}`,
   py: `# Your code here\nprint("Hello, World!")`,
   java: `public class Main {\n    public static void main(String[] args) {\n        // Your code here\n        System.out.println("Hello, World!");\n    }\n}`
 };
@@ -51,21 +51,23 @@ const Solve = () => {
   const [helpCount, setHelpCount] = useState(0);
   const today = getTodayDate();
 
-  // Initialize Bootstrap Tooltips
-  // CORRECTED: Initializes BOTH Tooltips and Popovers
+  // FILE: src/components/Solve.js
+
+  // ... inside your Solve component
+
+  // CORRECTED AND COMBINED: Initializes BOTH Tooltips and Popovers correctly
   useEffect(() => {
     if (typeof window.bootstrap !== 'undefined') {
       // 1. Initialize all tooltips
-      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new window.bootstrap.Tooltip(tooltipTriggerEl);
-      });
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new window.bootstrap.Tooltip(tooltipTriggerEl));
 
       // 2. Initialize all popovers
-      const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-      const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+      const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+      const popoverList = [...popoverTriggerList].map(popoverTriggerEl => {
+        // THIS IS THE FIX: We are now telling the JS to use 'hover'
         return new window.bootstrap.Popover(popoverTriggerEl, {
-          trigger: 'hover focus' // Ensures it works on hover
+          trigger: 'hover focus'
         });
       });
 
@@ -75,7 +77,9 @@ const Solve = () => {
         popoverList.forEach(popover => popover.dispose());
       };
     }
-  }, []); // Empty dependency array ensures this runs only once after the component mounts
+    // Adding problem and language to the dependency array ensures popovers re-initialize
+    // if the component re-renders when these props change.
+  }, [problem, language]);
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
