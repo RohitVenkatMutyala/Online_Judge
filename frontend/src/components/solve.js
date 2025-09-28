@@ -51,7 +51,7 @@ const Solve = () => {
   const [showDebugModal, setShowDebugModal] = useState(false);
   const [helpCount, setHelpCount] = useState(0);
   const today = getTodayDate();
-  
+
   // State to hold the position and text for the floating AI button
   const [selectionDetails, setSelectionDetails] = useState(null);
 
@@ -225,30 +225,39 @@ const Solve = () => {
 
   // ### THIS IS THE NEW IMPLEMENTATION ###
   // Sets up the listener for the floating "Ask AI" button.
+  // ADD THIS CORRECTED FUNCTION IN THE SAME SPOT (around line 294)
+
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
 
-    // Listen for changes in the cursor selection
-    editor.onDidChangeCursorSelection((e) => {
-      const selection = e.selection;
-      const selectedText = editor.getModel().getValueInRange(selection);
+    editor.onDidChangeCursorSelection(() => {
+      const selectedText = editor.getModel().getValueInRange(editor.getSelection());
 
-      // Only show the button if there's a real selection
-      if (selectedText) {
-        const editorDomNode = editor.getDomNode();
-        if (editorDomNode) {
-          const editorRect = editorDomNode.getBoundingClientRect();
-          const selectionEndPosition = editor.getPosition();
-          const contentWidgetPosition = editor.getScrolledVisiblePosition(selectionEndPosition);
+      // Only proceed if there is a selection
+      if (selectedText && !editor.getSelection().isEmpty()) {
+        const selection = editor.getSelection();
+        // Get the screen coordinates for the start of the selection
+        const contentWidgetPosition = editor.getScrolledVisiblePosition({
+          lineNumber: selection.startLineNumber,
+          column: selection.startColumn
+        });
 
-          // Calculate position for the button
-          const top = editorRect.top + contentWidgetPosition.top - 40; // Position above the cursor
-          const left = editorRect.left + contentWidgetPosition.left;
+        // The editor container is the direct parent of the editor's DOM node
+        const editorContainer = editor.getDomNode().parentElement;
+        if (contentWidgetPosition && editorContainer) {
+          // Calculate the top position relative to the card, including the header's height
+          const top = editorContainer.offsetTop + contentWidgetPosition.top;
+          // Calculate the left position, adding some padding from the side
+          const left = editorContainer.offsetLeft + contentWidgetPosition.left + 15;
 
-          setSelectionDetails({ text: selectedText, top, left });
+          setSelectionDetails({
+            text: selectedText,
+            top: top,
+            left: left,
+          });
         }
       } else {
-        // If there's no selection, hide the button
+        // If the selection is cleared, hide the button
         setSelectionDetails(null);
       }
     });
