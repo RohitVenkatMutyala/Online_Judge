@@ -93,7 +93,7 @@ const Tview = () => {
     setOriginalSelection(selectedText);
     setShowExplainModal(true);
     setIsExplaining(true);
-    setExplanation('Getting a detailed explanation from the AI...');
+    setExplanation('Getting a detailed explanation from the Randoman AI ....');
 
     // Manipulate the prompt to ask for a theory explanation
     const prompt = `Explain the following concept in simple terms with clear examples. Do not provide code unless it is essential for the explanation: "${selectedText}"`;

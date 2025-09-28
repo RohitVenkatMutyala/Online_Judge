@@ -24,7 +24,14 @@ function Dashboard() {
   // State for UI and Profile
   const [profileImage, setProfileImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  // Add these new state variables for profile links and the modal
+  const [githubLink, setGithubLink] = useState('');
+  const [linkedinLink, setLinkedinLink] = useState('');
+  const [showLinkModal, setShowLinkModal] = useState(false);
 
+  // Temporary state for the modal inputs to avoid saving on every keystroke
+  const [tempGithub, setTempGithub] = useState('');
+  const [tempLinkedin, setTempLinkedin] = useState('');
   // State for Stats and Heatmap
   const [stats, setStats] = useState({
     total: 0,
@@ -43,6 +50,7 @@ function Dashboard() {
   const [selectedTopic, setSelectedTopic] = useState('All');
 
   // Effect for fetching user profile image
+  // Effect for fetching user profile data (image AND links)
   useEffect(() => {
     if (!user?._id) return;
     const userDocRef = doc(db, 'users', user._id);
@@ -51,6 +59,16 @@ function Dashboard() {
       if (docSnap.exists()) {
         const userData = docSnap.data();
         setProfileImage(userData.profileImageURL || `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
+
+        // --- UPDATE THIS PART ---
+        // Fetch the links from the user's document
+        setGithubLink(userData.githubLink || '');
+        setLinkedinLink(userData.linkedinLink || '');
+        // Also set the temporary state for the modal
+        setTempGithub(userData.githubLink || '');
+        setTempLinkedin(userData.linkedinLink || '');
+        // --- END OF UPDATE ---
+
       } else {
         setProfileImage(`https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
       }
@@ -217,7 +235,36 @@ function Dashboard() {
       toast.error("Could not create shareable link. Please try again.");
     }
   };
+  // --- ADD THIS NEW FUNCTION ---
+  const handleUpdateLinks = async () => {
+    if (!user?._id) {
+      toast.error("User not found. Please try again.");
+      return;
+    }
 
+    // Optional: Basic URL validation
+    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+    if ((tempGithub && !urlPattern.test(tempGithub)) || (tempLinkedin && !urlPattern.test(tempLinkedin))) {
+      toast.warn("Please enter valid URLs.");
+      return;
+    }
+
+    const toastId = toast.loading("Updating links...");
+    const userDocRef = doc(db, 'users', user._id);
+    try {
+      await setDoc(userDocRef, {
+        githubLink: tempGithub,
+        linkedinLink: tempLinkedin
+      }, { merge: true });
+
+      toast.update(toastId, { render: "Links updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
+      setShowLinkModal(false); // Close the modal on success
+    } catch (error) {
+      console.error("Error updating links:", error);
+      toast.update(toastId, { render: "Failed to update links.", type: "error", isLoading: false, autoClose: 3000 });
+    }
+  };
+  // --- END OF NEW FUNCTION ---
   if (!user || user.role === 'admin') {
     return <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>;
   }
@@ -286,6 +333,23 @@ function Dashboard() {
                       {/* --- UPDATED SHARE BUTTON --- */}
                       <button className="btn btn-share rounded-pill" onClick={handleShare}>
                         <i className="bi bi-share-fill me-1"></i> Share
+                      </button>
+                      {/* --- ADD THIS NEW BLOCK --- */}
+                      <div className="vr d-none d-sm-block mx-2"></div>
+
+                      {githubLink && (
+                        <a href={githubLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View GitHub Profile">
+                          <i className="bi bi-github fs-4"></i>
+                        </a>
+                      )}
+                      {linkedinLink && (
+                        <a href={linkedinLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View LinkedIn Profile">
+                          <i className="bi bi-linkedin fs-4"></i>
+                        </a>
+                      )}
+
+                      <button className="btn btn-edit-profile rounded-pill ms-sm-auto" onClick={() => setShowLinkModal(true)}>
+                        <i className="bi bi-pencil-square me-1"></i> Edit Profile
                       </button>
                     </div>
                   </div>
@@ -422,6 +486,56 @@ function Dashboard() {
                 .react-calendar-heatmap .color-github-3 { fill: #26a641; }
                 .react-calendar-heatmap .color-github-4 { fill: #39d353; }
             `}</style>
+      {/* --- ADD THIS ENTIRE MODAL BLOCK --- */}
+      {showLinkModal && (
+        <div className="modal show fade" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
+              <div className="modal-header border-0">
+                <h5 className="modal-title fw-bold">
+                  <i className="bi bi-link-45deg me-2"></i> Update Your Profile Links
+                </h5>
+                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowLinkModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label htmlFor="githubLinkInput" className="form-label text-muted">GitHub Profile URL</label>
+                  <div className="input-group">
+                    <span className="input-group-text"><i className="bi bi-github"></i></span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="githubLinkInput"
+                      placeholder="https://github.com/username"
+                      value={tempGithub}
+                      onChange={(e) => setTempGithub(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="linkedinLinkInput" className="form-label text-muted">LinkedIn Profile URL</label>
+                  <div className="input-group">
+                    <span className="input-group-text"><i className="bi bi-linkedin"></i></span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="linkedinLinkInput"
+                      placeholder="https://linkedin.com/in/username"
+                      value={tempLinkedin}
+                      onChange={(e) => setTempLinkedin(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer border-0">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowLinkModal(false)}>Cancel</button>
+                <button type="button" className="btn btn-primary" onClick={handleUpdateLinks}>Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- END OF MODAL BLOCK --- */}
     </>
   );
 }
