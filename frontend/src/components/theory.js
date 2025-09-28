@@ -87,7 +87,7 @@ const Theory = () => {
 
         try {
             // Using the same '/help' endpoint, but with the new theory-focused prompt
-            const response = await axios.post(`${API_URL}/help`, { code: prompt, QID });
+            const response = await axios.post(`${API_URL}/help`, { code: prompt, qid });
             setExplanation(response.data.result || "Could not get an explanation for this topic.");
         } catch (err) {
             console.error("AI Explanation error:", err);
