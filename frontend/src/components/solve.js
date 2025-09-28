@@ -13,7 +13,7 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { increment } from "firebase/firestore";
 import { Tooltip, Popover } from "bootstrap";
 
-// Helper to get today's date string for Firestore keys
+// Helper to get today's date string for Firestore keyserror
 const getTodayDate = () => {
   const today = new Date();
   return today.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
@@ -221,7 +221,7 @@ const Solve = () => {
 
     } catch (err) {
       console.error("❌ AI Debug error:", err);
-      setDebugResponse("⚠️ Error retrieving help from AI or Firestore.");
+      setDebugResponse("⚠️ Error Please retry or try again later.");
     } finally {
       setIsDebugging(false);
     }
