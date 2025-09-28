@@ -231,37 +231,34 @@ const Solve = () => {
   // Add the AI Debug action to the editor's right-click menu
   // ADD THIS NEW FUNCTION IN THE SAME SPOT
 
-  function handleEditorDidMount(editor, monaco) {
-    editorRef.current = editor;
+ // ADD THIS NEW, SIMPLIFIED FUNCTION IN THE SAME SPOT (around line 290)
 
-    // ACTION 1: This appears ONLY when text is selected.
-    editor.addAction({
-      id: 'ask-randoman-ai-selection',
-      label: 'Ask Randoman AI', // <-- Your desired text for selections
-      contextMenuGroupId: 'navigation',
-      contextMenuOrder: 1.5,
-      // This is the key: it only shows the item if text is selected.
-      precondition: 'editorHasSelection',
-      run: function (ed) {
-        const selectedText = ed.getModel().getValueInRange(ed.getSelection());
-        handleAIDebug(selectedText); // Send only the selected text
-      },
-    });
+function handleEditorDidMount(editor, monaco) {
+  editorRef.current = editor;
 
-    // ACTION 2: This appears ONLY when NO text is selected.
-    editor.addAction({
-      id: 'debug-file-with-randoman-ai',
-      label: 'Debug file with Randoman AI', // A clear label for the whole file
-      contextMenuGroupId: 'navigation',
-      contextMenuOrder: 1.6, // Slightly different order to be safe
-      // This is the key: it only shows if there is no selection.
-      precondition: '!editorHasSelection',
-      run: function (ed) {
-        const currentCodeInEditor = ed.getValue();
-        handleAIDebug(currentCodeInEditor); // Send the entire file's code
-      },
-    });
-  }
+  // This single action will appear ONLY when you have selected text.
+  editor.addAction({
+    id: 'ask-randoman-ai-on-selection',
+    label: 'Ask Randoman AI model 1.1', // This is the text you wanted.
+    
+    // This is the condition: The menu item will only show if text is highlighted.
+    precondition: 'editorHasSelection', 
+    
+    contextMenuGroupId: 'navigation', // Puts it in the standard right-click menu.
+    contextMenuOrder: 1.5,
+    
+    // This function runs when you click the menu item.
+    run: function (ed) {
+      // Get the currently selected text.
+      const selectedText = ed.getModel().getValueInRange(ed.getSelection());
+      
+      // Send the selected text to your AI handler.
+      if (selectedText) {
+        handleAIDebug(selectedText);
+      }
+    },
+  });
+}
 
   const handleRun = async () => {
     setIsRunning(true);
