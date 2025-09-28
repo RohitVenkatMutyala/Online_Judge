@@ -457,7 +457,7 @@ function Dashboard() {
                                                     <div className="d-flex align-items-center mb-3">
                                                         <div className="nav-icon me-3"><i className="bi bi-file-earmark-person-fill"></i></div>
                                                         <div className="flex-grow-1">
-                                                            <h5 className="mb-1 fw-bold">AI Resume Reviewer</h5>
+                                                            <h5 className="mb-1 fw-bold">Randoman AI Resume Reviewer</h5>
                                                             <p className="mb-0 small text-muted">Paste your resume text below for instant feedback.</p>
                                                         </div>
                                                         {latestReview && (
@@ -476,7 +476,7 @@ function Dashboard() {
                                                     <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview} disabled={isReviewing}>
                                                         {isReviewing ? 
                                                             <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing...</> : 
-                                                            <><i className="bi bi-magic me-2"></i>Review with AI</>
+                                                            <><i className="bi bi-magic me-2"></i>Review with Randoman AI</>
                                                         }
                                                     </button>
                                                 </div>
@@ -554,7 +554,7 @@ function Dashboard() {
                     <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                         <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
                             <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold"><i className="bi bi-robot me-2"></i> AI Resume Feedback</h5>
+                                <h5 className="modal-title fw-bold"><i className="bi bi-robot me-2"></i> Randoman AI Resume Feedback</h5>
                                 <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowReviewModal(false)}></button>
                             </div>
                             <div className="modal-body">
