@@ -47,18 +47,16 @@ function PublicProfile() {
             setIsLoading(true);
             setError(null);
             try {
-                // Step 1: Fetch public user info (including social links) from Firebase
                 const publicProfileRef = doc(db, 'publicProfiles', userId);
                 const publicProfileSnap = await getDoc(publicProfileRef);
 
                 if (!publicProfileSnap.exists()) {
-                    setError("Public profile not found. The user may need to create a share link first.");
+                    setError("Public profile not found or is private.");
                     setIsLoading(false);
                     return;
                 }
                 setUser(publicProfileSnap.data());
 
-                // Step 2: Fetch problems stats from your backend
                 const problemsRes = await axios.get(`${API_URL}/problems/user/${userId}`);
                 if (problemsRes.data.success) {
                     const problems = problemsRes.data.problems;
@@ -98,7 +96,6 @@ function PublicProfile() {
                     });
                 }
 
-                // Step 3: Fetch submissions for heatmap from Firebase
                 const submissionsQuery = query(collection(db, "submissions"), where("id", "==", userId));
                 const querySnapshot = await getDocs(submissionsQuery);
                 const submissionCounts = {};
@@ -111,7 +108,6 @@ function PublicProfile() {
                 });
                 setHeatmapData(Object.entries(submissionCounts).map(([date, count]) => ({ date, count })));
 
-                // Step 4: Fetch recent submissions from Firebase
                 const recentSubmissionsQuery = query(collection(db, "submissions"), where("id", "==", userId), orderBy("submittedAt", "desc"), limit(5));
                 const recentSubmissionsSnapshot = await getDocs(recentSubmissionsQuery);
                 setRecentSubmissions(recentSubmissionsSnapshot.docs.map(doc => {
@@ -123,7 +119,6 @@ function PublicProfile() {
                         submittedAt: new Date(data.submittedAt).toLocaleDateString(),
                     };
                 }));
-
             } catch (err) {
                 console.error("Error fetching public profile data:", err);
                 setError("Failed to load profile data.");
@@ -165,7 +160,7 @@ function PublicProfile() {
             </div>
         </div>
     );
-    
+
     const today = new Date();
     const startDate = new Date(new Date().setDate(today.getDate() - 365));
 
@@ -192,121 +187,113 @@ function PublicProfile() {
             <div className={`container-fluid px-lg-4 py-5 dashboard-page theme-${theme}`}>
                 <div className="row g-4 justify-content-center">
                     <div className="col-12 col-xl-11">
-                        <div className="dashboard-container rounded-4 overflow-hidden">
-                            <div className="row g-0 h-100">
-                                {/* START: Profile Column */}
-                                <div className="col-12 col-lg-4 profile-column">
-                                    <div className="profile-section h-100 d-flex flex-column align-items-center justify-content-center p-4">
-                                        <div className="profile-image-container rounded-circle shadow-lg overflow-hidden position-relative mb-4">
-                                            <img src={user.profileImageURL || `https://api.dicebear.com/7.x/initials/svg?seed=${user.firstname} ${user.lastname}`} alt="Profile" className="w-100 h-100" />
-                                        </div>
-                                        <div className="text-center">
-                                            <h2 className="mb-1 fw-bold text-light">{user.firstname} {user.lastname}</h2>
-                                            <p className="mb-3 text-light opacity-75">{user.email}</p>
-                                            <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill"><i className="bi bi-person-check-fill me-2"></i><span className="fw-semibold">Verified User</span></div>
-                                            
-                                            {/* Social Links Section */}
-                                            <div className="d-flex justify-content-center gap-3 mt-4">
-                                                {user.githubLink && (
-                                                    <a href={user.githubLink} target="_blank" rel="noopener noreferrer" className="social-link-public">
-                                                        <i className="bi bi-github fs-4"></i>
-                                                    </a>
-                                                )}
-                                                {user.linkedinLink && (
-                                                    <a href={user.linkedinLink} target="_blank" rel="noopener noreferrer" className="social-link-public">
-                                                        <i className="bi bi-linkedin fs-4"></i>
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
+                        <div className="dashboard-container rounded-4 overflow-hidden p-4 p-lg-5">
+                            {/* --- START: UNIFIED HEADER ROW --- */}
+                            <div className="row g-4 align-items-center mb-5">
+                                <div className="col-12 col-md-auto">
+                                    <div className="profile-image-container rounded-circle shadow-lg overflow-hidden position-relative mx-auto">
+                                        <img src={user.profileImageURL || `https://api.dicebear.com/7.x/initials/svg?seed=${user.firstname} ${user.lastname}`} alt="Profile" className="w-100 h-100" />
                                     </div>
                                 </div>
-                                {/* END: Profile Column */}
-
-                                {/* START: Content Column */}
-                                <div className="col-12 col-lg-8 content-column">
-                                    <div className="p-4 p-lg-5">
-                                        <h1 className="fw-bold mb-2">{user.firstname}'s Profile</h1>
-                                        <p className="lead text-muted mb-4">A snapshot of their coding journey.</p>
-                                        
-                                        <div className="mb-5">
-                                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                                <h4 className="fw-semibold mb-0">Progress Overview</h4>
-                                                <select className="form-select form-select-sm" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: 'auto' }}>
-                                                    {stats.topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
-                                                </select>
-                                            </div>
-                                            <div className="row g-3">
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Total Solved" value={displayedStats.solved} total={displayedStats.total} icon="bi-check-all" color="primary" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Easy" value={displayedStats.easySolved} total={displayedStats.totalEasy} icon="bi-circle-square" color="success" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Medium" value={displayedStats.mediumSolved} total={displayedStats.totalMedium} icon="bi-square-half" color="warning" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Hard" value={displayedStats.hardSolved} total={displayedStats.totalHard} icon="bi-square-fill" color="danger" /></div>
-                                            </div>
+                                <div className="col-12 col-md">
+                                    <h1 className="fw-bold mb-1">{user.firstname} {user.lastname}</h1>
+                                    <p className="lead text-muted mb-2">{user.email}</p>
+                                    <div className="d-flex align-items-center gap-2">
+                                        <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill">
+                                            <i className="bi bi-person-check-fill me-2"></i>
+                                            <span className="fw-semibold small">Verified User</span>
                                         </div>
-                                        
-                                        <div className="mb-5">
-                                            <h4 className="fw-semibold mb-3">Submission Activity</h4>
-                                            <div className="heatmap-container card p-3">
-                                                <ReactCalendarHeatmap
-                                                    startDate={startDate}
-                                                    endDate={today}
-                                                    values={heatmapData}
-                                                    classForValue={(value) => `color-github-${!value ? 0 : Math.min(4, value.count)}`}
-                                                    tooltipDataAttrs={value => {
-                                                        if (!value || !value.date) return { 'data-tooltip-id': null };
-                                                        const dateStr = new Date(value.date).toDateString();
-                                                        const countStr = `${value.count || 0} submissions`;
-                                                        return { 'data-tooltip-id': 'heatmap-tooltip', 'data-tooltip-content': `${dateStr}: ${countStr}` };
-                                                    }}
-                                                />
-                                                <ReactTooltip id="heatmap-tooltip" />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 className="fw-semibold mb-3">Recent Activity</h4>
-                                            <div className="recent-submissions-container card">
-                                                {recentSubmissions.length > 0 ? (
-                                                    <ul className="list-group list-group-flush">
-                                                        {recentSubmissions.map((sub, index) => (
-                                                            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                                                                <div>
-                                                                    <span>QID: <span className="fw-semibold">{sub.QID}</span></span>
-                                                                    <small className="d-block text-muted">{sub.submittedAt}</small>
-                                                                </div>
-                                                                <span className={`badge ${sub.verdict === 'Passed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
-                                                                    {sub.verdict}
-                                                                </span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <div className="card-body text-center text-muted">No recent submissions found.</div>
-                                                )}
-                                            </div>
-                                        </div>
+                                        <div className="vr d-none d-sm-block mx-2"></div>
+                                        {user.githubLink && (
+                                            <a href={user.githubLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View GitHub Profile">
+                                                <i className="bi bi-github fs-4"></i>
+                                            </a>
+                                        )}
+                                        {user.linkedinLink && (
+                                            <a href={user.linkedinLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View LinkedIn Profile">
+                                                <i className="bi bi-linkedin fs-4"></i>
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
-                                {/* END: Content Column */}
                             </div>
+                            {/* --- END: UNIFIED HEADER ROW --- */}
+
+                            {/* --- START: STATS AND ACTIVITY CONTENT --- */}
+                            <div className="mb-5">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 className="fw-semibold mb-0">Progress Overview</h4>
+                                    <select className="form-select form-select-sm" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: 'auto' }}>
+                                        {stats.topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
+                                    </select>
+                                </div>
+                                <div className="row g-3">
+                                    <div className="col-md-6 col-xl-3"><StatCard title="Total Solved" value={displayedStats.solved} total={displayedStats.total} icon="bi-check-all" color="primary" /></div>
+                                    <div className="col-md-6 col-xl-3"><StatCard title="Easy" value={displayedStats.easySolved} total={displayedStats.totalEasy} icon="bi-circle-square" color="success" /></div>
+                                    <div className="col-md-6 col-xl-3"><StatCard title="Medium" value={displayedStats.mediumSolved} total={displayedStats.totalMedium} icon="bi-square-half" color="warning" /></div>
+                                    <div className="col-md-6 col-xl-3"><StatCard title="Hard" value={displayedStats.hardSolved} total={displayedStats.totalHard} icon="bi-square-fill" color="danger" /></div>
+                                </div>
+                            </div>
+
+                            <div className="mb-5">
+                                <h4 className="fw-semibold mb-3">Submission Activity</h4>
+                                <div className="heatmap-container card p-3">
+                                    <ReactCalendarHeatmap
+                                        startDate={startDate}
+                                        endDate={today}
+                                        values={heatmapData}
+                                        classForValue={(value) => `color-github-${!value ? 0 : Math.min(4, value.count)}`}
+                                        tooltipDataAttrs={value => {
+                                            if (!value || !value.date) return { 'data-tooltip-id': null };
+                                            const dateStr = new Date(value.date).toDateString();
+                                            const countStr = `${value.count || 0} submissions`;
+                                            return { 'data-tooltip-id': 'heatmap-tooltip', 'data-tooltip-content': `${dateStr}: ${countStr}` };
+                                        }}
+                                    />
+                                    <ReactTooltip id="heatmap-tooltip" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="fw-semibold mb-3">Recent Activity</h4>
+                                <div className="recent-submissions-container card">
+                                    {recentSubmissions.length > 0 ? (
+                                        <ul className="list-group list-group-flush">
+                                            {recentSubmissions.map((sub, index) => (
+                                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span>QID: <span className="fw-semibold">{sub.QID}</span></span>
+                                                        <small className="d-block text-muted">{sub.submittedAt}</small>
+                                                    </div>
+                                                    <span className={`badge ${sub.verdict === 'Passed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
+                                                        {sub.verdict}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <div className="card-body text-center text-muted">No recent submissions found.</div>
+                                    )}
+                                </div>
+                            </div>
+                            {/* --- END: STATS AND ACTIVITY CONTENT --- */}
                         </div>
                     </div>
                 </div>
             </div>
             <style>{`
-                /* Paste the same styles from your Dashboard.js here */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
                 .dashboard-container { min-height: 85vh; }
-                .theme-dark .dashboard-container, .theme-dark .content-column { background-color: #1e1e2f; border: 1px solid #3a3a5a; color: #fff; }
-                .theme-light .dashboard-container, .theme-light .content-column { background-color: #ffffff; border: 1px solid #dee2e6; color: #212529; }
-                .profile-column { background: linear-gradient(160deg, #343a40, #1e1e2f); }
-                .profile-image-container { width: 180px; height: 180px; border: 4px solid rgba(255,255,255,0.2); }
+                .theme-dark .dashboard-container { background-color: #1e1e2f; border: 1px solid #3a3a5a; color: #fff; }
+                .theme-light .dashboard-container { background-color: #ffffff; border: 1px solid #dee2e6; color: #212529; }
+                .profile-image-container { width: 120px; height: 120px; border: 4px solid rgba(255,255,255,0.2); }
+                .theme-light .profile-image-container { border-color: #dee2e6; }
                 .profile-image-container img { object-fit: cover; }
                 .user-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); color: white; }
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content-center; border-radius: 12px; }
+                .icon-container { width: 50px; height: 50px; display: flex; align-items-center; justify-content: center; border-radius: 12px; }
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
@@ -324,19 +311,10 @@ function PublicProfile() {
                 .theme-light .list-group-item { background-color: #fff; }
                 .list-group-item:last-child { border-bottom: none; }
                 .badge { padding: 0.5em 0.75em; font-size: 0.8em; }
-                @media (max-width: 991.98px) {
-                    .profile-column { border-radius: 1rem 1rem 0 0; }
-                    .content-column { border-radius: 0 0 1rem 1rem; }
-                    .profile-section { padding-bottom: 2rem !important; }
-                }
-                .social-link-public {
-                    color: rgba(255, 255, 255, 0.6);
-                    transition: all 0.2s ease-in-out;
-                }
-                .social-link-public:hover {
-                    color: #fff;
-                    transform: scale(1.1);
-                }
+                .social-link { color: #adb5bd; transition: all 0.2s ease-in-out; }
+                .social-link:hover { color: #3b82f6; transform: scale(1.1); }
+                .theme-light .social-link { color: #6c757d; }
+                .theme-light .social-link:hover { color: #000; }
             `}</style>
         </>
     );
