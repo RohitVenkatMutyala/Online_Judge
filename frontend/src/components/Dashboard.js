@@ -280,7 +280,10 @@ function Dashboard() {
         2. **Strengths**: 2-3 key strengths of the resume.
         3. **Areas for Improvement**: Detailed suggestions on clarity, impact (using metrics), project descriptions, and technical skills. Provide specific examples of how to rephrase bullet points.
         4. **Final Polish**: Tips on formatting and language.
-        
+        5. **Additional Resources**: Links to relevant articles, tools, or examples for further improvement.
+        6. **Common Mistakes**: Highlight frequent errors found in resumes and how to avoid them.
+        7. **ATS Optimization**: Advice on keywords and formatting to pass Applicant Tracking Systems.
+        8. **ATS Score**: Provide an estimated ATS score out of 100 based on the content and formatting.
         Here is the resume:
         ---
         ${resumeText}`;
