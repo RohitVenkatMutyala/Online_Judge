@@ -19,7 +19,7 @@ const getTodayDate = () => {
 
 // Boilerplate code for each language
 const boilerplates = {
-  cpp: `#include <iostream>\n using namespace std;\n\nint main() {\n    // Your code here\n    std::cout << "Hello, World!";\n    return 0;\n}`,
+  cpp: `#include <iostream>\n\nint main() {\n    // Your code here\n    std::cout << "Hello, World!";\n    return 0;\n}`,
   py: `# Your code here\nprint("Hello, World!")`,
   java: `public class Main {\n    public static void main(String[] args) {\n        // Your code here\n        System.out.println("Hello, World!");\n    }\n}`
 };
@@ -164,7 +164,7 @@ const Solve = () => {
     saveToFirebase({ input: val });
   };
 
-  // UPDATED: AI Debug handler now ALWAYS makes a new request
+  // AI Debug handler that ALWAYS makes a new request
   const handleAIDebug = async (codeToDebug) => {
     if (helpCount >= 20) {
       alert("❌ Daily help limit of 20 reached!");
@@ -176,11 +176,11 @@ const Solve = () => {
     setDebugResponse('Getting a fresh suggestion from the AI...');
 
     try {
-      // ALWAYS make a new API request, caching is removed
+      // Always make a new API request
       const response = await axios.post(`${API_URL}/help`, { code: codeToDebug, QID });
       const result = response.data.result || "No suggestion was returned from the AI.";
 
-      // Save the NEW response to Firestore for logging/history (overwriting old one)
+      // Save the new response to Firestore for logging/history
       const helpResponsesRef = collection(db, "helpResponses");
       const helpId = `${user._id}-${QID}-${language}`;
       const helpDocRef = doc(helpResponsesRef, helpId);
@@ -193,7 +193,8 @@ const Solve = () => {
       });
 
       setDebugResponse(result);
-      await updateHelpCount(); // Increment usage count only on new requests
+      // UPDATED: This line ensures the help count is incremented on every fresh request.
+      await updateHelpCount();
 
     } catch (err) {
       console.error("❌ AI Debug error:", err);
@@ -359,7 +360,7 @@ const Solve = () => {
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
-                <i className="bi bi-info-circle-fill text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Right-click on your code to get help from the AI Debugger."></i>
+                <i className="bi bi-info-circle-fill text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Right-click your code to get help from the AI Debugger."></i>
               </div>
               <div className="card-body p-0">
                 <Editor
@@ -415,7 +416,6 @@ const Solve = () => {
           </div>
         </div>
       </div>
-      {/* AI Debugger Modal */}
       {showDebugModal && (
         <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
           <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -426,10 +426,7 @@ const Solve = () => {
               </div>
               <div className="modal-body">
                 {isDebugging ? (
-                  <div className="text-center py-5">
-                    <div className="spinner-border text-warning" role="status"></div>
-                    <p className="mt-3 fw-semibold">{debugResponse}</p>
-                  </div>
+                  <div className="text-center py-5"><div className="spinner-border text-warning" role="status"></div><p className="mt-3 fw-semibold">{debugResponse}</p></div>
                 ) : (
                   <div className="markdown-content">
                     <ReactMarkdown
