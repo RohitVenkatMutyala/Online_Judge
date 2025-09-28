@@ -256,21 +256,7 @@ const Solve = () => {
       setIsRunning(false);
     }
   };
-  // Inside your component...
-  useEffect(() => {
-    // Ensure Bootstrap's JS is loaded
-    if (typeof window.bootstrap !== 'undefined') {
-      const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-      const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new window.bootstrap.Popover(popoverTriggerEl);
-      });
 
-      // Cleanup function to destroy popovers when the component unmounts
-      return () => {
-        popoverList.forEach(popover => popover.dispose());
-      };
-    }
-  }, []); // Empty dependency array ensures this runs only once
 
   const handlesubmit = async () => {
     setIsSubmitting(true);
