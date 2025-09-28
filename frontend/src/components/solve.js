@@ -52,36 +52,30 @@ const Solve = () => {
   const [helpCount, setHelpCount] = useState(0);
   const today = getTodayDate();
 
-  // FINAL FIX: Robust initializer for all Bootstrap components
-  // ADD THIS CORRECTED BLOCK AT LINE 67
-
+  // Robust initializer for Bootstrap components
   useEffect(() => {
     if (problem) {
       let popoverInstances = [];
       let tooltipInstances = [];
 
-      // Use a small delay to ensure the DOM is fully rendered and painted.
       const timer = setTimeout(() => {
-        // Initialize Popovers
         const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
         popoverInstances = [...popoverTriggerList].map(el => new Popover(el, {
           trigger: 'hover focus',
           html: true,
         }));
 
-        // Initialize Tooltips
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         tooltipInstances = [...tooltipTriggerList].map(el => new Tooltip(el));
-      }, 100); // 100ms delay is a safe bet
+      }, 100);
 
-      // Cleanup function
       return () => {
         clearTimeout(timer);
         popoverInstances.forEach(popover => popover.dispose());
         tooltipInstances.forEach(tooltip => tooltip.dispose());
       };
     }
-  }, [problem]); // Dependency array ensures this runs when the component is ready
+  }, [problem]);
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
@@ -109,9 +103,9 @@ const Solve = () => {
     const helpDocRef = doc(db, "helpCounts", `${user._id}_${today}`);
     try {
       await updateDoc(helpDocRef, {
-        count: increment(1) // Atomically increments the value on the server
+        count: increment(1)
       });
-      setHelpCount(prevCount => prevCount + 1); // Also update local state correctly
+      setHelpCount(prevCount => prevCount + 1);
     } catch (err) {
       console.error("Error updating help count:", err);
     }
@@ -188,8 +182,9 @@ const Solve = () => {
     saveToFirebase({ input: val });
   };
 
-  // AI Debug handler that ALWAYS makes a new request
+  // AI Debug handler
   const handleAIDebug = async (codeToDebug) => {
+    if (!codeToDebug) return; // Prevent sending empty requests
     if (helpCount >= 20) {
       alert("❌ Daily help limit of 20 reached!");
       return;
@@ -200,11 +195,9 @@ const Solve = () => {
     setDebugResponse('Getting a fresh suggestion from the AI...');
 
     try {
-      // Always make a new API request
       const response = await axios.post(`${API_URL}/help`, { code: codeToDebug, QID });
       const result = response.data.result || "No suggestion was returned from the AI.";
 
-      // Save the new response to Firestore for logging/history
       const helpResponsesRef = collection(db, "helpResponses");
       const helpId = `${user._id}-${QID}-${language}`;
       const helpDocRef = doc(helpResponsesRef, helpId);
@@ -217,7 +210,6 @@ const Solve = () => {
       });
 
       setDebugResponse(result);
-      // UPDATED: This line ensures the help count is incremented on every fresh request.
       await updateHelpCount();
 
     } catch (err) {
@@ -228,37 +220,29 @@ const Solve = () => {
     }
   };
 
+  // ### THIS IS THE CORRECTED PART ###
   // Add the AI Debug action to the editor's right-click menu
-  // ADD THIS NEW FUNCTION IN THE SAME SPOT
+  function handleEditorDidMount(editor, monaco) {
+    editorRef.current = editor;
 
- // ADD THIS NEW, SIMPLIFIED FUNCTION IN THE SAME SPOT (around line 290)
-
-function handleEditorDidMount(editor, monaco) {
-  editorRef.current = editor;
-
-  // This single action will appear ONLY when you have selected text.
-  editor.addAction({
-    id: 'ask-randoman-ai-on-selection',
-    label: 'Ask Randoman AI model 1.1', // This is the text you wanted.
-    
-    // This is the condition: The menu item will only show if text is highlighted.
-    precondition: 'editorHasSelection', 
-    
-    contextMenuGroupId: 'navigation', // Puts it in the standard right-click menu.
-    contextMenuOrder: 1.5,
-    
-    // This function runs when you click the menu item.
-    run: function (ed) {
-      // Get the currently selected text.
-      const selectedText = ed.getModel().getValueInRange(ed.getSelection());
-      
-      // Send the selected text to your AI handler.
-      if (selectedText) {
-        handleAIDebug(selectedText);
-      }
-    },
-  });
-}
+    // A single, reliable action that intelligently checks for a selection
+    editor.addAction({
+      id: 'ask-randoman-ai-universal',
+      label: 'Ask Randoman AI',
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 1.5,
+      // This function determines if the menu item should be shown.
+      // It will only show if the user has selected text.
+      keybindingContext: 'editorHasSelection',
+      run: function (ed) {
+        const selectedText = ed.getModel().getValueInRange(ed.getSelection());
+        // We add a check to ensure we don't send empty strings to the AI
+        if (selectedText) {
+          handleAIDebug(selectedText);
+        }
+      },
+    });
+  }
 
   const handleRun = async () => {
     setIsRunning(true);
@@ -400,7 +384,6 @@ function handleEditorDidMount(editor, monaco) {
             <div className="card shadow border-0 mb-3">
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
                 <span>Code Editor</span>
-                {/* START: Enhanced Popover Icon */}
                 <span
                   tabIndex="0"
                   data-bs-toggle="popover"
@@ -414,14 +397,13 @@ function handleEditorDidMount(editor, monaco) {
                       <li><strong>Specific Snippet:</strong> Select code, then right-click.</li>
                        <li><strong>For specific requests:</strong> Write your query as a comment (e.g., '// Only give me the corrected code') and select it along with your code.</li>
                     </ul>
-                    <p class='mb-0'>Choose 'Debug using Randoman AI model 1.1' from the menu.</p></div>"
+                    <p class='mb-0'>Choose 'Ask Randoman AI' from the menu.</p></div>"
                 >
                   <i
                     className="bi bi-info-circle-fill text-info"
                     style={{ cursor: 'pointer', fontSize: '1.2rem' }}
                   ></i>
                 </span>
-                {/* END: Enhanced Popover Icon */}
               </div>
               <div className="card-body p-0">
                 <Editor
