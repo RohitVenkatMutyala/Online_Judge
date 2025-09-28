@@ -11,7 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { increment } from "firebase/firestore";
-import { Tooltip } from "bootstrap";
+import { Tooltip , Popover } from "bootstrap";
 
 // Helper to get today's date string for Firestore keys
 const getTodayDate = () => {
