@@ -50,11 +50,12 @@ const Tview = () => {
 
       if (selectedText) {
         const range = selection.getRangeAt(0);
+        // This is the corrected calculation
         const rect = range.getBoundingClientRect();
         setAiButton({
           show: true,
-          x: rect.left + window.scrollX,
-          y: rect.top + window.scrollY - 40, // Position above the selection
+          x: rect.left, // Use the viewport's left position directly
+          y: rect.top - 40, // Position 40px above the selection relative to the viewport
           text: selectedText
         });
       } else {
@@ -614,7 +615,7 @@ const Tview = () => {
                 {/* Tutorial Body */}
                 <div className="card-body p-5">
                   <div className="tutorial-content">
-                   
+
                     <ReactMarkdown
                       children={problem.description}
                       components={{
