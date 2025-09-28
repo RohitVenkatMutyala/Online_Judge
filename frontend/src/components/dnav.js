@@ -1,286 +1,217 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { db } from '../firebaseConfig';
 import { doc, onSnapshot } from 'firebase/firestore';
+
 function Dnav() {
-  const { user, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [profileImage, setProfileImage] = useState(null);
+    const { user, logout } = useAuth();
+    const { theme, setTheme } = useTheme();
+    const navigate = useNavigate();
+    const location = useLocation(); // Hook to get current path
+    const [isCollapsed, setIsCollapsed] = useState(true);
+    const [profileImage, setProfileImage] = useState(null);
 
-  useEffect(() => {
-    // If there's no user, do nothing
-    if (!user || !user._id) return;
+    useEffect(() => {
+        if (!user || !user._id) return;
 
-    // Listen for real-time updates to the user's profile
-    const userDocRef = doc(db, 'users', user._id);
-    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-      if (docSnap.exists() && docSnap.data().profileImageURL) {
-        // Set the profile image if the URL exists
-        setProfileImage(docSnap.data().profileImageURL);
-      } else {
-        // Use a default or clear the image if no URL is found
-        setProfileImage(null);
-      }
-    });
+        const userDocRef = doc(db, 'users', user._id);
+        const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+            const seed = `${user.firstname} ${user.lastname}`;
+            if (docSnap.exists() && docSnap.data().profileImageURL) {
+                setProfileImage(docSnap.data().profileImageURL);
+            } else {
+                setProfileImage(`https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
+            }
+        });
 
-    // Cleanup the listener on component unmount
-    return () => unsubscribe();
-  }, [user]); // Rerun when the user object changes
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
+        return () => unsubscribe();
+    }, [user]);
 
-  const isAdmin = user?.role === 'admin' || user?.isAdmin;
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
+    };
 
-  const navLinkStyle = {
-    background: 'linear-gradient(135deg, #11998e, #38ef7d)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    fontWeight: '600',
-    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    position: 'relative',
-    textDecoration: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  };
+    const isAdmin = user?.role === 'admin' || user?.isAdmin;
 
-  const handleNavLinkHover = (e, isEnter) => {
-    if (isEnter) {
-      e.target.style.background = 'linear-gradient(135deg, #f12711, #f5af19)';
-      e.target.style.WebkitBackgroundClip = 'text';
-      e.target.style.WebkitTextFillColor = 'transparent';
-      e.target.style.transform = 'translateY(-2px)';
-      e.target.style.boxShadow = '0 4px 12px rgba(241, 39, 17, 0.3)';
-    } else {
-      e.target.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
-      e.target.style.WebkitBackgroundClip = 'text';
-      e.target.style.WebkitTextFillColor = 'transparent';
-      e.target.style.transform = 'translateY(0)';
-      e.target.style.boxShadow = 'none';
-    }
-  };
+    // A helper function to determine if a link is active
+    const isActive = (path) => location.pathname.startsWith(path);
 
-  return (
-    <>
-      {/* Enhanced Navigation Bar */}
-      <nav className="navbar navbar-expand-lg sticky-top shadow-lg"
-        style={{
-          background: 'linear-gradient(135deg, #1a1d23 0%, #20232a 50%, #2c3e50 100%)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-        <div className="container-fluid px-4">
+    return (
+        <>
+            <style>
+                {`
+                :root {
+                    --nav-light-bg: #f8f9fa;
+                    --nav-light-border: #dee2e6;
+                    --nav-light-text: #212529;
+                    --nav-light-link-active-border: #0d6efd;
+                    --nav-dark-bg: #1e1e2f;
+                    --nav-dark-border: rgba(255, 255, 255, 0.1);
+                    --nav-dark-text: #ffffff;
+                    --nav-dark-link-active-border: #ff4b2b;
+                }
 
-          {/* === MODIFIED LOGO SECTION START === */}
-          <Link to="#" className="navbar-brand d-flex align-items-center gap-3 py-2">
+                .navbar-custom {
+                    transition: background-color 0.3s ease, border-color 0.3s ease;
+                }
 
-            <span
-              className="fw-bold"
-              style={{
-                background: 'linear-gradient(135deg, #f12711 0%, #f5af19 30%, #ff6b6b 70%, #ee5a52 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontSize: '2rem',
-                fontWeight: '800',
-                letterSpacing: '-0.8px',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                cursor: 'pointer',
-                textShadow: '0 4px 8px rgba(241, 39, 17, 0.3)',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 30%, #00C9FF 70%, #92FE9D 100%)';
-                e.target.style.WebkitBackgroundClip = 'text';
-                e.target.style.WebkitTextFillColor = 'transparent';
-                e.target.style.transform = 'scale(1.08)';
-                e.target.style.textShadow = '0 6px 12px rgba(17, 153, 142, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #f12711 0%, #f5af19 30%, #ff6b6b 70%, #ee5a52 100%)';
-                e.target.style.WebkitBackgroundClip = 'text';
-                e.target.style.WebkitTextFillColor = 'transparent';
-                e.target.style.transform = 'scale(1)';
-                e.target.style.textShadow = '0 4px 8px rgba(241, 39, 17, 0.3)';
-              }}
-            >
-              Randoman
-            </span>
-          </Link>
-          {/* === MODIFIED LOGO SECTION END === */}
+                /* Light Theme */
+                .navbar-custom.theme-light {
+                    background-color: var(--nav-light-bg);
+                    border-bottom: 1px solid var(--nav-light-border);
+                }
+                .theme-light .navbar-brand-custom, .theme-light .nav-link-custom {
+                    color: var(--nav-light-text);
+                }
+                .theme-light .nav-link-custom.active::after {
+                    background-color: var(--nav-light-link-active-border);
+                }
+                .theme-light .profile-dropdown .dropdown-menu {
+                    --bs-dropdown-bg: var(--nav-light-bg);
+                    --bs-dropdown-link-color: var(--nav-light-text);
+                    --bs-dropdown-link-hover-bg: #e9ecef;
+                    --bs-dropdown-border-color: var(--nav-light-border);
+                }
 
-          {/* Enhanced Mobile Toggle */}
-          <button
-            className="navbar-toggler border-0 p-2"
-            type="button"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            style={{
-              background: 'linear-gradient(135deg, #f12711, #f5af19)',
-              borderRadius: '10px',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'scale(1.1)';
-              e.target.style.boxShadow = '0 4px 15px rgba(241, 39, 17, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'scale(1)';
-              e.target.style.boxShadow = 'none';
-            }}
-          >
-            <i className={`bi ${isCollapsed ? 'bi-list' : 'bi-x'} text-white fs-4`}></i>
-          </button>
+                /* Dark Theme */
+                .navbar-custom.theme-dark {
+                    background: linear-gradient(135deg, #1a1d23 0%, #20232a 50%, #2c3e50 100%);
+                    backdrop-filter: blur(0.5px);
+                    border-bottom: 1px solid var(--nav-dark-border);
+                }
+                 .theme-dark .navbar-brand-custom, .theme-dark .nav-link-custom {
+                    color: var(--nav-dark-text);
+                }
+                .theme-dark .nav-link-custom.active::after {
+                    background-color: var(--nav-dark-link-active-border);
+                }
+                .theme-dark .profile-dropdown .dropdown-menu {
+                    --bs-dropdown-bg: #2c3e50;
+                    --bs-dropdown-link-color: var(--nav-dark-text);
+                    --bs-dropdown-link-hover-bg: #34495e;
+                     --bs-dropdown-border-color: var(--nav-dark-border);
+                }
 
-          {/* Enhanced Navigation Menu */}
-          <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
-              {user ? (
-                <>
+                .navbar-brand-custom {
+                    background: linear-gradient(135deg, #f12711 0%, #f5af19 30%, #ff6b6b 70%, #ee5a52 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    font-size: 2rem;
+                    font-weight: 800;
+                    letter-spacing: -0.8px;
+                    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
+                }
+                
+                .navbar-brand-custom:hover {
+                    transform: scale(1.05);
+                }
 
-                  {/* Enhanced Action Buttons */}
-                  <li className="nav-item ms-lg-3">
-                    <div className="d-flex gap-2 align-items-center">
+                .nav-link-custom {
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    position: relative;
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
 
-                      {/* === NEW PROFILE DROPDOWN START === */}
-                      <div className="dropdown">
-                        <a
-                          href="#"
-                          className="d-block link-light text-decoration-none dropdown-toggle  no-caret"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                        >
-                          {profileImage ? (
-                            <img
-                              src={profileImage}
-                              alt="User"
-                              width="38"
-                              height="38"
-                              className="rounded-circle"
-                              style={{
-                                objectFit: 'cover',
-                                filter: 'blur(0.5px)'
-                              }}
-                            />
-                          ) : (
-                            <i className="bi bi-person-circle text-white fs-3"></i>
-                          )}
-                        </a>
-                        <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2">
-                          <li>
-                            <div className="dropdown-item-text text-white">
-                              <strong>{user.firstname} {user.lastname}</strong>
-                              <div className="small opacity-75">{user.email}</div>
-                            </div>
-                          </li>
-                          <li><hr className="dropdown-divider" /></li>
-                          <li>
-                            <button
-                              className="dropdown-item d-flex align-items-center gap-2"
-                              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                            >
-                              <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+                .nav-link-custom::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 50%;
+                    width: 0;
+                    height: 2px;
+                    background-color: transparent;
+                    transition: all 0.3s ease;
+                    transform: translateX(-50%);
+                }
 
-                              {/* This line is changed */}
-                              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                .nav-link-custom:hover::after, .nav-link-custom.active::after {
+                    width: 70%;
+                }
 
-                            </button>
-                          </li>
-                          <li><hr className="dropdown-divider" /></li>
-                          <li>
-                            <button
-                              className="dropdown-item d-flex align-items-center gap-2"
-                              onClick={handleLogout}
-                            >
-                              <i className="bi bi-box-arrow-right"></i>
-                              Logout
-                            </button>
-                          </li>
+                .dropdown-toggle.no-caret::after {
+                    display: none !important;
+                }
+                `}
+            </style>
 
+            <nav className={`navbar navbar-expand-lg sticky-top shadow-sm navbar-custom theme-${theme}`}>
+                <div className="container-fluid px-4">
+                    <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
+                        Randoman
+                    </Link>
+
+                    <button
+                        className="navbar-toggler border-0 p-2"
+                        type="button"
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                    >
+                        <i className={`bi ${isCollapsed ? 'bi-list' : 'bi-x'} text-${theme === 'dark' ? 'white' : 'dark'} fs-4`}></i>
+                    </button>
+
+                    <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
+                        <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
+                            {user && (
+                                <>
+                                    <li className="nav-item">
+                                        <Link className={`nav-link nav-link-custom ${isActive('/dashboard') ? 'active' : ''}`} to="/dashboard">
+                                            <i className="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
+                                        </Link>
+                                    </li>
+                                    
+                                    <li className="nav-item ms-lg-3">
+                                        <div className="dropdown profile-dropdown">
+                                            <a href="#" className="d-block text-decoration-none dropdown-toggle no-caret" data-bs-toggle="dropdown" aria-expanded="false">
+                                                {profileImage ? (
+                                                    <img src={profileImage} alt="User" width="38" height="38" className="rounded-circle" style={{ objectFit: 'cover' }} />
+                                                ) : (
+                                                    <i className={`bi bi-person-circle fs-3 text-${theme === 'dark' ? 'white' : 'dark'}`}></i>
+                                                )}
+                                            </a>
+                                            <ul className="dropdown-menu dropdown-menu-end mt-2 shadow-lg">
+                                                <li>
+                                                    <div className="dropdown-item-text">
+                                                        <strong>{user.firstname} {user.lastname}</strong>
+                                                        <div className="small opacity-75">{user.email}</div>
+                                                    </div>
+                                                </li>
+                                                <li><hr className="dropdown-divider" /></li>
+                                                <li><Link className="dropdown-item d-flex align-items-center gap-2" to="/problems"><i className="bi bi-code-slash"></i><span>Problems</span></Link></li>
+                                                <li><hr className="dropdown-divider" /></li>
+                                                <li>
+                                                    <button className="dropdown-item d-flex align-items-center gap-2" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                                                        <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+                                                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                                                    </button>
+                                                </li>
+                                                <li><hr className="dropdown-divider" /></li>
+                                                <li>
+                                                    <button className="dropdown-item d-flex align-items-center gap-2" onClick={handleLogout}>
+                                                        <i className="bi bi-box-arrow-right"></i> Logout
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </>
+                            )}
                         </ul>
-                      </div>
-                      {/* === NEW PROFILE DROPDOWN END === */}
-
-                      {/* Theme Toggle (Unchanged, but now next to the dropdown) */}
-
                     </div>
-                  </li>
-                </>
-              ) : (
-                <li className="nav-item ms-lg-3">
-                  <div className="d-flex gap-2 align-items-center">
-
-                    {/* === NEW LOGIN DROPDOWN START === */}
-                    <div className="dropdown">
-                      <a
-                        href="#"
-                        className="d-block link-light text-decoration-none dropdown-toggle no-caret" // <-- Add "no-caret"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        {/* Default icon for logged-out state */}
-                        <i className="bi bi-person-circle text-white fs-3"></i>
-                      </a>
-                      <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2">
-                        <li>
-                          <Link
-                            className="dropdown-item d-flex align-items-center gap-2"
-                            to="/login"
-                          >
-                            <i className="bi bi-box-arrow-in-right"></i>
-                            Login
-                          </Link>
-                        </li>
-                        <li><hr className="dropdown-divider" /></li>
-                        <li>
-                          <button
-                            className="dropdown-item d-flex align-items-center gap-2"
-                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                          >
-                            <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-
-                            {/* This line is changed */}
-                            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-                    {/* === NEW LOGIN DROPDOWN END === */}
-
-                  </div>
-                </li>
-              )}
-            </ul>
-          </div>
-        </div>
-
-      </nav>
-
-      {/* CSS for additional logo effects */}
-      <style>{`
-        .navbar-brand:hover .logo-ring {
-          opacity: 1 !important;
-          animation: rotate 2s linear infinite;
-        }
-         .dropdown-toggle.no-caret::after {
-  display: none !important;
-}
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-
-    </>
-  );
+                </div>
+            </nav>
+        </>
+    );
 }
 
 export default Dnav;

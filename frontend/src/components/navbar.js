@@ -81,7 +81,7 @@ function Navbar() {
                 /* Dark Theme */
                 .navbar-custom.theme-dark {
                     background: linear-gradient(135deg, #1a1d23 0%, #20232a 50%, #2c3e50 100%);
-                    backdrop-filter: blur(10px);
+                    backdrop-filter: blur(0.5px);
                     border-bottom: 1px solid var(--nav-dark-border);
                 }
                  .theme-dark .navbar-brand-custom, .theme-dark .nav-link-custom {
