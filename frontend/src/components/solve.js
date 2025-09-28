@@ -51,41 +51,40 @@ const Solve = () => {
   const [helpCount, setHelpCount] = useState(0);
   const today = getTodayDate();
 
-  // THIS IS THE ONLY INITIALIZER THAT SHOULD EXIST
+  // FINAL FIX: Robust initializer for all Bootstrap components
   useEffect(() => {
-    // A short delay can sometimes help ensure all DOM elements are ready.
+    // Define variables to hold the created instances
+    let tooltipInstances = [];
+    let popoverInstances = [];
+
+    // Use a timer to delay initialization until the DOM is definitely ready
     const timer = setTimeout(() => {
-        if (typeof window.bootstrap !== 'undefined') {
-        // 1. Dispose of any existing tooltips/popovers to prevent duplicates
-        const existingTooltips = document.querySelectorAll('.tooltip');
-        existingTooltips.forEach(t => t.remove());
-        
-        const existingPopovers = document.querySelectorAll('.popover');
-        existingPopovers.forEach(p => p.remove());
+      if (typeof window.bootstrap !== 'undefined') {
+        // Clean up any stray elements from previous renders
+        document.querySelectorAll('.tooltip, .popover').forEach(el => el.remove());
 
-        // 2. Initialize all tooltips
+        // Initialize tooltips
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new window.bootstrap.Tooltip(tooltipTriggerEl));
+        tooltipInstances = [...tooltipTriggerList].map(el => new window.bootstrap.Tooltip(el));
 
-        // 3. Initialize all popovers
+        // Initialize popovers with the correct trigger
         const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => {
-            return new window.bootstrap.Popover(popoverTriggerEl, {
-            trigger: 'hover focus'
-            });
-        });
-
-        // Cleanup function to destroy both when the component unmounts
-        return () => {
-            tooltipList.forEach(tooltip => tooltip.dispose());
-            popoverList.forEach(popover => popover.dispose());
-        };
+        popoverInstances = [...popoverTriggerList].map(el => new window.bootstrap.Popover(el, {
+          trigger: 'hover focus'
+        }));
       }
     }, 100); // 100ms delay
 
-    return () => clearTimeout(timer);
+    // This is the correct cleanup function for the useEffect hook
+    return () => {
+      clearTimeout(timer); // Clear the timer if the component unmounts before it fires
+      
+      // Dispose of all created instances to prevent memory leaks
+      tooltipInstances.forEach(tooltip => tooltip.dispose());
+      popoverInstances.forEach(popover => popover.dispose());
+    };
     
-  }, [problem]); // Re-run when problem data loads
+  }, [problem]); // Re-run when the main problem data loads
 
   // Fetch and manage daily AI help count from Firestore
   useEffect(() => {
@@ -262,9 +261,6 @@ const Solve = () => {
       setIsRunning(false);
     }
   };
-
-  // I HAVE REMOVED THE CONFLICTING USEEFFECT HOOK THAT WAS HERE.
-  // This was the source of the bug.
 
   const handlesubmit = async () => {
     setIsSubmitting(true);
@@ -501,3 +497,4 @@ const Solve = () => {
 };
 
 export default Solve;
+
