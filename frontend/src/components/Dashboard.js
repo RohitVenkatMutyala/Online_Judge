@@ -21,18 +21,13 @@ function Dashboard() {
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_SERVER_API;
 
-  // State for UI and Profile
   const [profileImage, setProfileImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  // Add these new state variables for profile links and the modal
   const [githubLink, setGithubLink] = useState('');
   const [linkedinLink, setLinkedinLink] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
-
-  // Temporary state for the modal inputs to avoid saving on every keystroke
   const [tempGithub, setTempGithub] = useState('');
   const [tempLinkedin, setTempLinkedin] = useState('');
-  // State for Stats and Heatmap
   const [stats, setStats] = useState({
     total: 0,
     solved: 0,
@@ -49,49 +44,63 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState('All');
 
-  // Effect for fetching user profile image
-  // Effect for fetching user profile data (image AND links)
+  // Effect for fetching user profile data (image from 'users', links from 'publicProfiles')
   useEffect(() => {
     if (!user?._id) return;
+
+    // Listener for private user data (like profile image)
     const userDocRef = doc(db, 'users', user._id);
-    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+    const userUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
       const seed = `${user.firstname} ${user.lastname}`;
       if (docSnap.exists()) {
         const userData = docSnap.data();
         setProfileImage(userData.profileImageURL || `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
-
-        // --- UPDATE THIS PART ---
-        // Fetch the links from the user's document
-        setGithubLink(userData.githubLink || '');
-        setLinkedinLink(userData.linkedinLink || '');
-        // Also set the temporary state for the modal
-        setTempGithub(userData.githubLink || '');
-        setTempLinkedin(userData.linkedinLink || '');
-        // --- END OF UPDATE ---
-
       } else {
         setProfileImage(`https://api.dicebear.com/7.x/initials/svg?seed=${seed}`);
       }
     });
-    return () => unsubscribe();
+
+    // ======================== CHANGE #1 START ========================
+    // Listener for public profile data (social links)
+    const publicProfileDocRef = doc(db, 'publicProfiles', user._id);
+    const publicProfileUnsubscribe = onSnapshot(publicProfileDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const publicData = docSnap.data();
+        setGithubLink(publicData.githubLink || '');
+        setLinkedinLink(publicData.linkedinLink || '');
+        setTempGithub(publicData.githubLink || '');
+        setTempLinkedin(publicData.linkedinLink || '');
+      } else {
+        // If no public profile exists yet, clear the links
+        setGithubLink('');
+        setLinkedinLink('');
+        setTempGithub('');
+        setTempLinkedin('');
+      }
+    });
+    // ======================== CHANGE #1 END ==========================
+
+    // Cleanup both listeners on component unmount
+    return () => {
+      userUnsubscribe();
+      publicProfileUnsubscribe();
+    };
   }, [user]);
 
-  // Effect for fetching stats and heatmap data
+
+  // Effect for fetching stats and heatmap data (no changes here)
   useEffect(() => {
     if (!user?._id) return;
 
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch problems for stats
         const problemsRes = await axios.get(`${API_URL}/problems/user/${user._id}`, { withCredentials: true });
         if (problemsRes.data.success) {
           const problems = problemsRes.data.problems;
           const solvedProblems = problems.filter(p => p.status === 'Solved');
-
           const topicStats = {};
           const allTopics = new Set();
-
           problems.forEach(p => {
             (p.tag?.split(',') || []).forEach(rawTag => {
               const tag = rawTag.trim();
@@ -114,7 +123,6 @@ function Dashboard() {
               }
             });
           });
-
           setStats({
             total: problems.length,
             solved: solvedProblems.length,
@@ -129,7 +137,6 @@ function Dashboard() {
           });
         }
 
-        // Fetch submissions for heatmap
         const submissionsQuery = query(collection(db, "submissions"), where("id", "==", user._id));
         const querySnapshot = await getDocs(submissionsQuery);
         const submissionCounts = {};
@@ -142,7 +149,6 @@ function Dashboard() {
         });
         const formattedHeatmapData = Object.entries(submissionCounts).map(([date, count]) => ({ date, count }));
         setHeatmapData(formattedHeatmapData);
-
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         toast.error("Could not load your stats.");
@@ -150,12 +156,9 @@ function Dashboard() {
         setIsLoading(false);
       }
     };
-
     fetchData();
-
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipTriggerList.forEach(el => new BootstrapTooltip(el));
-
   }, [user, API_URL]);
 
   const displayedStats = useMemo(() => {
@@ -181,7 +184,7 @@ function Dashboard() {
       toast.error("Invalid file type. Please select an image.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
       toast.error("File is too large. Please select an image under 5MB.");
       return;
     }
@@ -196,7 +199,9 @@ function Dashboard() {
     try {
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
+      // Save image to both private and public profiles
       await setDoc(doc(db, 'users', user._id), { profileImageURL: downloadURL }, { merge: true });
+      await setDoc(doc(db, 'publicProfiles', user._id), { profileImageURL: downloadURL }, { merge: true });
       toast.success("Profile image updated!");
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -207,44 +212,33 @@ function Dashboard() {
   };
 
   const handleShare = async () => {
-    if (!user?._id || !profileImage) {
-      toast.error("User data is not available yet. Please wait a moment.");
-      return;
-    }
-
+    if (!user?._id) return;
     try {
-      // Save public data to a new collection in Firebase
       const publicProfileRef = doc(db, 'publicProfiles', user._id);
       await setDoc(publicProfileRef, {
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
         profileImageURL: profileImage,
-        githubLink: tempGithub,
-        linkedinLink: tempLinkedin
-      });
-
+        githubLink: githubLink,
+        linkedinLink: linkedinLink
+      }, { merge: true }); // Use merge to avoid overwriting other fields
       const shareUrl = `${window.location.origin}/profile/${user._id}`;
       navigator.clipboard.writeText(shareUrl).then(() => {
         toast.success("Public profile URL copied to clipboard!");
       }).catch(err => {
-        console.error('Failed to copy URL: ', err);
         toast.error("Failed to copy URL.");
       });
-
     } catch (error) {
-      console.error("Error creating public profile:", error);
-      toast.error("Could not create shareable link. Please try again.");
+      toast.error("Could not create shareable link.");
     }
   };
-  // --- ADD THIS NEW FUNCTION ---
+
   const handleUpdateLinks = async () => {
     if (!user?._id) {
       toast.error("User not found. Please try again.");
       return;
     }
-
-    // Optional: Basic URL validation
     const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
     if ((tempGithub && !urlPattern.test(tempGithub)) || (tempLinkedin && !urlPattern.test(tempLinkedin))) {
       toast.warn("Please enter valid URLs.");
@@ -252,21 +246,25 @@ function Dashboard() {
     }
 
     const toastId = toast.loading("Updating links...");
-    const userDocRef = doc(db, 'users', user._id);
+
+    // ======================== CHANGE #2 START ========================
+    // Change the document reference to 'publicProfiles'
+    const publicProfileDocRef = doc(db, 'publicProfiles', user._id);
     try {
-      await setDoc(userDocRef, {
+      await setDoc(publicProfileDocRef, {
         githubLink: tempGithub,
         linkedinLink: tempLinkedin
-      }, { merge: true });
+      }, { merge: true }); // Use merge to create/update the document
+      // ======================== CHANGE #2 END ==========================
 
       toast.update(toastId, { render: "Links updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
-      setShowLinkModal(false); // Close the modal on success
+      setShowLinkModal(false);
     } catch (error) {
       console.error("Error updating links:", error);
       toast.update(toastId, { render: "Failed to update links.", type: "error", isLoading: false, autoClose: 3000 });
     }
   };
-  // --- END OF NEW FUNCTION ---
+
   if (!user || user.role === 'admin') {
     return <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>;
   }
@@ -309,10 +307,8 @@ function Dashboard() {
           <div className="col-12 col-xl-11">
             <div className="dashboard-container rounded-4 overflow-hidden">
               <div className="content-column p-4 p-lg-5">
-                {/* --- NEW HEADER ROW WITH PROFILE --- */}
                 <div className="row g-4 align-items-center mb-5">
                   <div className="col-12 col-md-auto">
-                    {/* Profile Image Upload */}
                     <label htmlFor="profileUpload" className="profile-upload-label">
                       <div className="profile-image-container rounded-circle shadow-lg overflow-hidden position-relative mx-auto">
                         {isUploading && <div className="position-absolute w-100 h-100 d-flex justify-content-center align-items-center" style={{ zIndex: 10, backgroundColor: 'rgba(0,0,0,0.5)' }}><div className="spinner-border text-light" role="status"></div></div>}
@@ -324,7 +320,6 @@ function Dashboard() {
                   </div>
 
                   <div className="col-12 col-md">
-                    {/* User Details */}
                     <h1 className="fw-bold mb-1">Welcome Back, {user.firstname}!</h1>
                     <p className="lead text-muted mb-2">{user.email}</p>
                     <div className="d-flex align-items-center gap-2">
@@ -332,13 +327,10 @@ function Dashboard() {
                         <i className="bi bi-person-check-fill me-2"></i>
                         <span className="fw-semibold small">Verified User</span>
                       </div>
-                      {/* --- UPDATED SHARE BUTTON --- */}
                       <button className="btn btn-share rounded-pill" onClick={handleShare}>
                         <i className="bi bi-share-fill me-1"></i> Share
                       </button>
-                      {/* --- ADD THIS NEW BLOCK --- */}
                       <div className="vr d-none d-sm-block mx-2"></div>
-
                       {githubLink && (
                         <a href={githubLink} target="_blank" rel="noopener noreferrer" className="social-link" data-bs-toggle="tooltip" title="View GitHub Profile">
                           <i className="bi bi-github fs-4"></i>
@@ -349,14 +341,12 @@ function Dashboard() {
                           <i className="bi bi-linkedin fs-4"></i>
                         </a>
                       )}
-
                       <button className="btn btn-edit-profile rounded-pill ms-sm-auto" onClick={() => setShowLinkModal(true)}>
                         <i className="bi bi-pencil-square me-1"></i> Edit Profile
                       </button>
                     </div>
                   </div>
                 </div>
-
                 {isLoading ? <div className="text-center py-5"><div className="spinner-border" role="status"></div></div> : (
                   <>
                     <div className="mb-5">
@@ -414,56 +404,26 @@ function Dashboard() {
       <style>{`
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
-
                 .dashboard-container { min-height: 85vh; }
-                
                 .theme-dark .dashboard-container { background-color: #1e1e2f; border: 1px solid #3a3a5a; color: #fff; }
                 .theme-light .dashboard-container { background-color: #ffffff; border: 1px solid #dee2e6; color: #212529; }
-                
-                .profile-image-container { 
-                    width: 120px; 
-                    height: 120px; 
-                    cursor: pointer; 
-                    border: 4px solid rgba(255,255,255,0.2); 
-                }
-                .theme-light .profile-image-container {
-                    border-color: #dee2e6;
-                }
+                .profile-image-container { width: 120px; height: 120px; cursor: pointer; border: 4px solid rgba(255,255,255,0.2); }
+                .theme-light .profile-image-container { border-color: #dee2e6; }
                 .profile-image-container img { object-fit: cover; }
                 .profile-upload-label:hover .profile-overlay { background: rgba(0,0,0,0.5); }
                 .profile-upload-label:hover .profile-overlay i { opacity: 1 !important; color: white; }
                 .profile-overlay { transition: all 0.3s ease; border-radius: 50%; }
                 .profile-overlay i { opacity: 0; transition: all 0.3s ease; }
                 .user-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); color: white; }
-                
-                .btn-share {
-                    background: rgba(255, 255, 255, 0.1);
-                    color: #fff;
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    transition: all 0.3s ease;
-                    padding: 0.25rem 0.75rem;
-                    font-size: 0.8rem;
-                }
-                .theme-light .btn-share {
-                    background: #e9ecef;
-                    color: #495057;
-                    border-color: #dee2e6;
-                }
-                .btn-share:hover {
-                    transform: translateY(-2px);
-                    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-                    color: white;
-                    border-color: transparent;
-                }
-
+                .btn-share { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; padding: 0.25rem 0.75rem; font-size: 0.8rem; }
+                .theme-light .btn-share { background: #e9ecef; color: #495057; border-color: #dee2e6; }
+                .btn-share:hover { transform: translateY(-2px); background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; border-color: transparent; }
                 .theme-dark .stat-card { background-color: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; }
                 .theme-light .stat-card { background-color: #f8f9fa; border: 1px solid #dee2e6; }
                 .icon-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-                
                 .theme-dark .form-select { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
                 .theme-light .form-select { background-color: #fff; color: #212529; border-color: #dee2e6; }
                 .form-select:focus { box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25); border-color: #3b82f6; }
-
                 .nav-card { cursor: pointer; transition: all 0.2s ease-in-out; border-radius: 0.5rem; }
                 .theme-dark .nav-card { background-color: rgba(255,255,255,0.05); }
                 .theme-light .nav-card { background-color: #f8f9fa; }
@@ -476,19 +436,23 @@ function Dashboard() {
                 .theme-dark .nav-arrow { color: #6c757d; }
                 .theme-light .nav-arrow { color: #adb5bd; }
                 .nav-card:hover .nav-arrow { transform: translateX(5px); }
-
-                /* Heatmap Styles */
                 .theme-dark .heatmap-container { background-color: transparent; border: 1px solid #3a3a5a !important; }
                 .theme-light .heatmap-container { background-color: #f8f9fa; border: 1px solid #dee2e6 !important; }
-                
                 .react-calendar-heatmap text { font-size: 10px; fill: #aaa; }
                 .react-calendar-heatmap .color-empty, .react-calendar-heatmap .color-github-0 { fill: ${theme === 'dark' ? '#161b22' : '#ebedf0'}; }
                 .react-calendar-heatmap .color-github-1 { fill: #0e4429; }
                 .react-calendar-heatmap .color-github-2 { fill: #006d32; }
                 .react-calendar-heatmap .color-github-3 { fill: #26a641; }
                 .react-calendar-heatmap .color-github-4 { fill: #39d353; }
+                .social-link { color: #adb5bd; transition: all 0.2s ease-in-out; }
+                .social-link:hover { color: #fff; transform: scale(1.1); }
+                .theme-light .social-link { color: #6c757d; }
+                .theme-light .social-link:hover { color: #000; }
+                .btn-edit-profile { background-color: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+                .theme-light .btn-edit-profile { background: #e9ecef; color: #495057; border-color: #dee2e6; }
+                .btn-edit-profile:hover { background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; border-color: transparent; transform: translateY(-2px); }
             `}</style>
-      {/* --- ADD THIS ENTIRE MODAL BLOCK --- */}
+
       {showLinkModal && (
         <div className="modal show fade" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
@@ -537,7 +501,6 @@ function Dashboard() {
           </div>
         </div>
       )}
-      {/* --- END OF MODAL BLOCK --- */}
     </>
   );
 }
