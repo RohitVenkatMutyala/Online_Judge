@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import Navbar from './navbar';
 import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const Tview = () => {
   const API_URL = process.env.REACT_APP_SERVER_API;
@@ -13,6 +15,13 @@ const Tview = () => {
   const [problem, setProblem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // --- State for the new AI Explanation Feature ---
+  const [aiButton, setAiButton] = useState({ show: false, x: 0, y: 0, text: '' });
+  const [showExplainModal, setShowExplainModal] = useState(false);
+  const [isExplaining, setIsExplaining] = useState(false);
+  const [explanation, setExplanation] = useState('');
+  const [originalSelection, setOriginalSelection] = useState('');
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -31,6 +40,62 @@ const Tview = () => {
 
     fetchProblem();
   }, [QID, API_URL]);
+
+  // --- Event listener to show/hide the AI button on text selection ---
+  useEffect(() => {
+    const handleMouseUp = () => {
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+
+        if (selectedText) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            setAiButton({
+                show: true,
+                x: rect.left + window.scrollX,
+                y: rect.top + window.scrollY - 40, // Position above the selection
+                text: selectedText
+            });
+        } else {
+            setAiButton({ show: false, x: 0, y: 0, text: '' });
+        }
+    };
+    
+    // We only add the listener when the main content has loaded
+    if (problem) {
+        document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    // Cleanup function to remove the listener
+    return () => {
+        document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [problem]); // Re-run this effect when the problem data is loaded
+
+  // --- Function to call the AI for an explanation ---
+  const handleExplainTheory = async (selectedText) => {
+    setOriginalSelection(selectedText);
+    setShowExplainModal(true);
+    setIsExplaining(true);
+    setExplanation('Getting a detailed explanation from the AI...');
+
+    // Manipulate the prompt to ask for a theory explanation
+    const prompt = `Explain the following concept in simple terms with clear examples. Do not provide code unless it is essential for the explanation: "${selectedText}"`;
+
+    try {
+        // Using the same '/help' endpoint, but with the new theory-focused prompt
+        const response = await axios.post(`${API_URL}/help`, { code: prompt, QID: 'theory-explanation' });
+        setExplanation(response.data.result || "Could not get an explanation for this topic.");
+    } catch (err) {
+        console.error("AI Explanation error:", err);
+        setExplanation("Sorry, an error occurred while getting the explanation.");
+    } finally {
+        setIsExplaining(false);
+        // Hide the floating button after it's clicked
+        setAiButton({ show: false, x: 0, y: 0, text: '' });
+    }
+  };
+
 
   const getDifficultyBadge = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
@@ -76,6 +141,23 @@ const Tview = () => {
   return (
     <>
       <Navbar />
+
+      {/* Floating "Ask AI" button that appears on text selection */}
+      {aiButton.show && (
+          <button
+              className="btn btn-dark btn-sm shadow"
+              style={{
+                  position: 'fixed',
+                  top: `${aiButton.y}px`,
+                  left: `${aiButton.x}px`,
+                  zIndex: 1050,
+                  transition: 'opacity 0.2s ease-in-out',
+              }}
+              onClick={() => handleExplainTheory(aiButton.text)}
+          >
+              <i className="bi bi-robot me-2"></i> Ask Randoman AI
+          </button>
+      )}
 
       {/* Custom Styles */}
       <style jsx>{`
@@ -438,24 +520,22 @@ const Tview = () => {
           transition: width 0.1s ease;
         }
           
-.bg-gradient-custom {
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
-}
+      .bg-gradient-custom {
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+      }
 
-/* Gradient text (already in your project, but here for clarity) */
-.gradient-text-secondary {
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
+      /* Gradient text (already in your project, but here for clarity) */
+      .gradient-text-secondary {
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
       `}</style>
 
       {/* Reading Progress Bar */}
       <div className="reading-progress">
         <div className="reading-progress-bar" id="progressBar"></div>
       </div>
-
 
       <div className="container py-5">
         {/* Loading State */}
@@ -496,7 +576,6 @@ const Tview = () => {
                   </div>
                 </div>
 
-
                 {/* Tutorial Body */}
                 <div className="card-body p-5">
                   <div className="tutorial-content">
@@ -505,13 +584,58 @@ const Tview = () => {
                     </ReactMarkdown>
                   </div>
                 </div>
-
-
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* AI Explanation Modal */}
+      {showExplainModal && (
+          <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
+              <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                  <div className="modal-content bg-dark text-light">
+                      <div className="modal-header border-0">
+                          <h5 className="modal-title fw-bold">
+                              <i className="bi bi-robot me-2 text-info"></i> AI Explanation
+                          </h5>
+                          <button type="button" className="btn-close btn-close-white" onClick={() => setShowExplainModal(false)}></button>
+                      </div>
+                      <div className="modal-body">
+                          {isExplaining ? (
+                              <div className="text-center py-5">
+                                  <div className="spinner-border text-info" role="status"></div>
+                                  <p className="mt-3 fw-semibold">{explanation}</p>
+                              </div>
+                          ) : (
+                              <>
+                                  <div className="mb-4">
+                                      <p className="text-muted mb-1">EXPLAINING THE CONCEPT:</p>
+                                      <h4 className="fw-bold">"{originalSelection}"</h4>
+                                  </div>
+                                  <hr/>
+                                  <div className="markdown-content mt-4" style={{whiteSpace: 'pre-wrap', wordWrap: 'break-word'}}>
+                                      <ReactMarkdown
+                                          children={explanation}
+                                          components={{
+                                              code({ node, inline, className, children, ...props }) {
+                                                  const match = /language-(\w+)/.exec(className || "");
+                                                  return !inline && match ? (
+                                                      <SyntaxHighlighter style={oneDark} language={match[1]} PreTag="div" {...props}>
+                                                          {String(children).replace(/\n$/, "")}
+                                                      </SyntaxHighlighter>
+                                                  ) : (<code className={`${className} bg-secondary-subtle p-1 rounded text-dark`} {...props}>{children}</code>);
+                                              },
+                                          }}
+                                      />
+                                  </div>
+                              </>
+                          )}
+                      </div>
+                  </div>
+              </div>
+          </div>
+      )}
 
       {/* Scroll Progress Script */}
       <script dangerouslySetInnerHTML={{
