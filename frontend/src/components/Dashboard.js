@@ -98,7 +98,7 @@ function Dashboard() {
                 setGithubLink(''); setLinkedinLink(''); setTempGithub(''); setTempLinkedin('');
             }
         });
-        
+
         return () => { userUnsubscribe(); publicProfileUnsubscribe(); };
     }, [user]);
 
@@ -115,7 +115,7 @@ function Dashboard() {
 
         let longestStreak = 0;
         let currentStreak = 0;
-        
+
         // Calculate longest streak
         for (let i = 0; i < uniqueDates.length; i++) {
             if (i === 0) {
@@ -141,12 +141,12 @@ function Dashboard() {
         const today = new Date();
         const yesterday = new Date();
         yesterday.setDate(today.getDate() - 1);
-        
+
         const todayStr = today.toISOString().slice(0, 10);
         const yesterdayStr = yesterday.toISOString().slice(0, 10);
-        
+
         const lastSubmissionDateStr = uniqueDates[uniqueDates.length - 1];
-        
+
         if (lastSubmissionDateStr === todayStr || lastSubmissionDateStr === yesterdayStr) {
             activeCurrentStreak = currentStreak;
         }
@@ -164,45 +164,45 @@ function Dashboard() {
                 // Fetch problems and calculate stats (existing logic)
                 const problemsRes = await axios.get(`${API_URL}/problems/user/${user._id}`, { withCredentials: true });
                 if (problemsRes.data.success) {
-                  // ... (your existing stats calculation logic remains here)
+                    // ... (your existing stats calculation logic remains here)
                     const problems = problemsRes.data.problems;
-                    const solvedProblems = problems.filter(p => p.status === 'Solved');
-                    const topicStats = {};
-                    const allTopics = new Set();
-                    problems.forEach(p => {
-                        (p.tag?.split(',') || []).forEach(rawTag => {
-                            const tag = rawTag.trim();
-                            if (!tag) return;
-                            allTopics.add(tag);
-                            if (!topicStats[tag]) {
-                                topicStats[tag] = { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
-                            }
-                            topicStats[tag].total++;
-                            const difficulty = p.difficulty?.toLowerCase();
-                            if (['easy', 'medium', 'hard'].includes(difficulty)) {
-                                topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
-                            }
+                    const solvedProblems = problems.filter(p => p.status === 'Solved');
+                    const topicStats = {};
+                    const allTopics = new Set();
+                    problems.forEach(p => {
+                        (p.tag?.split(',') || []).forEach(rawTag => {
+                            const tag = rawTag.trim();
+                            if (!tag) return;
+                            allTopics.add(tag);
+                            if (!topicStats[tag]) {
+                                topicStats[tag] = { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
+                            }
+                            topicStats[tag].total++;
+                            const difficulty = p.difficulty?.toLowerCase();
+                            if (['easy', 'medium', 'hard'].includes(difficulty)) {
+                                topicStats[tag][`total${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`]++;
+                            }
 
-                            if (p.status === 'Solved') {
-                                topicStats[tag].solved++;
-                                if (['easy', 'medium', 'hard'].includes(difficulty)) {
-                                    topicStats[tag][`${difficulty}Solved`]++;
-                                }
-                            }
-                        });
-                    });
-                    setStats({
-                        total: problems.length,
-                        solved: solvedProblems.length,
-                        easySolved: solvedProblems.filter(p => p.difficulty === 'Easy').length,
-                        mediumSolved: solvedProblems.filter(p => p.difficulty === 'Medium').length,
-                        hardSolved: solvedProblems.filter(p => p.difficulty === 'Hard').length,
-                        totalEasy: problems.filter(p => p.difficulty === 'Easy').length,
-                        totalMedium: problems.filter(p => p.difficulty === 'Medium').length,
-                        totalHard: problems.filter(p => p.difficulty === 'Hard').length,
-                        byTopic: topicStats,
-                        topics: ['All', ...Array.from(allTopics).sort()],
-                    });
+                            if (p.status === 'Solved') {
+                                topicStats[tag].solved++;
+                                if (['easy', 'medium', 'hard'].includes(difficulty)) {
+                                    topicStats[tag][`${difficulty}Solved`]++;
+                                }
+                            }
+                        });
+                    });
+                    setStats({
+                        total: problems.length,
+                        solved: solvedProblems.length,
+                        easySolved: solvedProblems.filter(p => p.difficulty === 'Easy').length,
+                        mediumSolved: solvedProblems.filter(p => p.difficulty === 'Medium').length,
+                        hardSolved: solvedProblems.filter(p => p.difficulty === 'Hard').length,
+                        totalEasy: problems.filter(p => p.difficulty === 'Easy').length,
+                        totalMedium: problems.filter(p => p.difficulty === 'Medium').length,
+                        totalHard: problems.filter(p => p.difficulty === 'Hard').length,
+                        byTopic: topicStats,
+                        topics: ['All', ...Array.from(allTopics).sort()],
+                    });
                 }
 
                 // Fetch submissions for heatmap
@@ -243,111 +243,111 @@ function Dashboard() {
     // All your other functions (displayedStats, handleImageChange, handleShare, handleUpdateLinks, handleResumeReview, etc.) remain unchanged.
     // ...
     const displayedStats = useMemo(() => {
-    if (selectedTopic === 'All') {
-      return {
-        total: stats.total,
-        solved: stats.solved,
-        easySolved: stats.easySolved,
-        mediumSolved: stats.mediumSolved,
-        hardSolved: stats.hardSolved,
-        totalEasy: stats.totalEasy,
-        totalMedium: stats.totalMedium,
-        totalHard: stats.totalHard,
-      };
-    }
-    return stats.byTopic[selectedTopic] || { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
-  }, [selectedTopic, stats]);
+        if (selectedTopic === 'All') {
+            return {
+                total: stats.total,
+                solved: stats.solved,
+                easySolved: stats.easySolved,
+                mediumSolved: stats.mediumSolved,
+                hardSolved: stats.hardSolved,
+                totalEasy: stats.totalEasy,
+                totalMedium: stats.totalMedium,
+                totalHard: stats.totalHard,
+            };
+        }
+        return stats.byTopic[selectedTopic] || { total: 0, solved: 0, easySolved: 0, mediumSolved: 0, hardSolved: 0, totalEasy: 0, totalMedium: 0, totalHard: 0 };
+    }, [selectedTopic, stats]);
 
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error("Invalid file type. Please select an image.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      toast.error("File is too large. Please select an image under 5MB.");
-      return;
-    }
-    if (!user?._id) {
-      toast.error("Please wait a moment and try again.");
-      return;
-    }
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            toast.error("Invalid file type. Please select an image.");
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            toast.error("File is too large. Please select an image under 5MB.");
+            return;
+        }
+        if (!user?._id) {
+            toast.error("Please wait a moment and try again.");
+            return;
+        }
 
-    setIsUploading(true);
-    toast.info("Uploading image...");
-    const storageRef = ref(storage, `profile_images/${user._id}`);
-    try {
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      await setDoc(doc(db, 'users', user._id), { profileImageURL: downloadURL }, { merge: true });
-      await setDoc(doc(db, 'publicProfiles', user._id), { profileImageURL: downloadURL }, { merge: true });
-      toast.success("Profile image updated!");
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("Failed to update profile image.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
+        setIsUploading(true);
+        toast.info("Uploading image...");
+        const storageRef = ref(storage, `profile_images/${user._id}`);
+        try {
+            await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(storageRef);
+            await setDoc(doc(db, 'users', user._id), { profileImageURL: downloadURL }, { merge: true });
+            await setDoc(doc(db, 'publicProfiles', user._id), { profileImageURL: downloadURL }, { merge: true });
+            toast.success("Profile image updated!");
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            toast.error("Failed to update profile image.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
-  const handleShare = async () => {
-    if (!user?._id) return;
-    try {
-      const publicProfileRef = doc(db, 'publicProfiles', user._id);
-      await setDoc(publicProfileRef, {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        profileImageURL: profileImage,
-        githubLink: githubLink,
-        linkedinLink: linkedinLink
-      }, { merge: true });
-      const shareUrl = `${window.location.origin}/profile/${user._id}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        toast.success("Public profile URL copied to clipboard!");
-      }).catch(err => {
-        toast.error("Failed to copy URL.");
-      });
-    } catch (error) {
-      toast.error("Could not create shareable link.");
-    }
-  };
+    const handleShare = async () => {
+        if (!user?._id) return;
+        try {
+            const publicProfileRef = doc(db, 'publicProfiles', user._id);
+            await setDoc(publicProfileRef, {
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                profileImageURL: profileImage,
+                githubLink: githubLink,
+                linkedinLink: linkedinLink
+            }, { merge: true });
+            const shareUrl = `${window.location.origin}/profile/${user._id}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                toast.success("Public profile URL copied to clipboard!");
+            }).catch(err => {
+                toast.error("Failed to copy URL.");
+            });
+        } catch (error) {
+            toast.error("Could not create shareable link.");
+        }
+    };
 
-  const handleUpdateLinks = async () => {
-    if (!user?._id) {
-      toast.error("User not found. Please try again.");
-      return;
-    }
-    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-    if ((tempGithub && !urlPattern.test(tempGithub)) || (tempLinkedin && !urlPattern.test(tempLinkedin))) {
-      toast.warn("Please enter valid URLs.");
-      return;
-    }
+    const handleUpdateLinks = async () => {
+        if (!user?._id) {
+            toast.error("User not found. Please try again.");
+            return;
+        }
+        const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+        if ((tempGithub && !urlPattern.test(tempGithub)) || (tempLinkedin && !urlPattern.test(tempLinkedin))) {
+            toast.warn("Please enter valid URLs.");
+            return;
+        }
 
-    const toastId = toast.loading("Updating links...");
-    const publicProfileDocRef = doc(db, 'publicProfiles', user._id);
-    try {
-      await setDoc(publicProfileDocRef, {
-        githubLink: tempGithub,
-        linkedinLink: tempLinkedin
-      }, { merge: true });
-      toast.update(toastId, { render: "Links updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
-      setShowLinkModal(false);
-    } catch (error) {
-      console.error("Error updating links:", error);
-      toast.update(toastId, { render: "Failed to update links.", type: "error", isLoading: false, autoClose: 3000 });
-    }
-  };
+        const toastId = toast.loading("Updating links...");
+        const publicProfileDocRef = doc(db, 'publicProfiles', user._id);
+        try {
+            await setDoc(publicProfileDocRef, {
+                githubLink: tempGithub,
+                linkedinLink: tempLinkedin
+            }, { merge: true });
+            toast.update(toastId, { render: "Links updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
+            setShowLinkModal(false);
+        } catch (error) {
+            console.error("Error updating links:", error);
+            toast.update(toastId, { render: "Failed to update links.", type: "error", isLoading: false, autoClose: 3000 });
+        }
+    };
 
-  const handleResumeReview = async () => {
-    if (!resumeText.trim()) {
-      toast.warn("Please paste your resume text into the box first.");
-      return;
-    }
-    setIsReviewing(true);
-    setReviewFeedback("Connecting to AI Reviewer...");
-    const prompt = `Act as an expert technical recruiter and resume reviewer for a software engineering role. Analyze the following resume text, providing constructive, actionable feedback. Structure your review with sections for: 
+    const handleResumeReview = async () => {
+        if (!resumeText.trim()) {
+            toast.warn("Please paste your resume text into the box first.");
+            return;
+        }
+        setIsReviewing(true);
+        setReviewFeedback("Connecting to AI Reviewer...");
+        const prompt = `Act as an expert technical recruiter and resume reviewer for a software engineering role. Analyze the following resume text, providing constructive, actionable feedback. Structure your review with sections for: 
     1. **Overall Impression**: A brief summary.
     2. **Strengths**: 2-3 key strengths of the resume.
     3. **Areas for Improvement**: Detailed suggestions on clarity, impact (using metrics), project descriptions, and technical skills. Provide specific examples of how to rephrase bullet points.
@@ -360,33 +360,33 @@ function Dashboard() {
     ---
     ${resumeText}`;
 
-    try {
-      const response = await axios.post(`${API_URL}/help`, { code: prompt, QID: 2 });
-      const result = response.data.result || "The AI could not provide a review at this time.";
-      setReviewFeedback(result);
-      const reviewDocRef = doc(db, 'resumeReviews', user._id);
-      const newReview = {
-        feedback: result,
-        reviewedAt: new Date().toISOString(),
-        userId: user._id
-      };
-      await setDoc(reviewDocRef, newReview);
-      setLatestReview(newReview);
-    } catch (error) {
-      console.error("AI Resume Review error:", error);
-      setReviewFeedback("An error occurred while contacting the AI service. Please try again or try later.");
-      toast.error("Failed to get resume review.");
-    } finally {
-      setIsReviewing(false);
-    }
-  };
+        try {
+            const response = await axios.post(`${API_URL}/help`, { code: prompt, QID: 2 });
+            const result = response.data.result || "The AI could not provide a review at this time.";
+            setReviewFeedback(result);
+            const reviewDocRef = doc(db, 'resumeReviews', user._id);
+            const newReview = {
+                feedback: result,
+                reviewedAt: new Date().toISOString(),
+                userId: user._id
+            };
+            await setDoc(reviewDocRef, newReview);
+            setLatestReview(newReview);
+        } catch (error) {
+            console.error("AI Resume Review error:", error);
+            setReviewFeedback("An error occurred while contacting the AI service. Please try again or try later.");
+            toast.error("Failed to get resume review.");
+        } finally {
+            setIsReviewing(false);
+        }
+    };
 
-  const resetAndCloseResumeModal = () => {
-    setShowResumeModal(false);
-    setResumeText('');
-    setReviewFeedback('');
-    setViewingHistory(false);
-  };
+    const resetAndCloseResumeModal = () => {
+        setShowResumeModal(false);
+        setResumeText('');
+        setReviewFeedback('');
+        setViewingHistory(false);
+    };
     // ...
 
     if (!user || user.role === 'admin') {
@@ -661,75 +661,78 @@ function Dashboard() {
                     transform: scale(1.1);
                 }
             `}</style>
-            
+
             {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
             {/* ... Your existing modal JSX code ... */}
-             {showResumeModal && (
-                <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-                    <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
-                            <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold">
-                                    <i className="bi bi-robot me-2"></i> 
-                                    {viewingHistory ? "Latest Review History" :"Randoman AI "}
-                                </h5>
-                                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
-                            </div>
-                            <div className="modal-body">
-                                {isReviewing ? (
-                                    <div className="text-center py-5">
-                                        <div className="spinner-border text-primary" role="status"></div>
-                                        <p className="mt-3 fw-semibold">{reviewFeedback}</p>
-                                    </div>
-                                ) : reviewFeedback ? (
-                                    <>
-                                        <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => { setReviewFeedback(''); setResumeText(''); }}>
-                                            <i className="bi bi-arrow-left"></i> Review Another Resume
-                                        </button>
-                                        <div className="markdown-content"><ReactMarkdown>{reviewFeedback}</ReactMarkdown></div>
-                                    </>
-                                ) : viewingHistory ? (
-                                    <>
-                                         <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => setViewingHistory(false)}>
-                                            <i className="bi bi-arrow-left"></i> Back to Reviewer
-                                        </button>
-                                        {latestReview ? (
-                                            <div>
-                                                <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
-                                                <hr/>
-                                                <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
-                                            </div>
-                                        ) : (
-                                            <p>No review history found.</p>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="d-flex justify-content-between align-items-center mb-3">
-                                            <p className="mb-0 text-muted">Paste your resume text below for instant feedback.</p>
-                                            {latestReview && (
-                                                <button className="btn btn-link text-decoration-none btn-sm" onClick={() => setViewingHistory(true)}>
-                                                     View Latest Review <i className="bi bi-clock-history"></i>
-                                                </button>
-                                            )}
-                                        </div>
-                                        <textarea
-                                            className="form-control resume-textarea"
-                                            rows="12"
-                                            placeholder="Paste the full text of your resume here..."
-                                            value={resumeText}
-                                            onChange={(e) => setResumeText(e.target.value)}
-                                        ></textarea>
-                                        <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview}>
-                                            <i className="bi bi-magic me-2"></i>Review with Randoman AI
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {showResumeModal && (
+                <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }}>
+                    <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title fw-bold d-flex align-items-center">
+                                    <i className="bi bi-robot me-2"></i>
+                                    {/* FIX: Removed the trailing space from "Randoman AI " and added more context */}
+                                    <span>
+                                        {viewingHistory ? "Latest Review History" : "Randoman AI Resume Reviewer"}
+                                    </span>
+                                </h5>
+                                <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
+                            </div>
+                            <div className="modal-body">
+                                {isReviewing ? (
+                                    <div className="text-center py-5">
+                                        <div className="spinner-border text-primary" role="status"></div>
+                                        <p className="mt-3 fw-semibold">{reviewFeedback}</p>
+                                    </div>
+                                ) : reviewFeedback ? (
+                                    <>
+                                        <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => { setReviewFeedback(''); setResumeText(''); }}>
+                                            <i className="bi bi-arrow-left"></i> Review Another Resume
+                                        </button>
+                                        <div className="markdown-content"><ReactMarkdown>{reviewFeedback}</ReactMarkdown></div>
+                                    </>
+                                ) : viewingHistory ? (
+                                    <>
+                                        <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => setViewingHistory(false)}>
+                                            <i className="bi bi-arrow-left"></i> Back to Reviewer
+                                        </button>
+                                        {latestReview ? (
+                                            <div>
+                                                <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
+                                                <hr />
+                                                <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
+                                            </div>
+                                        ) : (
+                                            <p>No review history found.</p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <p className="mb-0 text-muted">Paste your resume text below for instant feedback.</p>
+                                            {latestReview && (
+                                                <button className="btn btn-link text-decoration-none btn-sm" onClick={() => setViewingHistory(true)}>
+                                                    View Latest Review <i className="bi bi-clock-history"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                        <textarea
+                                            className="form-control resume-textarea"
+                                            rows="12"
+                                            placeholder="Paste the full text of your resume here..."
+                                            value={resumeText}
+                                            onChange={(e) => setResumeText(e.target.value)}
+                                        ></textarea>
+                                        <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview}>
+                                            <i className="bi bi-magic me-2"></i>Review with Randoman AI
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {showLinkModal && (
                 <div className="modal show fade" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
