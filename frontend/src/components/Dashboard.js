@@ -302,7 +302,7 @@ function Dashboard() {
             setLatestReview(newReview);
         } catch (error) {
             console.error("AI Resume Review error:", error);
-            setReviewFeedback("An error occurred while contacting the AI service. Please try again later.");
+            setReviewFeedback("An error occurred while contacting the AI service. Please try again or try later.");
             toast.error("Failed to get resume review.");
         } finally {
             setIsReviewing(false);
