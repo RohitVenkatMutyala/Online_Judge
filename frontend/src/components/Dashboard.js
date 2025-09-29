@@ -678,6 +678,35 @@ function Dashboard() {
   transform: translateY(-2px); /* Subtle lift effect on hover */
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
+  .floating-ai-btn {
+  /* Positioning */
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 1050; /* Make sure it's above other content */
+
+  /* Sizing */
+  width: 60px;
+  height: 60px;
+
+  /* Custom "Randoman AI" Theme */
+  background: linear-gradient(45deg, #6e48aa, #9448a0) !important; /* Gradient background */
+  border: none !important; /* Override Bootstrap's default border */
+
+  /* Ensure icon is centered */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Smooth transitions for hover effects */
+  transition: all 0.3s ease;
+}
+
+/* Enhanced hover effect */
+.floating-ai-btn:hover {
+  transform: translateY(-3px); /* Lifts the button slightly */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important; /* Enhance shadow on hover */
+}
             `}</style>
 
             {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
