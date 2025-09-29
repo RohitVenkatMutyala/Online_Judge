@@ -356,6 +356,7 @@ function Dashboard() {
     6. **Common Mistakes**: Highlight frequent errors found in resumes and how to avoid them.
     7. **ATS Optimization**: Advice on keywords and formatting to pass Applicant Tracking Systems.
     8. **ATS Score**: Provide an estimated ATS score out of 100 based on the content and formatting.
+    9.**Dont Inlude any Code and the QID given was 2 as the dummy question ID.
     Here is the resume:
     ---
     ${resumeText}`;
