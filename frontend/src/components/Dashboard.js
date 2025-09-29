@@ -357,6 +357,7 @@ function Dashboard() {
     7. **ATS Optimization**: Advice on keywords and formatting to pass Applicant Tracking Systems.
     8. **ATS Score**: Provide an estimated ATS score out of 100 based on the content and formatting.
     9.**Dont Inlude any Code and the QID given was 2 as the dummy question ID.
+    10.**In the last give the latex code of the resume with all the changes that have been made based on all the above instructions**
     Here is the resume:
     ---
     ${resumeText}`;
