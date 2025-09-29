@@ -122,22 +122,22 @@ const Contexts = () => {
                                             <li><strong>Duration:</strong> {(contest.duration / 3600).toFixed(2)} hours</li>
                                         </ul>
 
-                                        <div className="mt-auto d-grid gap-2">
+                                        <div className="mt-auto d-flex gap-2">
                                             <a
                                                 href={generateGoogleCalendarLink(contest)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="btn btn-primary d-flex align-items-center justify-content-center"
+                                                className="btn btn-outline-info flex-grow-1 d-flex align-items-center justify-content-center"
                                             >
-                                                <i className="bi bi-calendar-plus me-2"></i>Add to Calendar
+                                                <i className="bi bi-calendar-plus me-2"></i>Calendar
                                             </a>
                                             <a
                                                 href={contest.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="btn btn-outline-warning"
+                                                className="btn btn-outline-warning flex-grow-1"
                                             >
-                                                🔗 Visit Contest
+                                                Visit
                                             </a>
                                         </div>
                                     </div>
