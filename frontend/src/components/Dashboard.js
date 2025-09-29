@@ -356,7 +356,7 @@ function Dashboard() {
     6. **Common Mistakes**: Highlight frequent errors found in resumes and how to avoid them.
     7. **ATS Optimization**: Advice on keywords and formatting to pass Applicant Tracking Systems.
     8. **ATS Score**: Provide an estimated ATS score out of 100 based on the content and formatting.
-    9.**Dont Inlude any Code and the QID given was 2 as the dummy question ID.
+    9.**Dont Inlude anything related to the QID given was 2 as the dummy question ID.
     10.**In the last give the latex code of the resume with all the changes that have been made based on all the above instructions**
     Here is the resume:
     ---
@@ -662,6 +662,22 @@ function Dashboard() {
                 .badge-card:hover {
                     transform: scale(1.1);
                 }
+                    .btn-randoman-ai {
+  background: linear-gradient(90deg, #6e48aa, #9448a0); /* A nice purple gradient */
+  color: #ffffff;
+  border: none;
+  font-weight: 500;
+  border-radius: 8px; /* Slightly more rounded corners */
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-randoman-ai:hover {
+  transform: translateY(-2px); /* Subtle lift effect on hover */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
             `}</style>
 
             {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
@@ -725,7 +741,7 @@ function Dashboard() {
                                             value={resumeText}
                                             onChange={(e) => setResumeText(e.target.value)}
                                         ></textarea>
-                                        <button className="btn btn-primary w-100 mt-3" onClick={handleResumeReview}>
+                                        <button className="btn btn-randoman-ai w-100 mt-3" onClick={handleResumeReview}>
                                             <i className="bi bi-magic me-2"></i>Review with Randoman AI
                                         </button>
                                     </>
