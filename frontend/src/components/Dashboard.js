@@ -15,7 +15,7 @@ import 'react-calendar-heatmap/dist/styles.css';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import ReactMarkdown from "react-markdown";
-
+import Badge3D from './Badge3D';
 // --- ADD THIS NEW BLOCK: Badge Definitions ---
 const STREAK_BADGES = [
     { days: 7, name: 'Weekly Warrior', icon: 'bi-calendar-week-fill', color: 'success' },
@@ -528,9 +528,22 @@ function Dashboard() {
                                                     <h5 className="fw-semibold mb-3">Badges Earned</h5>
                                                     <div className="d-flex flex-wrap gap-3">
                                                         {awardedBadges.map(badge => (
-                                                            <div key={badge.name} className={`badge-card text-center p-3 rounded-3 bg-${badge.color}-subtle`} data-bs-toggle="tooltip" title={`${badge.name} - ${badge.days} Day Streak`}>
-                                                                <i className={`${badge.icon} fs-2 text-${badge.color}`}></i>
+                                                            // --- THIS IS THE BLOCK TO REPLACE ---
+                                                            <div
+                                                                key={badge.name}
+                                                                className="badge-3d-wrapper text-center"
+                                                                data-bs-toggle="tooltip"
+                                                                title={`${badge.name} - Awarded for a ${badge.days} Day Streak`}
+                                                            >
+                                                                <div className="badge-3d-container">
+                                                                    <Badge3D
+                                                                        color={getHexColor(badge.color)}
+                                                                        text={`${badge.days}d`}
+                                                                    />
+                                                                </div>
+                                                                <p className="badge-3d-label mt-2 mb-0 fw-semibold">{badge.name}</p>
                                                             </div>
+                                                            // --- END OF REPLACEMENT ---
                                                         ))}
                                                     </div>
                                                 </div>
@@ -707,6 +720,26 @@ function Dashboard() {
   transform: translateY(-3px); /* Lifts the button slightly */
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important; /* Enhance shadow on hover */
 }
+  .badge-card:hover {
+                    transform: scale(1.1);
+                }
+
+                /* --- ADD THESE NEW STYLES --- */
+                .badge-3d-wrapper {
+                  width: 120px; /* Container for both 3D model and label */
+                }
+
+                .badge-3d-container {
+                  width: 100px;
+                  height: 100px;
+                  margin: 0 auto; /* Center the container */
+                  cursor: grab;
+                }
+
+                .badge-3d-label {
+                  font-size: 0.85rem;
+                  color: ${theme === 'dark' ? '#adb5bd' : '#495057'};
+                }
             `}</style>
 
             {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
