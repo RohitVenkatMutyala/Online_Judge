@@ -25,16 +25,6 @@ const STREAK_BADGES = [
     { days: 81, name: 'Legendary Loremaster', icon: 'bi-gem', color: 'danger' },
 ];
 // --- END OF NEW BLOCK ---
-const getHexColor = (bootstrapColor) => {
-    switch (bootstrapColor) {
-        case 'success': return '#198754';
-        case 'info': return '#0dcaf0';
-        case 'primary': return '#0d6efd';
-        case 'warning': return '#ffc107';
-        case 'danger': return '#dc3545';
-        default: return '#6c757d'; // Default gray
-    }
-};
 
 function Dashboard() {
     const { user } = useAuth();
