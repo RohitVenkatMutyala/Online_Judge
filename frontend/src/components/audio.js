@@ -8,7 +8,7 @@ import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, wr
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 
-// Helper function to format Firestore Timestamps
+// Helper function to format Firestore Timestamps into a readable string
 const formatTimestamp = (timestamp) => {
     if (!timestamp) return 'N/A';
     const date = timestamp.toDate();
@@ -24,22 +24,26 @@ const formatTimestamp = (timestamp) => {
 
 function Audiobook() {
     const { user } = useAuth();
-    const theme = 'dark';
+    const theme = 'dark'; // Hardcoded theme for styling
 
+    // State for managing folders and files
     const [userFolders, setUserFolders] = useState([]);
     const [newFolderName, setNewFolderName] = useState('');
     const [selectedFolder, setSelectedFolder] = useState(null);
     const [folderItems, setFolderItems] = useState([]);
-    const [userMap, setUserMap] = useState({}); // To store user names {userId: 'DisplayName'}
+    const [userMap, setUserMap] = useState({}); // Stores user names {userId: 'DisplayName'}
 
+    // State for the "Add File" modal
     const [showAddFileModal, setShowAddFileModal] = useState(false);
     const [fileToUpload, setFileToUpload] = useState(null);
     const [fileTitle, setFileTitle] = useState('');
 
+    // General UI state
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('');
     const [error, setError] = useState('');
 
+    // Effect to fetch all folders the user is a member of
     useEffect(() => {
         let isMounted = true;
         const fetchFolders = async () => {
@@ -55,10 +59,10 @@ function Audiobook() {
             }
         };
         fetchFolders();
-        return () => { isMounted = false; };
+        return () => { isMounted = false; }; // Cleanup function to prevent memory leaks
     }, [user]);
 
-    // --- UPDATED: This function now also fetches user names ---
+    // Fetches files for a selected folder and the names of the users who uploaded them
     const fetchFolderItems = async (folderId) => {
         setIsLoading(true);
         setLoadingMessage('Loading files...');
@@ -68,22 +72,16 @@ function Audiobook() {
             const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setFolderItems(items);
 
-            // Fetch user data for the 'Added by' column
-            const userIds = [...new Set(items.map(item => item.userId))]; // Get unique user IDs
+            const userIds = [...new Set(items.map(item => item.userId))];
             const newUsers = {};
             for (const userId of userIds) {
-                if (!userMap[userId]) { // Only fetch if we don't have the user's name already
+                if (!userMap[userId]) {
                     const userDocRef = doc(db, "users", userId);
                     const userDocSnap = await getDoc(userDocRef);
-                    if (userDocSnap.exists()) {
-                        newUsers[userId] = userDocSnap.data().displayName || 'Unknown User';
-                    } else {
-                        newUsers[userId] = 'Unknown User';
-                    }
+                    newUsers[userId] = userDocSnap.exists() ? userDocSnap.data().displayName || 'Unknown User' : 'Unknown User';
                 }
             }
             setUserMap(prevMap => ({ ...prevMap, ...newUsers }));
-
         } catch (err) {
             console.error("Error fetching folder items:", err);
             setError("Could not load files for this folder.");
@@ -93,38 +91,39 @@ function Audiobook() {
         }
     };
 
+    // Handles creation of a new folder
     const handleCreateFolder = async (e) => {
         e.preventDefault();
-        if (!user || !user._id) { setError("User not loaded."); return; }
+        if (!user || !user._id) { setError("User not loaded. Please try again."); return; }
         if (!newFolderName.trim()) return;
         try {
-            await addDoc(collection(db, "playlists"), {
+            const docRef = await addDoc(collection(db, "playlists"), {
                 name: newFolderName,
                 originalOwner: user._id,
                 memberIds: [user._id],
                 isPublic: true,
                 createdAt: serverTimestamp(),
             });
+            const newFolder = { id: docRef.id, name: newFolderName, originalOwner: user._id, memberIds: [user._id] };
+            setUserFolders(prev => [newFolder, ...prev]);
             setNewFolderName('');
-            const q = query(collection(db, "playlists"), where("memberIds", "array-contains", user._id), orderBy("createdAt", "desc"));
-            const querySnapshot = await getDocs(q);
-            setUserFolders(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         } catch (err) {
             console.error("Error creating folder:", err);
             setError('Failed to create folder.');
         }
     };
 
+    // Handles selecting a folder from the grid
     const handleSelectFolder = (folder) => {
         setSelectedFolder(folder);
         setFolderItems([]);
         fetchFolderItems(folder.id);
     };
 
+    // Handles uploading a new file to the selected folder
     const handleFileUpload = async (e) => {
-        // ... (This function's logic remains the same, just variable names updated)
         e.preventDefault();
-        if (!user || !user._id) { setError("User not loaded."); return; }
+        if (!user || !user._id) { setError("User not loaded. Please try again."); return; }
         if (!fileToUpload || !fileTitle.trim()) { setError("Please provide a file and a title."); return; }
         setIsLoading(true);
         setLoadingMessage('Uploading file...');
@@ -148,12 +147,59 @@ function Audiobook() {
         }
     };
 
+    // Handles deleting a single file (owner only)
     const handleDeleteFile = async (fileToDelete) => {
-        // ... (This function's logic remains the same)
+        if (!window.confirm(`Are you sure you want to delete the file "${fileToDelete.title}"?`)) return;
+        setIsLoading(true);
+        setLoadingMessage('Deleting file...');
+        try {
+            const fileRef = ref(storage, fileToDelete.fileUrl);
+            await deleteObject(fileRef);
+            await deleteDoc(doc(db, "playlistItems", fileToDelete.id));
+            setFolderItems(prevItems => prevItems.filter(item => item.id !== fileToDelete.id));
+        } catch (err) {
+            console.error("Error deleting file:", err);
+            setError("Failed to delete file.");
+        } finally {
+            setIsLoading(false); setLoadingMessage('');
+        }
     };
 
+    // Handles deleting an entire folder and all its contents (owner only)
     const handleDeleteFolder = async (folderToDelete) => {
-        // ... (This function's logic remains the same)
+        if (!window.confirm(`Are you sure you want to permanently delete the folder "${folderToDelete.name}" and all of its files? This action cannot be undone.`)) return;
+        setIsLoading(true);
+        setLoadingMessage(`Deleting ${folderToDelete.name}...`);
+        try {
+            const itemsQuery = query(collection(db, "playlistItems"), where("playlistId", "==", folderToDelete.id));
+            const itemsSnapshot = await getDocs(itemsQuery);
+
+            for (const itemDoc of itemsSnapshot.docs) {
+                const fileData = itemDoc.data();
+                if (fileData.fileUrl) {
+                    const fileRef = ref(storage, fileData.fileUrl);
+                    await deleteObject(fileRef).catch(err => console.error("Could not delete file from storage:", err));
+                }
+            }
+
+            const batch = writeBatch(db);
+            itemsSnapshot.forEach(doc => batch.delete(doc.ref));
+            const folderDocRef = doc(db, "playlists", folderToDelete.id);
+            batch.delete(folderDocRef);
+            await batch.commit();
+
+            setUserFolders(prev => prev.filter(p => p.id !== folderToDelete.id));
+            if (selectedFolder?.id === folderToDelete.id) {
+                setSelectedFolder(null);
+                setFolderItems([]);
+            }
+        } catch (err) {
+            console.error("Error deleting folder:", err);
+            setError("Failed to delete folder.");
+        } finally {
+            setIsLoading(false);
+            setLoadingMessage('');
+        }
     };
 
     if (!user) { return (<div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>); }
@@ -163,17 +209,15 @@ function Audiobook() {
             <style>{`
         .theme-dark .dashboard-page { background-color: #12121c; color: #e0e0e0; }
         .dashboard-container { min-height: 85vh; background-color: #1e1e2f; border: 1px solid #3a3a5a; }
-        
-        /* New Folder Grid Styles */
         .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1.5rem; }
-        .folder-item { cursor: pointer; text-align: center; transition: transform 0.2s ease; }
+        .folder-item { cursor: pointer; text-align: center; transition: transform 0.2s ease; position: relative; }
         .folder-item:hover { transform: translateY(-5px); }
         .folder-icon { font-size: 5rem; color: #ffca28; }
         .folder-name { margin-top: 0.5rem; font-size: 0.9rem; word-break: break-word; }
         .folder-item.active .folder-icon { color: #4dabf7; }
         .folder-item.active .folder-name { font-weight: bold; }
-        
-        /* New File Table Styles */
+        .delete-folder-btn { position: absolute; top: -5px; right: 5px; background: rgba(0,0,0,0.3); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+        .folder-item:hover .delete-folder-btn { opacity: 1; }
         .file-table { color: #e0e0e0; }
         .file-table thead { color: #8c98a9; }
         .file-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
@@ -190,22 +234,25 @@ function Audiobook() {
                         {!selectedFolder ? (
                             <>
                                 <h2 className="mb-4">Your Folders</h2>
-                                <div className="folder-grid">
+                                <form onSubmit={handleCreateFolder} className="mb-4">
+                                    <div className="input-group">
+                                        <input type="text" className="form-control" placeholder="Create a new folder..." value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} disabled={isLoading} />
+                                        <button className="btn btn-primary" type="submit" disabled={isLoading || !newFolderName.trim()}>Create</button>
+                                    </div>
+                                </form>
+                                {error && <div className="alert alert-danger mt-3" onClick={() => setError('')}>{error}</div>}
+                                <div className="folder-grid mt-4">
                                     {userFolders.map(folder => (
                                         <div key={folder.id} className={`folder-item ${selectedFolder?.id === folder.id ? 'active' : ''}`} onClick={() => handleSelectFolder(folder)}>
                                             <i className="bi bi-folder-fill folder-icon"></i>
                                             <div className="folder-name">{folder.name}</div>
+                                            {user._id === folder.originalOwner && (
+                                                <button className="btn btn-sm btn-danger delete-folder-btn" onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder); }} title="Delete Folder">
+                                                    <i className="bi bi-trash-fill"></i>
+                                                </button>
+                                            )}
                                         </div>
                                     ))}
-                                    {/* Add New Folder UI */}
-                                    <div className="folder-item" onClick={() => { /* logic to show create folder modal */ }}>
-                                        <form onSubmit={handleCreateFolder}>
-                                            <div className="input-group">
-                                                <input type="text" className="form-control" placeholder="New Folder" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} disabled={isLoading} />
-                                                <button className="btn btn-primary" type="submit" disabled={isLoading || !newFolderName.trim()}>+</button>
-                                            </div>
-                                        </form>
-                                    </div>
                                 </div>
                             </>
                         ) : (
@@ -219,10 +266,14 @@ function Audiobook() {
                                     </div>
                                     <div>
                                         <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}><i className="bi bi-plus-lg me-2"></i>Upload File</button>
-                                        <button className="btn btn-share" onClick={() => {/* ... share logic ... */ }}><i className="bi bi-share-fill me-2"></i>Share</button>
+                                        <button className="btn btn-share" onClick={() => {
+                                            const shareUrl = `${window.location.origin}/playlist/${selectedFolder.id}`;
+                                            navigator.clipboard.writeText(shareUrl);
+                                            alert(`Copied share link to clipboard:\n${shareUrl}`);
+                                        }}><i className="bi bi-share-fill me-2"></i>Share</button>
                                     </div>
                                 </div>
-                                {isLoading && loadingMessage ? <p>{loadingMessage}</p> : (
+                                {isLoading && loadingMessage ? <div className="text-center py-5">{loadingMessage}</div> : (
                                     <table className="table file-table align-middle">
                                         <thead>
                                             <tr>
@@ -230,7 +281,7 @@ function Audiobook() {
                                                 <th scope="col">Name</th>
                                                 <th scope="col">Added by</th>
                                                 <th scope="col">Date Added</th>
-                                                <th scope="col"></th>
+                                                <th scope="col" style={{ width: '5%' }}></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -240,7 +291,7 @@ function Audiobook() {
                                                     <td className="file-title">
                                                         <a href={item.fileUrl} target="_blank" rel="noopener noreferrer">{item.title}</a>
                                                     </td>
-                                                    <td className="file-meta">{userMap[item.userId] || 'Loading...'}</td>
+                                                    <td className="file-meta">{userMap[item.userId] || '...'}</td>
                                                     <td className="file-meta">{formatTimestamp(item.createdAt)}</td>
                                                     <td>
                                                         {user._id === selectedFolder.originalOwner && (
@@ -252,7 +303,7 @@ function Audiobook() {
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan="5" className="text-center py-5">This folder is empty.</td>
+                                                    <td colSpan="5" className="text-center py-5">This folder is empty. Upload a file to get started.</td>
                                                 </tr>
                                             )}
                                         </tbody>
@@ -264,13 +315,13 @@ function Audiobook() {
                 </div>
             </div>
 
-            {showAddFileModal && selectedPlaylist && (
+            {showAddFileModal && selectedFolder && (
                 <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <form onSubmit={handleFileUpload}>
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Add File to "{selectedPlaylist.name}"</h5>
+                                    <h5 className="modal-title">Upload File to "{selectedFolder.name}"</h5>
                                     <button type="button" className="btn-close" onClick={() => setShowAddFileModal(false)}></button>
                                 </div>
                                 <div className="modal-body">
