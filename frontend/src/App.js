@@ -24,8 +24,9 @@ import Audiobook from './components/audio';
 import Chat from './components/chat';
 import PublicPlaylist from './components/PublicPlaylist';
 import CreateSession from './components/CreateSession';
-import PublicProfile from './components/PublicProfile'; 
+import PublicProfile from './components/PublicProfile';
 import { ToastContainer } from 'react-toastify';
+import FolderDetailPage from './components/FolderDetailPage';
 import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
@@ -256,15 +257,10 @@ function App() {
                 </>
               }
             />
-             <Route
-              path="/pod"
-              element={
-                <>
-                  <Helmet><title>Audio - Randoman</title></Helmet>
-                  <Audiobook />
-                </>
-              }
-            /> 
+            <Route path="/folders" element={<Audiobook />} />
+
+           
+            <Route path="/folder/:folderId" element={<FolderDetailPage />} />
             <Route path="/playlist/:playlistId" element={<PublicPlaylist />} />
             <Route
               path="/contexts"
@@ -275,7 +271,7 @@ function App() {
                 </>
               }
             />          </Routes>
-             <ToastContainer
+          <ToastContainer
             position="bottom-right"
             autoClose={5000}
             hideProgressBar={false}
