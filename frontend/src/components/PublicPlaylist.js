@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { db } from '../firebaseConfig';
@@ -16,9 +16,10 @@ const formatTimestamp = (timestamp) => {
 };
 
 function PublicPlaylist() {
-    const { playlistId: folderId } = useParams(); // Rename to folderId for clarity
+    const { playlistId: folderId } = useParams();
     const { user } = useAuth();
     const { theme } = useTheme();
+    const navigate = useNavigate(); // Initialize the navigate function
 
     const [folder, setFolder] = useState(null);
     const [items, setItems] = useState([]);
@@ -42,7 +43,6 @@ function PublicPlaylist() {
             const folderData = { id: folderDocSnap.id, ...folderDocSnap.data() };
             setFolder(folderData);
 
-            // Fetch owner's name
             if (folderData.originalOwner) {
                 const ownerDocRef = doc(db, "persons", folderData.originalOwner);
                 const ownerDocSnap = await getDoc(ownerDocRef);
@@ -87,6 +87,21 @@ function PublicPlaylist() {
             setIsSaving(false);
         }
     };
+
+    // --- NEW: Function to handle file clicks ---
+    const handleFileClick = (e, fileUrl) => {
+        e.preventDefault(); // Prevent the link from opening immediately
+
+        if (user) {
+            // If user is logged in, open the file in a new tab
+            window.open(fileUrl, '_blank', 'noopener,noreferrer');
+        } else {
+            // If user is not logged in, show an alert and redirect
+            alert('Please login to view or download files.');
+            navigate('/login'); // Assuming your login page is at the '/login' route
+        }
+    };
+
 
     if (isLoading) { return <div className={`theme-${theme} dashboard-page d-flex justify-content-center align-items-center`} style={{ minHeight: '100vh' }}><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>; }
     if (error) { return <div className="container mt-5"><div className="alert alert-danger text-center">{error}</div></div>; }
@@ -135,7 +150,6 @@ function PublicPlaylist() {
                             )}
                         </div>
                         <p className="file-meta mb-4">Total Members: {folder.memberIds?.length || 0}</p>
-
                         <div className="table-responsive">
                             <table className="table file-table align-middle">
                                 <thead><tr><th scope="col" style={{ width: '5%' }}></th><th scope="col">Name</th><th scope="col">Date Added</th><th scope="col" className='text-end'>Filename</th></tr></thead>
@@ -144,7 +158,13 @@ function PublicPlaylist() {
                                         <tr key={item.id}>
                                             <td><i className="bi bi-file-earmark-text file-icon"></i></td>
                                             <td className="file-title">
-                                                <a href={item.fileUrl} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                                                {/* --- UPDATE: Replaced anchor tag with a custom onClick handler --- */}
+                                                <a
+                                                    href={item.fileUrl}
+                                                    onClick={(e) => handleFileClick(e, item.fileUrl)}
+                                                >
+                                                    {item.title}
+                                                </a>
                                             </td>
                                             <td className="file-meta">{formatTimestamp(item.createdAt)}</td>
                                             <td className='text-end'>
