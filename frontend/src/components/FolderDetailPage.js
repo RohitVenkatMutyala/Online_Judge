@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Import useCallback
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -28,31 +28,39 @@ function FolderDetailPage() {
     const [showAddFileModal, setShowAddFileModal] = useState(false);
     const [fileToUpload, setFileToUpload] = useState(null);
     const [fileTitle, setFileTitle] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // Set initial loading to true
     const [error, setError] = useState('');
 
     const STORAGE_LIMIT_BYTES = 250 * 1024 * 1024;
 
-    useEffect(() => {
+    // --- FIX: Moved fetchFolderAndItems outside of useEffect and wrapped in useCallback ---
+    const fetchFolderAndItems = useCallback(async () => {
         if (!folderId || !user) return;
         setIsLoading(true);
-        const fetchFolderAndItems = async () => {
-            try {
-                const folderDocRef = doc(db, "playlists", folderId);
-                const folderDocSnap = await getDoc(folderDocRef);
-                if (!folderDocSnap.exists()) { setError("Folder not found."); return; }
-                const folderData = { id: folderDocSnap.id, ...folderDocSnap.data() };
-                if (!folderData.memberIds?.includes(user._id)) { setError("You do not have access to this folder."); return; }
-                setFolder(folderData);
+        try {
+            const folderDocRef = doc(db, "playlists", folderId);
+            const folderDocSnap = await getDoc(folderDocRef);
 
-                const q = query(collection(db, "playlistItems"), where("playlistId", "==", folderId), orderBy("createdAt", "asc"));
-                const querySnapshot = await getDocs(q);
-                const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setFolderItems(items);
-                
-                const userIds = [...new Set(items.map(item => item.userId))];
-                const newUsers = {};
-                for (const userId of userIds) {
+            if (!folderDocSnap.exists()) {
+                setError("Folder not found.");
+                return;
+            }
+            const folderData = { id: folderDocSnap.id, ...folderDocSnap.data() };
+            if (!folderData.memberIds?.includes(user._id)) {
+                setError("You do not have access to this folder.");
+                return;
+            }
+            setFolder(folderData);
+
+            const q = query(collection(db, "playlistItems"), where("playlistId", "==", folderId), orderBy("createdAt", "asc"));
+            const querySnapshot = await getDocs(q);
+            const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setFolderItems(items);
+            
+            const userIds = [...new Set(items.map(item => item.userId))];
+            const newUsers = {};
+            for (const userId of userIds) {
+                if (!userMap[userId]) {
                     const userDocRef = doc(db, "persons", userId);
                     const userDocSnap = await getDoc(userDocRef);
                     if (userDocSnap.exists()) {
@@ -62,15 +70,20 @@ function FolderDetailPage() {
                         newUsers[userId] = 'Unknown User';
                     }
                 }
-                setUserMap(prevMap => ({ ...prevMap, ...newUsers }));
-            } catch(err) {
-                setError("Failed to load folder data.");
-            } finally {
-                setIsLoading(false);
             }
-        };
+            setUserMap(prevMap => ({ ...prevMap, ...newUsers }));
+        } catch(err) {
+            console.error("Failed to load folder data:", err)
+            setError("Failed to load folder data.");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [folderId, user, userMap]); // Dependencies for useCallback
+
+    // --- FIX: useEffect is now much simpler ---
+    useEffect(() => {
         fetchFolderAndItems();
-    }, [folderId, user]);
+    }, [fetchFolderAndItems]); // This effect will run when the component mounts and when fetchFolderAndItems changes
 
     const handleFileUpload = async (e) => {
         e.preventDefault();
@@ -96,7 +109,9 @@ function FolderDetailPage() {
             });
             await updateDoc(userDocRef, { storageUsed: increment(fileToUpload.size) });
             setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
-            fetchFolderAndItems();
+            
+            // This call will now work correctly
+            fetchFolderAndItems(); 
         } catch (err) {
             setError("File upload failed.");
         } finally {
@@ -120,9 +135,9 @@ function FolderDetailPage() {
         }
     };
 
-    if (isLoading && !folder) { return <div className={`theme-${theme} dashboard-page text-center py-5`}><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>; }
-    if (error) { return <div className="alert alert-danger">{error}</div>; }
-    if (!folder) { return <div className={`theme-${theme} dashboard-page text-center py-5`}><h4>Folder not found or you don't have access.</h4></div>; }
+    if (isLoading && !folder) { return <div className={`theme-${theme} dashboard-page d-flex justify-content-center align-items-center`} style={{minHeight: '100vh'}}><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>; }
+    if (error) { return <div className="container mt-5"><div className="alert alert-danger">{error}</div></div>; }
+    if (!folder) { return <div className={`theme-${theme} dashboard-page text-center py-5`}><div className="container"><h4>Folder not found or you don't have access.</h4></div></div>; }
 
     return (
         <>
@@ -146,7 +161,7 @@ function FolderDetailPage() {
                 .file-title a:hover { text-decoration: underline; }
                 .file-meta { font-size: 0.85rem; color: #8c98a9; }
             `}</style>
-            <Navbar />
+           <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
                 <div className="container">
                     <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
