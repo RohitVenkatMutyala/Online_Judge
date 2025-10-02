@@ -5,241 +5,244 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './sketchy.css';
 import { db, storage } from '../firebaseConfig';
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || ''; 
 
 function Audiobook() {
   const { user } = useAuth();
+
+  // State for managing playlists and files
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null); // Will hold the full playlist object
+  const [playlistItems, setPlaylistItems] = useState([]);
+
+  // State for the "Add File" modal
+  const [showAddFileModal, setShowAddFileModal] = useState(false);
+  const [fileToUpload, setFileToUpload] = useState(null);
+  const [fileTitle, setFileTitle] = useState('');
   
-  // State has been simplified: removed pdfFile, added inputText
-  const [inputText, setInputText] = useState('');
+  // General UI state
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
-  const [generatedAudioBlob, setGeneratedAudioBlob] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
-  const [userPlaylists, setUserPlaylists] = useState([]);
-  const [selectedPlaylist, setSelectedPlaylist] = useState('');
-  const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [episodeTitle, setEpisodeTitle] = useState('');
+
+  // Fetch the user's playlists
+  const fetchPlaylists = async () => {
+    if (!user || !user.uid) return;
+    try {
+      const q = query(collection(db, "playlists"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUserPlaylists(playlists);
+    } catch (err) {
+      console.error("Error fetching playlists:", err);
+      setError("Could not fetch your playlists.");
+    }
+  };
 
   useEffect(() => {
-    // Note: The previous code had a bug here, checking for user._id. Correcting to user.uid
-    if (!user || !user._id) return;
-
-    const fetchPlaylists = async () => {
-      try {
-        const q = query(collection(db, "playlists"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
-        const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setUserPlaylists(playlists);
-      } catch (err) { console.error("Error fetching playlists:", err); setError("Could not fetch your playlists."); }
-    };
     fetchPlaylists();
   }, [user]);
 
-  // handleFileChange has been removed as it's no longer needed.
-
-  // The main function is now much simpler
-  const handleGeneratePodcast = async () => {
-    if (!inputText.trim()) {
-      setError('Please paste some text into the box first.');
-      return;
-    }
-    
+  // Fetch items for the selected playlist
+  const fetchPlaylistItems = async (playlistId) => {
     setIsLoading(true);
-    setLoadingMessage('Generating podcast script...');
-    setError('');
-
+    setLoadingMessage('Loading files...');
     try {
-      // Step 1: The fullText is now directly from the state. No PDF processing needed.
-      const fullText = inputText;
-
-      const prompt = `
-        Act as a professional podcast scriptwriter. Your task is to convert the following document text into a concise, engaging, and conversational audio script. Structure your output as follows:
-        1.  **Opening Hook**: Start with a compelling single sentence to grab the listener's attention.
-        2.  **Introduction**: Briefly introduce the topic of the document in 1-2 sentences.
-        3.  **Key Takeaways**: Identify and summarize the 3-4 most important points from the text. Present them clearly, as if you were explaining them to someone. Use simple language.
-        4.  **Conclusion**: Provide a brief concluding thought or summary of the main message in one sentence.
-        **Constraints**:
-        - The entire script must be in a conversational and natural-sounding tone.
-        - The final output should ONLY be the script text itself, with no extra explanations, titles, or conversational filler like "Hello and welcome...".
-        - Do not mention that the script is based on a document.
-        - Ensure the total length is suitable for a 2-3 minute audio clip (approximately 300-400 words).
-        Here is the document text:
-        ---
-        ${fullText}
-      `;
-
-      setLoadingMessage('Generating audio... This may take a moment.');
-
-      const response = await axios.post(
-        `${API_URL}/help`, 
-        { code: prompt, QID: 2 },
-        { responseType: 'blob' }
-      );
-      
-      const audioBlob = response.data;
-      setGeneratedAudioBlob(audioBlob);
-      setPreviewUrl(URL.createObjectURL(audioBlob));
-      setShowPlaylistModal(true); 
-
+      const q = query(collection(db, "playlistItems"), where("playlistId", "==", playlistId), orderBy("createdAt", "asc"));
+      const querySnapshot = await getDocs(q);
+      const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPlaylistItems(items);
     } catch (err) {
-      console.error("Error generating podcast:", err);
-      setError(`An error occurred: ${err.message}`);
+      console.error("Error fetching playlist items:", err);
+      setError("Could not load files for this playlist.");
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
     }
   };
 
-  const handleSaveToPlaylist = async (e) => {
+  const handleCreatePlaylist = async (e) => {
     e.preventDefault();
-    if (!episodeTitle || !generatedAudioBlob || (!selectedPlaylist && !newPlaylistName)) {
-        setError('Please provide a title and select or create a playlist.'); return;
-    }
-    setIsLoading(true); setLoadingMessage('Saving your new podcast...'); setError('');
+    if (!newPlaylistName.trim()) return;
+    setIsLoading(true);
+    setLoadingMessage('Creating playlist...');
     try {
-        let playlistIdToSave = selectedPlaylist;
-        if (selectedPlaylist === 'CREATE_NEW') {
-            if (!newPlaylistName) { setError('Please enter a name for the new playlist.'); setIsLoading(false); return; }
-            const newPlaylistRef = await addDoc(collection(db, "playlists"), { name: newPlaylistName, userId: user.uid, isPublic: true, createdAt: serverTimestamp() });
-            playlistIdToSave = newPlaylistRef.id;
-            setUserPlaylists([...userPlaylists, {id: playlistIdToSave, name: newPlaylistName}]);
-        }
-        setLoadingMessage('Uploading audio file...');
-        const audioId = uuidv4();
-        const storageRef = ref(storage, `podcasts/${user.uid}/${playlistIdToSave}/${audioId}.mp3`);
-        const snapshot = await uploadBytes(storageRef, generatedAudioBlob);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        setLoadingMessage('Finalizing details...');
-
-        // Removed originalFileName since we are not using a file anymore
-        await addDoc(collection(db, "audioEpisodes"), { 
-            title: episodeTitle, 
-            audioUrl: downloadURL, 
-            playlistId: playlistIdToSave, 
-            userId: user.uid, 
-            createdAt: serverTimestamp()
-        });
-
-        resetFormState();
-    } catch (err) { console.error("Error saving to playlist:", err); setError("Failed to save the podcast. Please try again.");
-    } finally { setIsLoading(false); setLoadingMessage(''); }
+      await addDoc(collection(db, "playlists"), {
+        name: newPlaylistName,
+        userId: user.uid,
+        isPublic: true,
+        createdAt: serverTimestamp(),
+      });
+      setNewPlaylistName('');
+      fetchPlaylists(); // Refresh the playlist list
+    } catch (err) {
+      console.error("Error creating playlist:", err);
+      setError('Failed to create playlist.');
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage('');
+    }
   };
 
-  const resetFormState = () => {
-    if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+  const handleSelectPlaylist = (playlist) => {
+    setSelectedPlaylist(playlist);
+    fetchPlaylistItems(playlist.id);
+  };
+
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
+    if (!fileToUpload || !fileTitle.trim()) {
+      setError("Please select a file and provide a title.");
+      return;
     }
-    // Updated to reset the new inputText state
-    setShowPlaylistModal(false); 
-    setInputText(''); 
-    setGeneratedAudioBlob(null); 
-    setEpisodeTitle(''); 
-    setSelectedPlaylist(''); 
-    setNewPlaylistName(''); 
-    setPreviewUrl('');
-  }
+    setIsLoading(true);
+    setLoadingMessage('Uploading file...');
+    try {
+      const fileId = uuidv4();
+      const storageRef = ref(storage, `playlistFiles/${user.uid}/${selectedPlaylist.id}/${fileId}-${fileToUpload.name}`);
+      const snapshot = await uploadBytes(storageRef, fileToUpload);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      await addDoc(collection(db, "playlistItems"), {
+        title: fileTitle,
+        fileUrl: downloadURL,
+        fileName: fileToUpload.name,
+        fileType: fileToUpload.type,
+        playlistId: selectedPlaylist.id,
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+      });
+      
+      // Reset form and close modal
+      setShowAddFileModal(false);
+      setFileToUpload(null);
+      setFileTitle('');
+      fetchPlaylistItems(selectedPlaylist.id); // Refresh the file list
+    } catch (err) {
+      console.error("Error uploading file:", err);
+      setError("File upload failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage('');
+    }
+  };
 
   if (!user) { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div> ); }
-  //if (user.role !== 'admin') { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not authorized to access this page.</div></div> ); }
 
   return (
     <>
       <Navbar />
       <div className="container mt-4">
-        <h2 className="mb-4">Create a Podcast from Text</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <div className="card bg-light mb-4">
-          <div className="card-body">
-            <h5 className="card-title">Step 1: Paste Your Text</h5>
-            <div className="mb-3">
-              <label htmlFor="text-input" className="form-label">Paste the text you want to convert into a podcast episode.</label>
-              {/* Replaced file input with a textarea */}
-              <textarea
-                className="form-control"
-                id="text-input"
-                rows="10"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Paste your article, notes, or script here..."
-                disabled={isLoading}
-              ></textarea>
+        <h2 className="mb-4">Playlist Manager</h2>
+        {error && <div className="alert alert-danger" onClick={() => setError('')}>{error}</div>}
+
+        <div className="row">
+          {/* Left Column: Playlist Creation and List */}
+          <div className="col-md-4">
+            <div className="card bg-light mb-4">
+              <div className="card-body">
+                <h5 className="card-title">Create New Playlist</h5>
+                <form onSubmit={handleCreatePlaylist}>
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Playlist Name"
+                      value={newPlaylistName}
+                      onChange={(e) => setNewPlaylistName(e.target.value)}
+                      disabled={isLoading}
+                    />
+                    <button className="btn btn-primary" type="submit" disabled={isLoading || !newPlaylistName.trim()}>Create</button>
+                  </div>
+                </form>
+              </div>
             </div>
-            <button 
-              className="btn btn-primary" 
-              onClick={handleGeneratePodcast} 
-              disabled={!inputText.trim() || isLoading}
-            >
-              {isLoading ? ( <><span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span className="ms-2">{loadingMessage}</span></> ) : 'Generate Podcast Audio'}
-            </button>
+
+            <h3>Your Playlists</h3>
+            <div className="list-group">
+              {userPlaylists.map(playlist => (
+                <button
+                  key={playlist.id}
+                  type="button"
+                  className={`list-group-item list-group-item-action ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`}
+                  onClick={() => handleSelectPlaylist(playlist)}
+                >
+                  {playlist.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Selected Playlist Content */}
+          <div className="col-md-8">
+            {selectedPlaylist ? (
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h3>Files in "{selectedPlaylist.name}"</h3>
+                  <div>
+                    <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}>
+                      <i className="bi bi-plus-lg me-2"></i>Add New File
+                    </button>
+                    <button className="btn btn-outline-secondary" onClick={() => {
+                        const shareUrl = `${window.location.origin}/playlist/${selectedPlaylist.id}`;
+                        navigator.clipboard.writeText(shareUrl);
+                        alert(`Copied share link to clipboard:\n${shareUrl}`);
+                    }}>
+                        <i className="bi bi-share-fill me-2"></i>Share
+                    </button>
+                  </div>
+                </div>
+                {isLoading && loadingMessage ? <p>{loadingMessage}</p> : (
+                    <ul className="list-group">
+                        {playlistItems.length > 0 ? playlistItems.map(item => (
+                            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" key={item.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                {item.title}
+                                <span className="badge bg-secondary rounded-pill">{item.fileName}</span>
+                            </a>
+                        )) : <li className="list-group-item">This playlist is empty.</li>}
+                    </ul>
+                )}
+              </div>
+            ) : (
+              <div className="text-center mt-5">
+                <h4>Select a playlist on the left to view its files, or create a new one.</h4>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* The Modal and Playlist display sections remain the same */}
-        {showPlaylistModal && (
-          <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        {/* Add File Modal */}
+        {showAddFileModal && (
+          <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Save Your New Podcast Episode</h5>
-                  <button type="button" className="btn-close" onClick={resetFormState} aria-label="Close" disabled={isLoading}></button>
-                </div>
-                <div className="modal-body">
-                  {previewUrl && ( <div className="mb-3 text-center"><p><strong>Audio Preview</strong></p><audio controls src={previewUrl} style={{ width: '100%' }}>Your browser does not support the audio element.</audio></div> )}
-                  <form onSubmit={handleSaveToPlaylist}>
+                <form onSubmit={handleFileUpload}>
+                  <div className="modal-header">
+                    <h5 className="modal-title">Add File to "{selectedPlaylist.name}"</h5>
+                    <button type="button" className="btn-close" onClick={() => setShowAddFileModal(false)}></button>
+                  </div>
+                  <div className="modal-body">
                     <div className="mb-3">
-                        <label htmlFor="episodeTitle" className="form-label">Episode Title</label>
-                        <input type="text" id="episodeTitle" className="form-control" value={episodeTitle} onChange={(e) => setEpisodeTitle(e.target.value)} required />
+                      <label htmlFor="fileTitle" className="form-label">File Title</label>
+                      <input type="text" id="fileTitle" className="form-control" value={fileTitle} onChange={(e) => setFileTitle(e.target.value)} required />
                     </div>
                     <div className="mb-3">
-                      <label htmlFor="playlistSelect" className="form-label">Choose a Playlist</label>
-                      <select id="playlistSelect" className="form-select" value={selectedPlaylist} onChange={(e) => setSelectedPlaylist(e.target.value)} required>
-                        <option value="" disabled>Select a playlist...</option>
-                        {userPlaylists.map(playlist => (<option key={playlist.id} value={playlist.id}>{playlist.name}</option>))}
-                        <option value="CREATE_NEW">-- Create a New Playlist --</option>
-                      </select>
+                      <label htmlFor="fileUpload" className="form-label">Select File</label>
+                      <input type="file" id="fileUpload" className="form-control" onChange={(e) => setFileToUpload(e.target.files[0])} required />
                     </div>
-                    {selectedPlaylist === 'CREATE_NEW' && (
-                      <div className="mb-3">
-                        <label htmlFor="newPlaylistName" className="form-label">New Playlist Name</label>
-                        <input type="text" id="newPlaylistName" className="form-control" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} placeholder="e.g., Tech Summaries" required/>
-                      </div>
-                    )}
-                    <div className="d-flex justify-content-end">
-                         <button type="button" className="btn btn-secondary me-2" onClick={resetFormState} disabled={isLoading}>Cancel</button>
-                         <button type="submit" className="btn btn-success" disabled={isLoading}>{isLoading ? 'Saving...' : 'Save to Playlist'}</button>
-                    </div>
-                  </form>
-                </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Uploading...' : 'Upload'}</button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
         )}
-
-        <div className="mt-5">
-            <h3>Your Playlists</h3>
-            {userPlaylists.length > 0 ? (
-                <ul className="list-group">
-                    {userPlaylists.map(playlist => (
-                        <li key={playlist.id} className="list-group-item d-flex justify-content-between align-items-center">
-                            {playlist.name}
-                            <button className="btn btn-sm btn-outline-secondary" onClick={() => {
-                                const shareUrl = `${window.location.origin}/playlist/${playlist.id}`;
-                                navigator.clipboard.writeText(shareUrl);
-                                alert(`Copied share link to clipboard:\n${shareUrl}`);
-                            }}><i className="bi bi-share-fill me-2"></i>Share Publicly</button>
-                        </li>
-                    ))}
-                </ul>
-            ) : (<p>You haven't created any playlists yet.</p>)}
-        </div>
       </div>
     </>
   );
