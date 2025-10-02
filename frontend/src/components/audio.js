@@ -1,49 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import Navbar from './navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { db, storage } from '../firebaseConfig';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, writeBatch, doc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, writeBatch, doc, deleteDoc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 
-// Helper function to format Firestore Timestamps into a readable string
+// Helper function to format Firestore Timestamps
 const formatTimestamp = (timestamp) => {
     if (!timestamp) return 'N/A';
     const date = timestamp.toDate();
-    return date.toLocaleString('en-IN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
+    return date.toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
 function Audiobook() {
     const { user } = useAuth();
-    const theme = 'dark'; // Hardcoded theme for styling
+    const { theme } = useTheme();
 
-    // State for managing folders and files
     const [userFolders, setUserFolders] = useState([]);
     const [newFolderName, setNewFolderName] = useState('');
     const [selectedFolder, setSelectedFolder] = useState(null);
     const [folderItems, setFolderItems] = useState([]);
-    const [userMap, setUserMap] = useState({}); // Stores user names {userId: 'DisplayName'}
-
-    // State for the "Add File" modal
+    const [userMap, setUserMap] = useState({});
     const [showAddFileModal, setShowAddFileModal] = useState(false);
     const [fileToUpload, setFileToUpload] = useState(null);
     const [fileTitle, setFileTitle] = useState('');
-
-    // General UI state
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('');
     const [error, setError] = useState('');
 
-    // Effect to fetch all folders the user is a member of
     useEffect(() => {
         let isMounted = true;
         const fetchFolders = async () => {
@@ -59,10 +47,9 @@ function Audiobook() {
             }
         };
         fetchFolders();
-        return () => { isMounted = false; }; // Cleanup function to prevent memory leaks
+        return () => { isMounted = false; };
     }, [user]);
 
-    // Fetches files for a selected folder and the names of the users who uploaded them
     const fetchFolderItems = async (folderId) => {
         setIsLoading(true);
         setLoadingMessage('Loading files...');
@@ -76,9 +63,14 @@ function Audiobook() {
             const newUsers = {};
             for (const userId of userIds) {
                 if (!userMap[userId]) {
-                    const userDocRef = doc(db, "users", userId);
+                    const userDocRef = doc(db, "persons", userId);
                     const userDocSnap = await getDoc(userDocRef);
-                    newUsers[userId] = userDocSnap.exists() ? userDocSnap.data().firstname || 'Unknown User' : 'Unknown User';
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        newUsers[userId] = `${userData.firstname || ''} ${userData.lastname || ''}`.trim() || 'Unknown User';
+                    } else {
+                        newUsers[userId] = 'Unknown User';
+                    }
                 }
             }
             setUserMap(prevMap => ({ ...prevMap, ...newUsers }));
@@ -91,7 +83,6 @@ function Audiobook() {
         }
     };
 
-    // Handles creation of a new folder
     const handleCreateFolder = async (e) => {
         e.preventDefault();
         if (!user || !user._id) { setError("User not loaded. Please try again."); return; }
@@ -113,14 +104,12 @@ function Audiobook() {
         }
     };
 
-    // Handles selecting a folder from the grid
     const handleSelectFolder = (folder) => {
         setSelectedFolder(folder);
         setFolderItems([]);
         fetchFolderItems(folder.id);
     };
 
-    // Handles uploading a new file to the selected folder
     const handleFileUpload = async (e) => {
         e.preventDefault();
         if (!user || !user._id) { setError("User not loaded. Please try again."); return; }
@@ -128,6 +117,15 @@ function Audiobook() {
         setIsLoading(true);
         setLoadingMessage('Uploading file...');
         try {
+            const personDocRef = doc(db, "persons", user._id);
+            const personDocSnap = await getDoc(personDocRef);
+            if (!personDocSnap.exists()) {
+                await setDoc(personDocRef, {
+                    firstname: user.firstname || "First",
+                    lastname: user.lastname || "Last",
+                    email: user.email || "no-email@example.com"
+                });
+            }
             const fileId = uuidv4();
             const storageRef = ref(storage, `playlistFiles/${selectedFolder.originalOwner}/${selectedFolder.id}/${fileId}-${fileToUpload.name}`);
             const snapshot = await uploadBytes(storageRef, fileToUpload);
@@ -147,7 +145,6 @@ function Audiobook() {
         }
     };
 
-    // Handles deleting a single file (owner only)
     const handleDeleteFile = async (fileToDelete) => {
         if (!window.confirm(`Are you sure you want to delete the file "${fileToDelete.title}"?`)) return;
         setIsLoading(true);
@@ -165,9 +162,8 @@ function Audiobook() {
         }
     };
 
-    // Handles deleting an entire folder and all its contents (owner only)
     const handleDeleteFolder = async (folderToDelete) => {
-        if (!window.confirm(`Are you sure you want to permanently delete the folder "${folderToDelete.name}" and all of its files? This action cannot be undone.`)) return;
+        if (!window.confirm(`Are you sure you want to permanently delete the folder "${folderToDelete.name}" and all its files? This action cannot be undone.`)) return;
         setIsLoading(true);
         setLoadingMessage(`Deleting ${folderToDelete.name}...`);
         try {
@@ -207,25 +203,33 @@ function Audiobook() {
     return (
         <>
             <style>{`
-        .theme-dark .dashboard-page { background-color: #12121c; color: #e0e0e0; }
-        .dashboard-container { min-height: 85vh; background-color: #1e1e2f; border: 1px solid #3a3a5a; }
-        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1.5rem; }
-        .folder-item { cursor: pointer; text-align: center; transition: transform 0.2s ease; position: relative; }
-        .folder-item:hover { transform: translateY(-5px); }
-        .folder-icon { font-size: 5rem; color: #ffca28; }
-        .folder-name { margin-top: 0.5rem; font-size: 0.9rem; word-break: break-word; }
-        .folder-item.active .folder-icon { color: #4dabf7; }
-        .folder-item.active .folder-name { font-weight: bold; }
-        .delete-folder-btn { position: absolute; top: -5px; right: 5px; background: rgba(0,0,0,0.3); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
-        .folder-item:hover .delete-folder-btn { opacity: 1; }
-        .file-table { color: #e0e0e0; }
-        .file-table thead { color: #8c98a9; }
-        .file-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
-        .file-icon { font-size: 1.5rem; color: #8c98a9; }
-        .file-title a { color: #e0e0e0; text-decoration: none; }
-        .file-title a:hover { text-decoration: underline; }
-        .file-meta { font-size: 0.85rem; color: #8c98a9; }
-        .btn-share { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
+          .theme-dark .dashboard-page { background-color: #12121c; }
+          .theme-light .dashboard-page { background-color: #f8f9fa; }
+          .dashboard-container { min-height: 85vh; }
+          .theme-dark .dashboard-container { background-color: #1e1e2f; border: 1px solid #3a3a5a; color: #fff; }
+          .theme-light .dashboard-container { background-color: #ffffff; border: 1px solid #dee2e6; color: #212529; }
+          .btn-share { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; padding: 0.25rem 0.75rem; font-size: 0.8rem; }
+          .theme-light .btn-share { background: #e9ecef; color: #495057; border-color: #dee2e6; }
+          .btn-share:hover { transform: translateY(-2px); background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; border-color: transparent; }
+          .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1.5rem; }
+          .folder-item { cursor: pointer; text-align: center; transition: transform 0.2s ease; position: relative; }
+          .folder-item:hover { transform: translateY(-5px); }
+          .folder-icon { font-size: 5rem; color: #ffca28; }
+          .folder-name { margin-top: 0.5rem; font-size: 0.9rem; word-break: break-word; }
+          .folder-item.active .folder-icon { color: #4dabf7; }
+          .folder-item.active .folder-name { font-weight: bold; }
+          .delete-folder-btn { position: absolute; top: -5px; right: 5px; background: rgba(0,0,0,0.3); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+          .folder-item:hover .delete-folder-btn { opacity: 1; }
+          .file-table { color: #e0e0e0; }
+          .theme-light .file-table { color: #212529; }
+          .file-table thead { color: #8c98a9; }
+          .file-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+          .theme-light .file-table tbody tr:hover { background-color: #f1f3f5; }
+          .file-icon { font-size: 1.5rem; color: #8c98a9; }
+          .file-title a { color: #e0e0e0; text-decoration: none; }
+          .theme-light .file-title a { color: #212529; }
+          .file-title a:hover { text-decoration: underline; }
+          .file-meta { font-size: 0.85rem; color: #8c98a9; }
       `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
@@ -259,7 +263,7 @@ function Audiobook() {
                             <div>
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <div>
-                                        <button className="btn btn-link text-light px-0" onClick={() => setSelectedFolder(null)}>
+                                        <button className={`btn btn-link px-0 ${theme === 'dark' ? 'text-light' : ''}`} onClick={() => setSelectedFolder(null)}>
                                             <i className="bi bi-arrow-left me-2"></i>Back to Folders
                                         </button>
                                         <h3 className="mt-2">Files in "{selectedFolder.name}"</h3>
@@ -277,35 +281,23 @@ function Audiobook() {
                                     <table className="table file-table align-middle">
                                         <thead>
                                             <tr>
-                                                <th scope="col" style={{ width: '5%' }}></th>
-                                                <th scope="col">Name</th>
-                                                <th scope="col">Added by</th>
-                                                <th scope="col">Date Added</th>
-                                                <th scope="col" style={{ width: '5%' }}></th>
+                                                <th scope="col" style={{ width: '5%' }}></th><th scope="col">Name</th><th scope="col">Added by</th><th scope="col">Date Added</th><th scope="col" style={{ width: '5%' }}></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {folderItems.length > 0 ? folderItems.map(item => (
                                                 <tr key={item.id}>
                                                     <td><i className="bi bi-file-earmark-text file-icon"></i></td>
-                                                    <td className="file-title">
-                                                        <a href={item.fileUrl} target="_blank" rel="noopener noreferrer">{item.title}</a>
-                                                    </td>
+                                                    <td className="file-title"><a href={item.fileUrl} target="_blank" rel="noopener noreferrer">{item.title}</a></td>
                                                     <td className="file-meta">{userMap[item.userId] || '...'}</td>
                                                     <td className="file-meta">{formatTimestamp(item.createdAt)}</td>
                                                     <td>
                                                         {user._id === selectedFolder.originalOwner && (
-                                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteFile(item)} title="Delete File">
-                                                                <i className="bi bi-trash-fill"></i>
-                                                            </button>
+                                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteFile(item)} title="Delete File"><i className="bi bi-trash-fill"></i></button>
                                                         )}
                                                     </td>
                                                 </tr>
-                                            )) : (
-                                                <tr>
-                                                    <td colSpan="5" className="text-center py-5">This folder is empty. Upload a file to get started.</td>
-                                                </tr>
-                                            )}
+                                            )) : (<tr><td colSpan="5" className="text-center py-5">This folder is empty. Upload a file to get started.</td></tr>)}
                                         </tbody>
                                     </table>
                                 )}
