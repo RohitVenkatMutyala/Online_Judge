@@ -78,7 +78,7 @@ function Audiobook() {
                 if (!userMap[userId]) {
                     const userDocRef = doc(db, "users", userId);
                     const userDocSnap = await getDoc(userDocRef);
-                    newUsers[userId] = userDocSnap.exists() ? userDocSnap.data().displayName || 'Unknown User' : 'Unknown User';
+                    newUsers[userId] = userDocSnap.exists() ? userDocSnap.data().firstname || 'Unknown User' : 'Unknown User';
                 }
             }
             setUserMap(prevMap => ({ ...prevMap, ...newUsers }));
