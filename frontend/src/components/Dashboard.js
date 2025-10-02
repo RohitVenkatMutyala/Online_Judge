@@ -726,7 +726,7 @@ function Dashboard() {
                         <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
                             <div className="modal-header border-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center">
-                                    <i className="bi bi-sparkle"></i>
+                                    <i className="bi bi-robot me-2"></i>
                                     {/* FIX: Removed the trailing space from "Randoman AI " and added more context */}
                                     <span>
                                         {viewingHistory ? "Latest Review History" : "Randoman AI Resume Reviewer"}
