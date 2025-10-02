@@ -8,19 +8,17 @@ import { db, storage } from '../firebaseConfig';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 
-// Import and configure the pdf.js library
+// Import the pdf.js library
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// FIX #2: Use a hardcoded, stable URL for the worker to prevent 404 errors.
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
-// Define your API base URL - adjust if it's stored elsewhere (e.g., .env file)
 const API_URL = process.env.REACT_APP_API_URL || ''; 
 
 function Audiobook() {
   const { user } = useAuth();
-
-  // (No changes to state variables)
   const [pdfFile, setPdfFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -33,9 +31,10 @@ function Audiobook() {
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [episodeTitle, setEpisodeTitle] = useState('');
 
-  // (No changes to useEffect, handleFileChange)
   useEffect(() => {
-    if (!user) return;
+    // FIX #1: Add a check for user.uid to prevent query errors on initial load.
+    if (!user || !user._id) return;
+
     const fetchPlaylists = async () => {
       try {
         const q = query(collection(db, "playlists"), where("userId", "==", user.uid));
@@ -56,7 +55,6 @@ function Audiobook() {
     } else { setPdfFile(null); setError('Please select a valid PDF file.'); }
   };
 
-  // --- **** MODIFIED FUNCTION STARTS HERE **** ---
   const handleGeneratePodcast = async () => {
     if (!pdfFile) {
       setError('Please select a PDF file first.');
@@ -68,7 +66,6 @@ function Audiobook() {
     setError('');
 
     try {
-      // Step 1: Extract text from PDF on the client-side (no changes here)
       const reader = new FileReader();
       reader.readAsArrayBuffer(pdfFile);
       const fullText = await new Promise((resolve, reject) => {
@@ -89,21 +86,17 @@ function Audiobook() {
 
       setLoadingMessage('Generating podcast script...');
 
-      // Step 2: Manipulate the prompt with detailed instructions for the AI
       const prompt = `
         Act as a professional podcast scriptwriter. Your task is to convert the following document text into a concise, engaging, and conversational audio script. Structure your output as follows:
-
         1.  **Opening Hook**: Start with a compelling single sentence to grab the listener's attention.
         2.  **Introduction**: Briefly introduce the topic of the document in 1-2 sentences.
         3.  **Key Takeaways**: Identify and summarize the 3-4 most important points from the text. Present them clearly, as if you were explaining them to someone. Use simple language.
         4.  **Conclusion**: Provide a brief concluding thought or summary of the main message in one sentence.
-
         **Constraints**:
         - The entire script must be in a conversational and natural-sounding tone.
         - The final output should ONLY be the script text itself, with no extra explanations, titles, or conversational filler like "Hello and welcome...".
         - Do not mention that the script is based on a document.
         - Ensure the total length is suitable for a 2-3 minute audio clip (approximately 300-400 words).
-        - the QID mentioned in these was dummy dont include anything related to that question id 2
         Here is the document text:
         ---
         ${fullText}
@@ -111,21 +104,13 @@ function Audiobook() {
 
       setLoadingMessage('Generating audio... This may take a moment.');
 
-      // Step 3: Send the request to your backend using the specified configuration
       const response = await axios.post(
         `${API_URL}/help`, 
-        { 
-          code: prompt, // The detailed prompt
-          QID: 2        // The dummy question ID
-        },
-        {
-          responseType: 'blob' // Important: tells axios to handle the response as a file/blob
-        }
+        { code: prompt, QID: 2 },
+        { responseType: 'blob' }
       );
       
-      const audioBlob = response.data; // With axios and responseType: 'blob', the data is the blob itself
-
-      // Step 4: Handle the returned audio blob
+      const audioBlob = response.data;
       setGeneratedAudioBlob(audioBlob);
       setPreviewUrl(URL.createObjectURL(audioBlob));
       setShowPlaylistModal(true); 
@@ -138,10 +123,7 @@ function Audiobook() {
       setLoadingMessage('');
     }
   };
-  // --- **** MODIFIED FUNCTION ENDS HERE **** ---
 
-
-  // (No changes to handleSaveToPlaylist or resetFormState)
   const handleSaveToPlaylist = async (e) => {
     e.preventDefault();
     if (!episodeTitle || !generatedAudioBlob || (!selectedPlaylist && !newPlaylistName)) {
@@ -169,14 +151,15 @@ function Audiobook() {
   };
 
   const resetFormState = () => {
+    if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+    }
     setShowPlaylistModal(false); setPdfFile(null); setGeneratedAudioBlob(null); setEpisodeTitle(''); setSelectedPlaylist(''); setNewPlaylistName(''); setPreviewUrl('');
     if (document.getElementById('pdf-upload')) { document.getElementById('pdf-upload').value = null; }
   }
 
-
-  // (No changes to access control or JSX)
   if (!user) { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div> ); }
-  //if (user.role !== 'admin') { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not authorized to access this page.</div></div> ); }
+  if (user.role !== 'admin') { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not authorized to access this page.</div></div> ); }
 
   return (
     <>
