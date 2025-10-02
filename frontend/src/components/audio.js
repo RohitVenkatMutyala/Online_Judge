@@ -224,6 +224,25 @@ function Audiobook() {
 }
 .theme-dark .themed-input-group .input-group-text { color: #8c98a9; }
 .theme-light .themed-input-group .input-group-text { color: #6c757d; }
+.btn-icon-gradient {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px; /* Standard button height */
+    height: 38px;
+    padding: 0;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    color: white;
+    border: none;
+    font-size: 1.2rem; /* Make the icon a bit larger */
+    transition: all 0.3s ease;
+}
+
+.btn-icon-gradient:hover {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
@@ -244,8 +263,9 @@ function Audiobook() {
                                 <form onSubmit={handleCreateFolder}>
                                     <div className="themed-input-group">
                                         <input type="text" className="form-control" placeholder="Create a new folder..." value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
-                                        <button className="btn btn-primary m-1" type="submit" disabled={!newFolderName.trim()}>Create</button>
-                                    </div>
+                                        <button className="btn btn-icon-gradient m-1" type="submit" disabled={!newFolderName.trim()} title="Create Folder">
+                                            <i className="bi bi-plus-lg"></i>
+                                        </button></div>
                                 </form>
                             </div>
                             <div className="col-md-6">
