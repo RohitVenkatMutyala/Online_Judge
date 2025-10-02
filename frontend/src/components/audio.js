@@ -30,9 +30,9 @@ function Audiobook() {
 
   // Fetch the user's playlists
   const fetchPlaylists = async () => {
-    if (!user || !user.uid) return;
+    if (!user || !user._id) return;
     try {
-      const q = query(collection(db, "playlists"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+      const q = query(collection(db, "playlists"), where("userId", "==", user._id), orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
       const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUserPlaylists(playlists);
@@ -72,7 +72,7 @@ function Audiobook() {
     try {
       await addDoc(collection(db, "playlists"), {
         name: newPlaylistName,
-        userId: user.uid,
+        userId: user._id,
         isPublic: true,
         createdAt: serverTimestamp(),
       });
@@ -102,7 +102,7 @@ function Audiobook() {
     setLoadingMessage('Uploading file...');
     try {
       const fileId = uuidv4();
-      const storageRef = ref(storage, `playlistFiles/${user.uid}/${selectedPlaylist.id}/${fileId}-${fileToUpload.name}`);
+      const storageRef = ref(storage, `playlistFiles/${user._id}/${selectedPlaylist.id}/${fileId}-${fileToUpload.name}`);
       const snapshot = await uploadBytes(storageRef, fileToUpload);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
@@ -112,7 +112,7 @@ function Audiobook() {
         fileName: fileToUpload.name,
         fileType: fileToUpload.type,
         playlistId: selectedPlaylist.id,
-        userId: user.uid,
+        userId: user._id,
         createdAt: serverTimestamp(),
       });
       
