@@ -162,7 +162,7 @@ function Audiobook() {
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
-                <div className="container">
+                
                     <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
                         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
                              <h2 className="mb-2 mb-md-0"> Folders</h2>
@@ -210,7 +210,7 @@ function Audiobook() {
                         </div>
                     </div>
                 </div>
-            </div>
+            
             {showRenameModal && (
                  <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
