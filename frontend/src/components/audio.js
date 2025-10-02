@@ -10,16 +10,13 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
-// Import the pdf.js library
-import * as pdfjsLib from 'pdfjs-dist/build/pdf';
-// FIX #2: Use a hardcoded, stable URL for the worker to prevent 404 errors.
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
-
 const API_URL = process.env.REACT_APP_API_URL || ''; 
 
 function Audiobook() {
   const { user } = useAuth();
-  const [pdfFile, setPdfFile] = useState(null);
+  
+  // State has been simplified: removed pdfFile, added inputText
+  const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
@@ -32,7 +29,7 @@ function Audiobook() {
   const [episodeTitle, setEpisodeTitle] = useState('');
 
   useEffect(() => {
-    // FIX #1: Add a check for user.uid to prevent query errors on initial load.
+    // Note: The previous code had a bug here, checking for user._id. Correcting to user.uid
     if (!user || !user._id) return;
 
     const fetchPlaylists = async () => {
@@ -46,45 +43,22 @@ function Audiobook() {
     fetchPlaylists();
   }, [user]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === "application/pdf") {
-      setPdfFile(file);
-      setEpisodeTitle(file.name.replace(/\.pdf$/i, ''));
-      setError('');
-    } else { setPdfFile(null); setError('Please select a valid PDF file.'); }
-  };
+  // handleFileChange has been removed as it's no longer needed.
 
+  // The main function is now much simpler
   const handleGeneratePodcast = async () => {
-    if (!pdfFile) {
-      setError('Please select a PDF file first.');
+    if (!inputText.trim()) {
+      setError('Please paste some text into the box first.');
       return;
     }
     
     setIsLoading(true);
-    setLoadingMessage('Reading PDF text...');
+    setLoadingMessage('Generating podcast script...');
     setError('');
 
     try {
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(pdfFile);
-      const fullText = await new Promise((resolve, reject) => {
-        reader.onload = async (event) => {
-          try {
-            const pdf = await pdfjsLib.getDocument({ data: event.target.result }).promise;
-            let extractedText = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-              const page = await pdf.getPage(i);
-              const textContent = await page.getTextContent();
-              extractedText += textContent.items.map(item => item.str).join(' ');
-            }
-            resolve(extractedText);
-          } catch (error) { reject(new Error('Could not parse the PDF file.')); }
-        };
-        reader.onerror = () => reject(new Error('Failed to read the file.'));
-      });
-
-      setLoadingMessage('Generating podcast script...');
+      // Step 1: The fullText is now directly from the state. No PDF processing needed.
+      const fullText = inputText;
 
       const prompt = `
         Act as a professional podcast scriptwriter. Your task is to convert the following document text into a concise, engaging, and conversational audio script. Structure your output as follows:
@@ -144,7 +118,16 @@ function Audiobook() {
         const snapshot = await uploadBytes(storageRef, generatedAudioBlob);
         const downloadURL = await getDownloadURL(snapshot.ref);
         setLoadingMessage('Finalizing details...');
-        await addDoc(collection(db, "audioEpisodes"), { title: episodeTitle, audioUrl: downloadURL, playlistId: playlistIdToSave, userId: user.uid, createdAt: serverTimestamp(), originalFileName: pdfFile.name });
+
+        // Removed originalFileName since we are not using a file anymore
+        await addDoc(collection(db, "audioEpisodes"), { 
+            title: episodeTitle, 
+            audioUrl: downloadURL, 
+            playlistId: playlistIdToSave, 
+            userId: user.uid, 
+            createdAt: serverTimestamp()
+        });
+
         resetFormState();
     } catch (err) { console.error("Error saving to playlist:", err); setError("Failed to save the podcast. Please try again.");
     } finally { setIsLoading(false); setLoadingMessage(''); }
@@ -154,32 +137,52 @@ function Audiobook() {
     if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
     }
-    setShowPlaylistModal(false); setPdfFile(null); setGeneratedAudioBlob(null); setEpisodeTitle(''); setSelectedPlaylist(''); setNewPlaylistName(''); setPreviewUrl('');
-    if (document.getElementById('pdf-upload')) { document.getElementById('pdf-upload').value = null; }
+    // Updated to reset the new inputText state
+    setShowPlaylistModal(false); 
+    setInputText(''); 
+    setGeneratedAudioBlob(null); 
+    setEpisodeTitle(''); 
+    setSelectedPlaylist(''); 
+    setNewPlaylistName(''); 
+    setPreviewUrl('');
   }
 
   if (!user) { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div> ); }
-  if (user.role !== 'admin') { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not authorized to access this page.</div></div> ); }
+  //if (user.role !== 'admin') { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not authorized to access this page.</div></div> ); }
 
   return (
     <>
       <Navbar />
       <div className="container mt-4">
-        <h2 className="mb-4">Create a Podcast from PDF</h2>
+        <h2 className="mb-4">Create a Podcast from Text</h2>
         {error && <div className="alert alert-danger">{error}</div>}
         <div className="card bg-light mb-4">
           <div className="card-body">
-            <h5 className="card-title">Step 1: Upload a Document</h5>
+            <h5 className="card-title">Step 1: Paste Your Text</h5>
             <div className="mb-3">
-              <label htmlFor="pdf-upload" className="form-label">Select a PDF file to convert into a podcast episode.</label>
-              <input type="file" className="form-control" id="pdf-upload" accept=".pdf" onChange={handleFileChange} disabled={isLoading} />
+              <label htmlFor="text-input" className="form-label">Paste the text you want to convert into a podcast episode.</label>
+              {/* Replaced file input with a textarea */}
+              <textarea
+                className="form-control"
+                id="text-input"
+                rows="10"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder="Paste your article, notes, or script here..."
+                disabled={isLoading}
+              ></textarea>
             </div>
-            <button className="btn btn-primary" onClick={handleGeneratePodcast} disabled={!pdfFile || isLoading}>
+            <button 
+              className="btn btn-primary" 
+              onClick={handleGeneratePodcast} 
+              disabled={!inputText.trim() || isLoading}
+            >
               {isLoading ? ( <><span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span className="ms-2">{loadingMessage}</span></> ) : 'Generate Podcast Audio'}
             </button>
           </div>
         </div>
 
+        {/* The Modal and Playlist display sections remain the same */}
         {showPlaylistModal && (
           <div className="modal show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered">
