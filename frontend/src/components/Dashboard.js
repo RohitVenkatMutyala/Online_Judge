@@ -566,15 +566,16 @@ function Dashboard() {
                                                 <div className="col-12"><NavCard title="Live Sessions" description="Collaborative coding with integrated chat" icon="bi-broadcast-pin" path="/new-chat" /></div>
                                                 <div className="col-12"><NavCard title="Solve Problems" description="Practice coding with our curated problem sets" icon="bi-puzzle-fill" path="/problems" /></div>
                                                 <div className="col-12"><NavCard title="Fundamentals" description="Master the core concepts and principles" icon="bi-book-half" path="/funda" /></div>
-                                                <div className="col-12"><NavCard title="Contests" description="Explore real-world examples and use cases" icon="bi-collection-fill" path="/contexts" /></div>
-                                                <div className="col-12"><NavCard title="Submissions" description="Review your previous solutions and progress" icon="bi-check2-square" path="/sub" /></div>
-                                                <div className="col-12"><NavCard
+                                                 <div className="col-12"><NavCard
                                                         title="Folders"
                                                         description="Create, manage, and share your collaborative folders and files."
                                                         icon="bi-collection-fill"
                                                         path="/folders"
                                                     />
                                                 </div>
+                                                <div className="col-12"><NavCard title="Contests" description="Explore real-world examples and use cases" icon="bi-collection-fill" path="/contexts" /></div>
+                                                <div className="col-12"><NavCard title="Submissions" description="Review your previous solutions and progress" icon="bi-check2-square" path="/sub" /></div>
+                                               
                                             </div>
                                         </div>
                                     </>
