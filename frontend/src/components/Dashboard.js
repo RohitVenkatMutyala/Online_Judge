@@ -363,7 +363,7 @@ function Dashboard() {
     ${resumeText}`;
 
         try {
-            const response = await axios.post(`${API_URL}/help`, { code: prompt, QID: 2 });
+            const response = await axios.post(`${API_URL}/help`, { code: prompt, QID:2 });
             const result = response.data.result || "The AI could not provide a review at this time.";
             setReviewFeedback(result);
             const reviewDocRef = doc(db, 'resumeReviews', user._id);
