@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 function Audiobook() {
   const { user } = useAuth();
+  const theme = 'dark'; // Hardcoded theme for styling
 
   // State for managing playlists and files
   const [userPlaylists, setUserPlaylists] = useState([]);
@@ -29,17 +30,16 @@ function Audiobook() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Add a cleanup function to prevent memory leaks
     let isMounted = true;
-
     const fetchPlaylists = async () => {
       if (!user || !user._id) return;
       try {
-        const q = query(collection(db, "playlists"), where("userId", "==", user._id), orderBy("createdAt", "desc"));
+        // Updated query to fetch playlists where the user is a member
+        const q = query(collection(db, "playlists"), where("memberIds", "array-contains", user._id), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
         const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         
-        if (isMounted) { // Only update state if the component is still mounted
+        if (isMounted) {
           setUserPlaylists(playlists);
         }
       } catch (err) {
@@ -51,11 +51,7 @@ function Audiobook() {
     };
 
     fetchPlaylists();
-
-    return () => {
-      // This is the cleanup function
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [user]);
 
   const fetchPlaylistItems = async (playlistId) => {
@@ -78,25 +74,28 @@ function Audiobook() {
   const handleCreatePlaylist = async (e) => {
     e.preventDefault();
     if (!user || !user._id) {
-        setError("User not fully loaded. Please try again in a moment.");
+        setError("User not loaded. Please try again.");
         return;
     }
-
     if (!newPlaylistName.trim()) return;
+    
     setIsLoading(true);
     setLoadingMessage('Creating playlist...');
     try {
-      const newPlaylistRef = await addDoc(collection(db, "playlists"), {
+      // Initialize playlist with a memberIds array containing the owner
+      await addDoc(collection(db, "playlists"), {
         name: newPlaylistName,
-        userId: user._id,
+        userId: user._id, // owner
+        memberIds: [user._id], // members
         isPublic: true,
         createdAt: serverTimestamp(),
       });
-      
-      const newPlaylist = { id: newPlaylistRef.id, name: newPlaylistName };
-      setUserPlaylists([newPlaylist, ...userPlaylists]);
       setNewPlaylistName('');
-
+      // Refresh the list after creation
+      const q = query(collection(db, "playlists"), where("memberIds", "array-contains", user._id), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUserPlaylists(playlists);
     } catch (err) {
       console.error("Error creating playlist:", err);
       setError('Failed to create playlist.');
@@ -108,20 +107,21 @@ function Audiobook() {
 
   const handleSelectPlaylist = (playlist) => {
     setSelectedPlaylist(playlist);
+    setPlaylistItems([]); // Clear previous items before fetching new ones
     fetchPlaylistItems(playlist.id);
   };
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!user || !user._id) {
-        setError("User not fully loaded. Please try again in a moment.");
+        setError("User not loaded. Please try again.");
         return;
     }
-
     if (!fileToUpload || !fileTitle.trim()) {
       setError("Please select a file and provide a title.");
       return;
     }
+
     setIsLoading(true);
     setLoadingMessage('Uploading file...');
     try {
@@ -146,7 +146,7 @@ function Audiobook() {
       fetchPlaylistItems(selectedPlaylist.id);
     } catch (err) {
       console.error("Error uploading file:", err);
-      setError("File upload failed. Please try again.");
+      setError("File upload failed.");
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -157,93 +157,113 @@ function Audiobook() {
 
   return (
     <>
+      <style>{`
+        /* Your Provided CSS Styles */
+        .theme-dark .dashboard-page { background-color: #12121c; }
+        .theme-light .dashboard-page { background-color: #f8f9fa; }
+        .dashboard-container { min-height: 85vh; }
+        .theme-dark .dashboard-container { background-color: #1e1e2f; border: 1px solid #3a3a5a; color: #fff; }
+        .theme-light .dashboard-container { background-color: #ffffff; border: 1px solid #dee2e6; color: #212529; }
+        .btn-share { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; padding: 0.25rem 0.75rem; font-size: 0.8rem; }
+        .theme-light .btn-share { background: #e9ecef; color: #495057; border-color: #dee2e6; }
+        .btn-share:hover { transform: translateY(-2px); background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; border-color: transparent; }
+        .theme-dark .list-group-item { background-color: #2c3340; color: #fff; border-color: #3a3a5a; }
+        .theme-dark .list-group-item.active { background-color: #3b82f6; border-color: #3b82f6; }
+        .theme-light .list-group-item { background-color: #fff; color: #212529; border-color: #dee2e6; }
+      `}</style>
       <Navbar />
-      <div className="container mt-4">
-        <h2 className="mb-4">Playlist Manager</h2>
-        {error && <div className="alert alert-danger" onClick={() => setError('')}>{error}</div>}
-        <div className="row">
-          <div className="col-md-4">
-            <div className="card bg-light mb-4">
-              <div className="card-body">
-                <h5 className="card-title">Create New Playlist</h5>
-                <form onSubmit={handleCreatePlaylist}>
-                  <div className="input-group">
-                    <input type="text" className="form-control" placeholder="Playlist Name" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} disabled={isLoading} />
-                    <button className="btn btn-primary" type="submit" disabled={isLoading || !newPlaylistName.trim()}>Create</button>
+      <div className={`theme-${theme} dashboard-page py-4`}>
+        <div className="container">
+            <div className="dashboard-container p-4 rounded-3 shadow-sm">
+                <h2 className="mb-4">Playlist Manager</h2>
+                {error && <div className="alert alert-danger" onClick={() => setError('')}>{error}</div>}
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <div className="card bg-transparent mb-4">
+                      <div className="card-body">
+                        <h5 className="card-title">Create New Playlist</h5>
+                        <form onSubmit={handleCreatePlaylist}>
+                          <div className="input-group">
+                            <input type="text" className="form-control" placeholder="Playlist Name" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} disabled={isLoading} />
+                            <button className="btn btn-primary" type="submit" disabled={isLoading || !newPlaylistName.trim()}>Create</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                    <h3>Your Playlists</h3>
+                    <div className="list-group">
+                      {userPlaylists.map(playlist => (
+                        <button key={playlist.id} type="button" className={`list-group-item list-group-item-action ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`} onClick={() => handleSelectPlaylist(playlist)}>
+                          {playlist.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </form>
-              </div>
-            </div>
-            <h3>Your Playlists</h3>
-            <div className="list-group">
-              {userPlaylists.map(playlist => (
-                <button key={playlist.id} type="button" className={`list-group-item list-group-item-action ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`} onClick={() => handleSelectPlaylist(playlist)}>
-                  {playlist.name}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="col-md-8">
-            {selectedPlaylist ? (
-              <div>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h3>Files in "{selectedPlaylist.name}"</h3>
-                  <div>
-                    <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}><i className="bi bi-plus-lg me-2"></i>Add New File</button>
-                    <button className="btn btn-outline-secondary" onClick={() => {
-                        const shareUrl = `${window.location.origin}/playlist/${selectedPlaylist.id}`;
-                        navigator.clipboard.writeText(shareUrl);
-                        alert(`Copied share link to clipboard:\n${shareUrl}`);
-                    }}><i className="bi bi-share-fill me-2"></i>Share</button>
+                  <div className="col-md-8">
+                    {selectedPlaylist ? (
+                      <div>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <h3>Files in "{selectedPlaylist.name}"</h3>
+                          <div>
+                            <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}><i className="bi bi-plus-lg me-2"></i>Add New File</button>
+                            <button className="btn btn-share" onClick={() => {
+                                const shareUrl = `${window.location.origin}/playlist/${selectedPlaylist.id}`;
+                                navigator.clipboard.writeText(shareUrl);
+                                alert(`Copied share link to clipboard:\n${shareUrl}`);
+                            }}><i className="bi bi-share-fill me-2"></i>Share</button>
+                          </div>
+                        </div>
+                        {isLoading && loadingMessage ? <p>{loadingMessage}</p> : (
+                            <ul className="list-group">
+                                {playlistItems.length > 0 ? playlistItems.map(item => (
+                                    <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" key={item.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        {item.title}
+                                        <span className="badge bg-secondary rounded-pill">{item.fileName}</span>
+                                    </a>
+                                )) : <li className="list-group-item">This playlist is empty. Add a file to get started.</li>}
+                            </ul>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center mt-5 pt-5">
+                        <h4>Select a playlist to view its files, or create a new one.</h4>
+                      </div>
+                    )}
                   </div>
                 </div>
-                {isLoading && loadingMessage ? <p>{loadingMessage}</p> : (
-                    <ul className="list-group">
-                        {playlistItems.length > 0 ? playlistItems.map(item => (
-                            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" key={item.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                {item.title}
-                                <span className="badge bg-secondary rounded-pill">{item.fileName}</span>
-                            </a>
-                        )) : <li className="list-group-item">This playlist is empty.</li>}
-                    </ul>
-                )}
               </div>
-            ) : (
-              <div className="text-center mt-5">
-                <h4>Select a playlist on the left to view its files, or create a new one.</h4>
-              </div>
-            )}
-          </div>
         </div>
-        {showAddFileModal && (
-          <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <form onSubmit={handleFileUpload}>
-                  <div className="modal-header">
-                    <h5 className="modal-title">Add File to "{selectedPlaylist.name}"</h5>
-                    <button type="button" className="btn-close" onClick={() => setShowAddFileModal(false)}></button>
+      </div>
+
+      {showAddFileModal && selectedPlaylist && (
+        <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <form onSubmit={handleFileUpload}>
+                <div className="modal-header">
+                  <h5 className="modal-title">Add File to "{selectedPlaylist.name}"</h5>
+                  <button type="button" className="btn-close" onClick={() => setShowAddFileModal(false)}></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="fileTitle" className="form-label">File Title</label>
+                    <input type="text" id="fileTitle" className="form-control" value={fileTitle} onChange={(e) => setFileTitle(e.target.value)} required />
                   </div>
-                  <div className="modal-body">
-                    <div className="mb-3">
-                      <label htmlFor="fileTitle" className="form-label">File Title</label>
-                      <input type="text" id="fileTitle" className="form-control" value={fileTitle} onChange={(e) => setFileTitle(e.target.value)} required />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="fileUpload" className="form-label">Select File</label>
-                      <input type="file" id="fileUpload" className="form-control" onChange={(e) => setFileToUpload(e.target.files[0])} required />
-                    </div>
+                  <div className="mb-3">
+                    <label htmlFor="fileUpload" className="form-label">Select File</label>
+                    <input type="file" id="fileUpload" className="form-control" onChange={(e) => setFileToUpload(e.target.files[0])} required />
                   </div>
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Uploading...' : 'Upload'}</button>
-                  </div>
-                </form>
-              </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Uploading...' : 'Upload'}</button>
+                </div>
+              </form>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }
