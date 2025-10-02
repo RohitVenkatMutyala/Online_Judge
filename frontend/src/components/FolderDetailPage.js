@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Import useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -28,12 +28,16 @@ function FolderDetailPage() {
     const [showAddFileModal, setShowAddFileModal] = useState(false);
     const [fileToUpload, setFileToUpload] = useState(null);
     const [fileTitle, setFileTitle] = useState('');
-    const [isLoading, setIsLoading] = useState(true); // Set initial loading to true
+
+    // Main page loading state
+    const [isLoading, setIsLoading] = useState(true);
+    // FIX #2: Separate loading state for the upload modal to prevent "vibrating"
+    const [isUploading, setIsUploading] = useState(false);
+
     const [error, setError] = useState('');
 
     const STORAGE_LIMIT_BYTES = 250 * 1024 * 1024;
 
-    // --- FIX: Moved fetchFolderAndItems outside of useEffect and wrapped in useCallback ---
     const fetchFolderAndItems = useCallback(async () => {
         if (!folderId || !user) return;
         setIsLoading(true);
@@ -43,11 +47,13 @@ function FolderDetailPage() {
 
             if (!folderDocSnap.exists()) {
                 setError("Folder not found.");
+                setIsLoading(false);
                 return;
             }
             const folderData = { id: folderDocSnap.id, ...folderDocSnap.data() };
             if (!folderData.memberIds?.includes(user._id)) {
                 setError("You do not have access to this folder.");
+                setIsLoading(false);
                 return;
             }
             setFolder(folderData);
@@ -56,11 +62,11 @@ function FolderDetailPage() {
             const querySnapshot = await getDocs(q);
             const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setFolderItems(items);
-            
+
             const userIds = [...new Set(items.map(item => item.userId))];
-            const newUsers = {};
-            for (const userId of userIds) {
-                if (!userMap[userId]) {
+            if (userIds.length > 0) {
+                const newUsers = {};
+                for (const userId of userIds) {
                     const userDocRef = doc(db, "persons", userId);
                     const userDocSnap = await getDoc(userDocRef);
                     if (userDocSnap.exists()) {
@@ -70,32 +76,35 @@ function FolderDetailPage() {
                         newUsers[userId] = 'Unknown User';
                     }
                 }
+                setUserMap(prevMap => ({ ...prevMap, ...newUsers }));
             }
-            setUserMap(prevMap => ({ ...prevMap, ...newUsers }));
-        } catch(err) {
+        } catch (err) {
             console.error("Failed to load folder data:", err)
             setError("Failed to load folder data.");
         } finally {
             setIsLoading(false);
         }
-    }, [folderId, user, userMap]); // Dependencies for useCallback
+        // FIX #1: Removed userMap from dependency array to prevent infinite loop
+    }, [folderId, user]);
 
-    // --- FIX: useEffect is now much simpler ---
     useEffect(() => {
         fetchFolderAndItems();
-    }, [fetchFolderAndItems]); // This effect will run when the component mounts and when fetchFolderAndItems changes
+    }, [fetchFolderAndItems]);
 
     const handleFileUpload = async (e) => {
         e.preventDefault();
         if (!user || !user._id || !fileToUpload || !fileTitle.trim()) return;
-        setIsLoading(true);
+
+        // FIX #2: Use the separate loading state
+        setIsUploading(true);
         const userDocRef = doc(db, "persons", user._id);
         try {
             const userDocSnap = await getDoc(userDocRef);
             const currentStorage = userDocSnap.data()?.storageUsed || 0;
             if (currentStorage + fileToUpload.size > STORAGE_LIMIT_BYTES) {
                 setError(`Upload failed: You would exceed your storage limit.`);
-                setIsLoading(false); setShowAddFileModal(false); return;
+                setShowAddFileModal(false);
+                return;
             }
             const fileId = uuidv4();
             const storageRef = ref(storage, `playlistFiles/${folder.originalOwner}/${folder.id}/${fileId}-${fileToUpload.name}`);
@@ -109,16 +118,16 @@ function FolderDetailPage() {
             });
             await updateDoc(userDocRef, { storageUsed: increment(fileToUpload.size) });
             setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
-            
-            // This call will now work correctly
-            fetchFolderAndItems(); 
+
+            await fetchFolderAndItems();
         } catch (err) {
             setError("File upload failed.");
         } finally {
-            setIsLoading(false);
+            // FIX #2: Reset the separate loading state
+            setIsUploading(false);
         }
     };
-    
+
     const handleDeleteFile = async (fileToDelete) => {
         if (!window.confirm(`Are you sure you want to delete "${fileToDelete.title}"?`)) return;
         const fileOwnerRef = doc(db, "persons", fileToDelete.userId);
@@ -135,7 +144,7 @@ function FolderDetailPage() {
         }
     };
 
-    if (isLoading && !folder) { return <div className={`theme-${theme} dashboard-page d-flex justify-content-center align-items-center`} style={{minHeight: '100vh'}}><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>; }
+    if (isLoading) { return <div className={`theme-${theme} dashboard-page d-flex justify-content-center align-items-center`} style={{ minHeight: '100vh' }}><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>; }
     if (error) { return <div className="container mt-5"><div className="alert alert-danger">{error}</div></div>; }
     if (!folder) { return <div className={`theme-${theme} dashboard-page text-center py-5`}><div className="container"><h4>Folder not found or you don't have access.</h4></div></div>; }
 
@@ -161,7 +170,7 @@ function FolderDetailPage() {
                 .file-title a:hover { text-decoration: underline; }
                 .file-meta { font-size: 0.85rem; color: #8c98a9; }
             `}</style>
-           <Navbar />
+            <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
                 <div className="container">
                     <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
@@ -183,21 +192,21 @@ function FolderDetailPage() {
                         </div>
                         <div className="table-responsive">
                             <table className="table file-table align-middle">
-                                <thead><tr><th scope="col" style={{width: '5%'}}></th><th scope="col">Name</th><th scope="col">Added by</th><th scope="col">Date Added</th><th scope="col" style={{width: '5%'}}></th></tr></thead>
+                                <thead><tr><th scope="col" style={{ width: '5%' }}></th><th scope="col">Name</th><th scope="col">Added by</th><th scope="col">Date Added</th><th scope="col" style={{ width: '5%' }}></th></tr></thead>
                                 <tbody>
-                                {folderItems.length > 0 ? folderItems.map(item => (
-                                    <tr key={item.id}>
-                                    <td><i className="bi bi-file-earmark-text file-icon"></i></td>
-                                    <td className="file-title"><a href={item.fileUrl} target="_blank" rel="noopener noreferrer">{item.title}</a></td>
-                                    <td className="file-meta">{userMap[item.userId] || '...'}</td>
-                                    <td className="file-meta">{formatTimestamp(item.createdAt)}</td>
-                                    <td>
-                                        {user._id === folder.originalOwner && (
-                                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteFile(item)} title="Delete File"><i className="bi bi-trash-fill"></i></button>
-                                        )}
-                                    </td>
-                                    </tr>
-                                )) : ( <tr><td colSpan="5" className="text-center py-5">This folder is empty. Upload a file to get started.</td></tr> )}
+                                    {folderItems.length > 0 ? folderItems.map(item => (
+                                        <tr key={item.id}>
+                                            <td><i className="bi bi-file-earmark-text file-icon"></i></td>
+                                            <td className="file-title"><a href={item.fileUrl} target="_blank" rel="noopener noreferrer">{item.title}</a></td>
+                                            <td className="file-meta">{userMap[item.userId] || '...'}</td>
+                                            <td className="file-meta">{formatTimestamp(item.createdAt)}</td>
+                                            <td>
+                                                {user._id === folder.originalOwner && (
+                                                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteFile(item)} title="Delete File"><i className="bi bi-trash-fill"></i></button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )) : (<tr><td colSpan="5" className="text-center py-5">This folder is empty. Upload a file to get started.</td></tr>)}
                                 </tbody>
                             </table>
                         </div>
@@ -205,20 +214,26 @@ function FolderDetailPage() {
                 </div>
             </div>
             {showAddFileModal && (
-                 <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
-                        <form onSubmit={handleFileUpload}>
-                            <div className="modal-header"><h5 className="modal-title">Upload File to "{folder.name}"</h5><button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowAddFileModal(false)}></button></div>
-                            <div className="modal-body">
-                                <div className="mb-3"><label htmlFor="fileTitle" className="form-label">File Title</label><input type="text" id="fileTitle" className="form-control" value={fileTitle} onChange={(e) => setFileTitle(e.target.value)} required /></div>
-                                <div className="mb-3"><label htmlFor="fileUpload" className="form-label">Select File</label><input type="file" id="fileUpload" className="form-control" onChange={(e) => setFileToUpload(e.target.files[0])} required /></div>
-                            </div>
-                            <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)}>Cancel</button><button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Uploading...' : 'Upload'}</button></div>
-                        </form>
+                            <form onSubmit={handleFileUpload}>
+                                <div className="modal-header"><h5 className="modal-title">Upload File to "{folder.name}"</h5><button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowAddFileModal(false)}></button></div>
+                                <div className="modal-body">
+                                    <div className="mb-3"><label htmlFor="fileTitle" className="form-label">File Title</label><input type="text" id="fileTitle" className="form-control" value={fileTitle} onChange={(e) => setFileTitle(e.target.value)} required /></div>
+                                    <div className="mb-3"><label htmlFor="fileUpload" className="form-label">Select File</label><input type="file" id="fileUpload" className="form-control" onChange={(e) => setFileToUpload(e.target.files[0])} required /></div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)} disabled={isUploading}>Cancel</button>
+                                    {/* FIX #2: Use the separate isUploading state here */}
+                                    <button type="submit" className="btn btn-primary" disabled={isUploading}>
+                                        {isUploading ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Uploading...</> : 'Upload'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                 </div>
+                </div>
             )}
         </>
     );

@@ -165,7 +165,7 @@ function Audiobook() {
                 <div className="container">
                     <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
                         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-                             <h2 className="mb-2 mb-md-0">Your Folders</h2>
+                             <h2 className="mb-2 mb-md-0"> Folders</h2>
                              <div className="w-100 w-md-25 mt-2 mt-md-0" style={{minWidth: '200px'}}>
                                 <p className="mb-1 text-end" style={{fontSize: '0.8rem'}}>{`${formatBytes(storageUsed)} MB / ${STORAGE_LIMIT_MB} MB Used`}</p>
                                 <div className="progress" style={{height: '8px'}}>
