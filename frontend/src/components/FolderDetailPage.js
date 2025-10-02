@@ -9,6 +9,7 @@ import { db, storage } from '../firebaseConfig';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, doc, deleteDoc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'react-toastify';
 
 const formatTimestamp = (timestamp) => {
     if (!timestamp) return 'N/A';
@@ -272,7 +273,15 @@ function FolderDetailPage() {
                                 <button className="btn btn-share" onClick={() => {
                                     const shareUrl = `${window.location.origin}/playlist/${folder.id}`;
                                     navigator.clipboard.writeText(shareUrl);
-                                    alert(`Copied share link to clipboard:\n${shareUrl}`);
+
+                                    // Replace the alert() with this toast notification
+                                    toast.success(
+                                        <div>
+                                            Copied link to clipboard!
+                                            <br />
+                                            <small style={{ wordBreak: 'break-all' }}>{shareUrl}</small>
+                                        </div>
+                                    );
                                 }}>
                                     <i className="bi bi-share-fill me-2"></i>Share
                                 </button>
