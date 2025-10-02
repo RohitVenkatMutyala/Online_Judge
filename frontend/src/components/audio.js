@@ -351,6 +351,39 @@ function Audiobook() {
                     </div>
                 </div>
             )}
+            {showRenameModal && (
+                <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
+                            <form onSubmit={handleRenameFolder}>
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Rename Folder</h5>
+                                    <button
+                                        type="button"
+                                        className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`}
+                                        onClick={() => setShowRenameModal(false)}
+                                    ></button>
+                                </div>
+                                <div className="modal-body">
+                                    <label htmlFor="renameInput" className="form-label">New folder name</label>
+                                    <input
+                                        id="renameInput"
+                                        type="text"
+                                        className="form-control"
+                                        value={renameText}
+                                        onChange={(e) => setRenameText(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowRenameModal(false)}>Cancel</button>
+                                    <button type="submit" className="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
