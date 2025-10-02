@@ -169,6 +169,37 @@ function FolderDetailPage() {
                 .theme-light .file-title a { color: #212529; }
                 .file-title a:hover { text-decoration: underline; }
                 .file-meta { font-size: 0.85rem; color: #8c98a9; }
+                .btn-back {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: 50rem; /* Creates the pill shape */
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Dark Theme Styles */
+.theme-dark .btn-back {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #adb5bd;
+}
+
+.theme-dark .btn-back:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Light Theme Styles */
+.theme-light .btn-back {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.theme-light .btn-back:hover {
+    background-color: #dee2e6;
+    color: #212529;
+}
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
@@ -176,7 +207,7 @@ function FolderDetailPage() {
                     <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
                         <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
                             <div className='mb-2 mb-md-0'>
-                                <button className={`btn btn-link px-0 ${theme === 'dark' ? 'text-light' : ''}`} onClick={() => navigate('/folders')}>
+                                <button className="btn btn-back" onClick={() => navigate('/folders')}>
                                     <i className="bi bi-arrow-left me-2"></i>Back to Folders
                                 </button>
                                 <h3 className="mt-2">Files in "{folder.name}"</h3>
