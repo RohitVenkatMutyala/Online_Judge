@@ -200,25 +200,82 @@ function FolderDetailPage() {
     background-color: #dee2e6;
     color: #212529;
 }
+    /* Container for the entire header/toolbar */
+.page-header {
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+.theme-dark .page-header {
+    border-bottom: 1px solid #3a3a5a;
+}
+.theme-light .page-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Breadcrumb navigation styles */
+.breadcrumb-nav {
+    font-size: 1.75rem; /* h3 equivalent */
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.breadcrumb-link {
+    color: #8c98a9; /* Muted color for the link part */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.breadcrumb-link:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+.breadcrumb-separator {
+    color: #495057;
+}
+.theme-light .breadcrumb-separator {
+    color: #ced4da;
+}
+
+/* A prominent style for the main action button */
+.btn-primary-action {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    color: white;
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.btn-primary-action:hover {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
                 <div className="container">
                     <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
-                        <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-                            <div className='mb-2 mb-md-0'>
-                                <button className="btn btn-back" onClick={() => navigate('/folders')}>
-                                    <i className="bi bi-arrow-left me-2"></i>Back to Folders
-                                </button>
-                                <h3 className="mt-2">Files in "{folder.name}"</h3>
+                        <div className="page-header d-flex justify-content-between align-items-center flex-wrap">
+                            {/* Breadcrumb Navigation on the left */}
+                            <div className="breadcrumb-nav mb-2 mb-md-0">
+                                <a href="#" className="breadcrumb-link" onClick={(e) => { e.preventDefault(); navigate('/folders'); }}>
+                                    Folders
+                                </a>
+                                <span className="breadcrumb-separator">/</span>
+                                <span>{folder.name}</span>
                             </div>
+
+                            {/* Action Buttons on the right */}
                             <div>
-                                <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}><i className="bi bi-plus-lg me-2"></i>Upload File</button>
+                                <button className="btn btn-primary-action me-2" onClick={() => setShowAddFileModal(true)}>
+                                    <i className="bi bi-plus-lg me-2"></i>Upload File
+                                </button>
                                 <button className="btn btn-share" onClick={() => {
                                     const shareUrl = `${window.location.origin}/playlist/${folder.id}`;
                                     navigator.clipboard.writeText(shareUrl);
                                     alert(`Copied share link to clipboard:\n${shareUrl}`);
-                                }}><i className="bi bi-share-fill me-2"></i>Share</button>
+                                }}>
+                                    <i className="bi bi-share-fill me-2"></i>Share
+                                </button>
                             </div>
                         </div>
                         <div className="table-responsive">

@@ -26,7 +26,7 @@ function Audiobook() {
     const [filteredFolders, setFilteredFolders] = useState([]);
     const [newFolderName, setNewFolderName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     const STORAGE_LIMIT_MB = 250;
     const STORAGE_LIMIT_BYTES = STORAGE_LIMIT_MB * 1024 * 1024;
     const [storageUsed, setStorageUsed] = useState(0);
@@ -34,7 +34,7 @@ function Audiobook() {
     const [showRenameModal, setShowRenameModal] = useState(false);
     const [renamingFolder, setRenamingFolder] = useState(null);
     const [renameText, setRenameText] = useState('');
-    
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -60,7 +60,7 @@ function Audiobook() {
             } catch (err) {
                 if (isMounted) setError("Could not fetch your data.");
             } finally {
-                if(isMounted) setIsLoading(false);
+                if (isMounted) setIsLoading(false);
             }
         };
         fetchInitialData();
@@ -84,20 +84,20 @@ function Audiobook() {
             setNewFolderName('');
         } catch (err) { setError('Failed to create folder.'); }
     };
-    
+
     const handleRenameFolder = async (e) => {
         e.preventDefault();
         if (!renameText.trim() || !renamingFolder) return;
         const folderRef = doc(db, "playlists", renamingFolder.id);
         try {
             await updateDoc(folderRef, { name: renameText });
-            setUserFolders(prevFolders => prevFolders.map(folder => 
+            setUserFolders(prevFolders => prevFolders.map(folder =>
                 folder.id === renamingFolder.id ? { ...folder, name: renameText } : folder
             ));
             setShowRenameModal(false);
             setRenamingFolder(null);
             setRenameText('');
-        } catch(err) { setError("Failed to rename folder."); }
+        } catch (err) { setError("Failed to rename folder."); }
     };
 
     const handleDeleteFolder = async (folderToDelete) => {
@@ -135,7 +135,7 @@ function Audiobook() {
         }
     };
 
-    if (!user) { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div> ); }
+    if (!user) { return (<div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>); }
 
     return (
         <>
@@ -159,70 +159,137 @@ function Audiobook() {
                 .folder-name { margin-top: 0.5rem; font-size: 0.9rem; word-break: break-word; }
                 .folder-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 0.5rem; opacity: 0; transition: opacity 0.2s; }
                 .folder-item:hover .folder-actions { opacity: 1; }
+                /* Main container for all the top controls */
+.controls-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+}
+.theme-dark .controls-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #3a3a5a;
+}
+.theme-light .controls-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+/* Styling for the storage quota widget */
+.storage-widget p {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+.theme-dark .storage-widget p { color: #adb5bd; }
+.theme-light .storage-widget p { color: #6c757d; }
+.storage-bar-container {
+    background-color: #3a3a5a;
+    border-radius: 4px;
+}
+.theme-light .storage-bar-container { background-color: #e9ecef; }
+.storage-bar {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: width 0.5s ease-in-out;
+}
+
+/* Enhanced Input Group Styling */
+.themed-input-group {
+    display: flex;
+    align-items: center;
+    border-radius: 0.375rem;
+    transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.theme-dark .themed-input-group {
+    background-color: #2c3340;
+    border: 1px solid #3a3a5a;
+}
+.theme-light .themed-input-group {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+}
+
+/* Highlight effect when typing in an input */
+.themed-input-group:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.themed-input-group .form-control {
+    border: none;
+    background-color: transparent;
+    box-shadow: none !important; /* Override bootstrap focus */
+}
+.themed-input-group .input-group-text {
+    background-color: transparent;
+    border: none;
+}
+.theme-dark .themed-input-group .input-group-text { color: #8c98a9; }
+.theme-light .themed-input-group .input-group-text { color: #6c757d; }
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
-                
-                    <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
+
+                <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
+                    <div className="controls-card">
                         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-                             <h2 className="mb-2 mb-md-0"> Folders</h2>
-                             <div className="w-100 w-md-25 mt-2 mt-md-0" style={{minWidth: '200px'}}>
-                                <p className="mb-1 text-end" style={{fontSize: '0.8rem'}}>{`${formatBytes(storageUsed)} MB / ${STORAGE_LIMIT_MB} MB Used`}</p>
-                                <div className="progress" style={{height: '8px'}}>
-                                    <div className="progress-bar storage-bar" role="progressbar" style={{width: `${(storageUsed / STORAGE_LIMIT_BYTES) * 100}%`}}></div>
+                            <h2 className="mb-2 mb-md-0">Your Folders</h2>
+                            <div className="storage-widget w-100 w-md-25 mt-2 mt-md-0" style={{ minWidth: '200px' }}>
+                                <p className="text-end">{`${formatBytes(storageUsed)} MB / ${STORAGE_LIMIT_MB} MB Used`}</p>
+                                <div className="progress storage-bar-container" style={{ height: '8px' }}>
+                                    <div className="progress-bar storage-bar" role="progressbar" style={{ width: `${(storageUsed / STORAGE_LIMIT_BYTES) * 100}%` }}></div>
                                 </div>
-                             </div>
+                            </div>
                         </div>
-                        <div className="row mb-4">
+                        <div className="row">
                             <div className="col-md-6 mb-3 mb-md-0">
                                 <form onSubmit={handleCreateFolder}>
-                                    <div className="input-group">
+                                    <div className="themed-input-group">
                                         <input type="text" className="form-control" placeholder="Create a new folder..." value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
-                                        <button className="btn btn-primary" type="submit">Create</button>
+                                        <button className="btn btn-primary m-1" type="submit" disabled={!newFolderName.trim()}>Create</button>
                                     </div>
                                 </form>
                             </div>
                             <div className="col-md-6">
-                                <div className="input-group">
+                                <div className="themed-input-group">
                                     <span className="input-group-text"><i className="bi bi-search"></i></span>
                                     <input type="text" className="form-control" placeholder="Search folders by name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                 </div>
                             </div>
                         </div>
-                        {error && <div className="alert alert-danger mt-3" onClick={() => setError('')}>{error}</div>}
-                        <div className="folder-grid mt-4">
-                            {filteredFolders.map(folder => (
-                                <div key={folder.id} className="folder-item" onClick={() => navigate(`/folder/${folder.id}`)}>
-                                    <i className="bi bi-folder-fill folder-icon"></i>
-                                    <div className="folder-name">{folder.name}</div>
-                                    {user._id === folder.originalOwner && (
-                                        <div className="folder-actions">
-                                            <button className="btn btn-sm btn-outline-light" style={{'--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem'}} onClick={(e) => { e.stopPropagation(); setRenamingFolder(folder); setRenameText(folder.name); setShowRenameModal(true); }} title="Rename Folder">
-                                                <i className="bi bi-pencil-fill"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-danger" style={{'--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem'}} onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder); }} title="Delete Folder">
-                                                <i className="bi bi-trash-fill"></i>
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                    </div>
+                    {error && <div className="alert alert-danger mt-3" onClick={() => setError('')}>{error}</div>}
+                    <div className="folder-grid mt-4">
+                        {filteredFolders.map(folder => (
+                            <div key={folder.id} className="folder-item" onClick={() => navigate(`/folder/${folder.id}`)}>
+                                <i className="bi bi-folder-fill folder-icon"></i>
+                                <div className="folder-name">{folder.name}</div>
+                                {user._id === folder.originalOwner && (
+                                    <div className="folder-actions">
+                                        <button className="btn btn-sm btn-outline-light" style={{ '--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem' }} onClick={(e) => { e.stopPropagation(); setRenamingFolder(folder); setRenameText(folder.name); setShowRenameModal(true); }} title="Rename Folder">
+                                            <i className="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button className="btn btn-sm btn-outline-danger" style={{ '--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem' }} onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder); }} title="Delete Folder">
+                                            <i className="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {showRenameModal && (
+                <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
+                            <form onSubmit={handleRenameFolder}>
+                                <div className="modal-header"><h5 className="modal-title">Rename Folder</h5><button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowRenameModal(false)}></button></div>
+                                <div className="modal-body"><input type="text" className="form-control" value={renameText} onChange={(e) => setRenameText(e.target.value)} required /></div>
+                                <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setShowRenameModal(false)}>Cancel</button><button type="submit" className="btn btn-primary">Save Changes</button></div>
+                            </form>
                         </div>
                     </div>
                 </div>
-            
-            {showRenameModal && (
-                 <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : ''}`}>
-                        <form onSubmit={handleRenameFolder}>
-                            <div className="modal-header"><h5 className="modal-title">Rename Folder</h5><button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowRenameModal(false)}></button></div>
-                            <div className="modal-body"><input type="text" className="form-control" value={renameText} onChange={(e) => setRenameText(e.target.value)} required /></div>
-                            <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setShowRenameModal(false)}>Cancel</button><button type="submit" className="btn btn-primary">Save Changes</button></div>
-                        </form>
-                        </div>
-                    </div>
-                 </div>
             )}
         </>
     );
