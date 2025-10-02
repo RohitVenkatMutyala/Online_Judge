@@ -287,7 +287,7 @@ function Audiobook() {
                                         </button></div>
                                 </form>
                             </div>
-                            <div className="col-md-6">
+                            <div className="col-md-6 mb-3 mb-md-0">
                                 <div className="themed-input-group">
                                     <span className="input-group-text"><i className="bi bi-search"></i></span>
                                     <input type="text" className="form-control" placeholder="Search folders by name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
