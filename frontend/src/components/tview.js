@@ -172,7 +172,7 @@ const Tview = () => {
           }}
           onClick={() => handleExplainTheory(aiButton.text)}
         >
-          <i className="bi bi-robot me-2"></i> Ask Randoman AI
+          <i className="bi bi-sparkle"></i> Ask Randoman AI
         </button>
       )}
 
@@ -600,11 +600,11 @@ const Tview = () => {
                       data-bs-trigger="hover focus"
                       data-bs-placement="left"
                       data-bs-html="true"
-                      data-bs-title="<i class='bi bi-robot me-2'></i> Randoman AI Assistant Help"
+                      data-bs-title="<i class='bi bi-sparkle'></i> Randoman AI Assistant Help"
                       data-bs-content="<div class='p-1 text-start'><p class='mb-0'>Simply highlight any text on this page, and the 'Ask Randoman AI' button will appear automatically to give you a more detailed explanation.</p></div>"
                     >
                       <i
-                        className="bi bi-robot me-2"
+                        className="bi bi-sparkle"
                         style={{ cursor: 'pointer', fontSize: '1.5rem', opacity: '0.7' }}
                       ></i>
                     </span>
@@ -663,7 +663,7 @@ const Tview = () => {
             <div className="modal-content bg-dark text-light">
               <div className="modal-header border-0">
                 <h5 className="modal-title fw-bold">
-                  <i className="bi bi-robot me-2 text-info"></i>  Randoman AI Explanation
+                  <i className="bi bi-sparkle text-info"></i>  Randoman AI Explanation
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowExplainModal(false)}></button>
               </div>

@@ -195,7 +195,7 @@ const Submission = () => {
                   </div>
                   <div className="col-md-6 text-md-end">
                     <div className="d-inline-flex align-items-center gap-2 p-2 rounded-3" style={{ border: '1px solid var(--bs-border-color)' }}>
-                      <i className="bi bi-robot text-primary fs-4"></i>
+                      <i className="bi bi-sparkle text-primary fs-4"></i>
                       <span className="fw-semibold">AI Help Used Today: <strong>{helpCount}/20</strong></span>
                     </div>
                   </div>
@@ -257,7 +257,7 @@ const Submission = () => {
                           <div className="card-footer">
                             <div className="help-card card">
                               <div className="card-header bg-transparent border-0 d-flex align-items-center gap-2">
-                                <i className="bi bi-robot text-primary"></i>
+                                <i className="bi bi-sparkle text-primary"></i>
                                 <h6 className="mb-0 fw-semibold">Randoman AI Feedback</h6>
                               </div>
                               <div className="card-body">

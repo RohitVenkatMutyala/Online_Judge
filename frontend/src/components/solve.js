@@ -431,7 +431,7 @@ If the code is malicious or violates the rules, respond ONLY with this exact JSO
                   }}
                   onClick={() => handleAIDebug(selectionDetails.text)}
                 >
-                  <i className="bi bi-robot me-2"></i> Ask Randoman AI
+                  <i className="bi bi-sparkle"></i> Ask Randoman AI
                 </button>
               )}
               <div className="card-header bg-dark text-white fw-semibold rounded-top d-flex justify-content-between align-items-center">
@@ -442,7 +442,7 @@ If the code is malicious or violates the rules, respond ONLY with this exact JSO
                   data-bs-trigger="hover focus"
                   data-bs-placement="left"
                   data-bs-html="true"
-                  data-bs-title="<i class='bi bi-robot me-2'></i> Randoman AI Assistant"
+                  data-bs-title="<i class='bi bi-sparkle'></i> Randoman AI Assistant"
                   data-bs-content="<div class='p-1'><p>Get instant help with your code:</p>
                     <ul class='mb-2'>
                       <li><strong>Full File:</strong> Right-click anywhere.</li>
@@ -452,7 +452,7 @@ If the code is malicious or violates the rules, respond ONLY with this exact JSO
                     </div>"
                 >
                   <i
-                    className="bi bi-robot me-2"
+                    className="bi bi-sparkle"
                     style={{ cursor: 'pointer', fontSize: '1.2rem' }}
                   ></i>
                 </span>
@@ -516,7 +516,7 @@ If the code is malicious or violates the rules, respond ONLY with this exact JSO
           <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable" style={{ maxWidth: '90vw' }}>
             <div className={`modal-content ${theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
               <div className="modal-header border-0">
-                <h5 className="modal-title fw-bold"><i className="bi bi-robot me-2" style={{ color: '#ff4b2b' }}></i> Randoman AI Debugger <span className="badge bg-secondary ms-2">{helpCount}/20 Used</span></h5>
+                <h5 className="modal-title fw-bold"><i className="bi bi-sparkle" style={{ color: '#ff4b2b' }}></i> Randoman AI Debugger <span className="badge bg-secondary ms-2">{helpCount}/20 Used</span></h5>
                 <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={() => setShowDebugModal(false)}></button>
               </div>
               <div className="modal-body">
