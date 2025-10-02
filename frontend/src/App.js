@@ -20,6 +20,7 @@ import Contexts from './components/context';
 import Userview from './components/userview';
 import Theory from './components/theory';
 import Tview from './components/tview';
+import Audiobook from './components/audio';
 import Chat from './components/chat';
 import CreateSession from './components/CreateSession';
 import PublicProfile from './components/PublicProfile'; 
@@ -254,6 +255,15 @@ function App() {
                 </>
               }
             />
+             <Route
+              path="/pod"
+              element={
+                <>
+                  <Helmet><title>Audio - Randoman</title></Helmet>
+                  <Audiobook />
+                </>
+              }
+            /> 
             <Route
               path="/contexts"
               element={

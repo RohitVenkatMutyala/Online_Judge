@@ -187,6 +187,9 @@ function Navbar() {
                                             <li className="nav-item">
                                                 <Link className={`nav-link nav-link-custom ${isActive('/new-chat') ? 'active' : ''}`} to="/new-chat"><i className="bi bi-broadcast-pin"></i><span>Sessions</span></Link>
                                             </li>
+                                             <li className="nav-item">
+                                                <Link className={`nav-link nav-link-custom ${isActive('/pod') ? 'active' : ''}`} to="/pod"><i className="bi bi-broadcast-pin"></i><span>Audio</span></Link>
+                                            </li>
                                             <li className="nav-item">
                                                 <Link className={`nav-link nav-link-custom ${isActive('/contexts') ? 'active' : ''}`} to="/contexts"><i className="bi bi-trophy-fill"></i><span>Contests</span></Link>
                                             </li>
