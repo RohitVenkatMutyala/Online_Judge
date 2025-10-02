@@ -259,6 +259,27 @@ function Audiobook() {
     color: #3b82f6; /* Use a solid color from the gradient for the icon */
     font-size: 1.75rem;
 }
+    .folder-name {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500; /* Makes text slightly bolder and more readable */
+    letter-spacing: 0.5px; /* Adds a touch of refinement */
+    
+    /* These three properties create the ellipsis (...) for long names */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    transition: color 0.2s ease-in-out;
+}
+
+/* Make the text color brighter when the user hovers over the folder item */
+.folder-item:hover .folder-name {
+    color: #fff;
+}
+.theme-light .folder-item:hover .folder-name {
+    color: #000;
+}
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
@@ -300,7 +321,7 @@ function Audiobook() {
                         {filteredFolders.map(folder => (
                             <div key={folder.id} className="folder-item" onClick={() => navigate(`/folder/${folder.id}`)}>
                                 <i className="bi bi-folder-fill folder-icon"></i>
-                                <div className="folder-name">{folder.name}</div>
+                                <div className="folder-name" title={folder.name}>{folder.name}</div>
                                 {user._id === folder.originalOwner && (
                                     <div className="folder-actions">
                                         <button className="btn btn-sm btn-outline-light" style={{ '--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem' }} onClick={(e) => { e.stopPropagation(); setRenamingFolder(folder); setRenameText(folder.name); setShowRenameModal(true); }} title="Rename Folder">
