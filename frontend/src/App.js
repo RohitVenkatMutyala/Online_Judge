@@ -22,6 +22,7 @@ import Theory from './components/theory';
 import Tview from './components/tview';
 import Audiobook from './components/audio';
 import Chat from './components/chat';
+import PublicPlaylist from './components/PublicPlaylist';
 import CreateSession from './components/CreateSession';
 import PublicProfile from './components/PublicProfile'; 
 import { ToastContainer } from 'react-toastify';
@@ -264,6 +265,7 @@ function App() {
                 </>
               }
             /> 
+            <Route path="/playlist/:playlistId" element={<PublicPlaylist />} />
             <Route
               path="/contexts"
               element={
