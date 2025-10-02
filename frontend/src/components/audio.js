@@ -27,7 +27,7 @@ function Audiobook() {
     const [newFolderName, setNewFolderName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
-    const STORAGE_LIMIT_MB = 250;
+    const STORAGE_LIMIT_MB = 750;
     const STORAGE_LIMIT_BYTES = STORAGE_LIMIT_MB * 1024 * 1024;
     const [storageUsed, setStorageUsed] = useState(0);
 
