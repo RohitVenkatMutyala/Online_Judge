@@ -243,6 +243,22 @@ function Audiobook() {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
+    .gradient-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 600;
+    /* The magic for gradient text */
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.gradient-title i {
+    color: #3b82f6; /* Use a solid color from the gradient for the icon */
+    font-size: 1.75rem;
+}
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
@@ -250,7 +266,10 @@ function Audiobook() {
                 <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
                     <div className="controls-card">
                         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-                            <h2 className="mb-2 mb-md-0">Your Folders</h2>
+                            <h2 className="gradient-title mb-2 mb-md-0">
+                                <i className="bi bi-folder-fill"></i>
+                                <span>Folders</span>
+                            </h2>
                             <div className="storage-widget w-100 w-md-25 mt-2 mt-md-0" style={{ minWidth: '200px' }}>
                                 <p className="text-end">{`${formatBytes(storageUsed)} MB / ${STORAGE_LIMIT_MB} MB Used`}</p>
                                 <div className="progress storage-bar-container" style={{ height: '8px' }}>
