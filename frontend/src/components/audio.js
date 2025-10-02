@@ -324,7 +324,7 @@ function Audiobook() {
                                 <div className="folder-name" title={folder.name}>{folder.name}</div>
                                 {user._id === folder.originalOwner && (
                                     <div className="folder-actions">
-                                        <button className="btn btn-sm btn-outline-light" style={{ '--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem' }} onClick={(e) => { e.stopPropagation(); setRenamingFolder(folder); setRenameText(folder.name); setShowRenameModal(true); }} title="Rename Folder">
+                                        <button className="btn btn-sm btn-outline-danger" style={{ '--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem' }} onClick={(e) => { e.stopPropagation(); setRenamingFolder(folder); setRenameText(folder.name); setShowRenameModal(true); }} title="Rename Folder">
                                             <i className="bi bi-pencil-fill"></i>
                                         </button>
                                         <button className="btn btn-sm btn-outline-danger" style={{ '--bs-btn-padding-y': '.1rem', '--bs-btn-padding-x': '.4rem', '--bs-btn-font-size': '.7rem' }} onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder); }} title="Delete Folder">
