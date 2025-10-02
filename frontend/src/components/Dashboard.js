@@ -393,6 +393,7 @@ function Dashboard() {
 
     if (!user || user.role === 'admin') {
         return <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>;
+        navigate('/login');
     }
 
     const StatCard = ({ title, value, total, icon, color }) => (
