@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useAuth } from '../context/AuthContext';
 import { db } from '../firebaseConfig';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, setDoc, serverTimestamp } from 'firebase/firestore';
 import Navbar from './navbar';
 
 function PublicPlaylist() {
   const { playlistId } = useParams();
-  const { user } = useAuth(); // Get the current logged-in user
+  const { user } = useAuth();
 
-  // State for displaying the playlist
   const [playlist, setPlaylist] = useState(null);
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // New state for the "Save" button functionality
   const [isSaving, setIsSaving] = useState(false);
   const [isAlreadySaved, setIsAlreadySaved] = useState(false);
 
-  // Effect to fetch the main playlist data
   useEffect(() => {
     const fetchPlaylistData = async () => {
       if (!playlistId) return;
@@ -31,6 +27,7 @@ function PublicPlaylist() {
 
         if (!playlistDocSnap.exists() || !playlistDocSnap.data().isPublic) {
           setError("This playlist could not be found or is not public.");
+          setIsLoading(false);
           return;
         }
         
@@ -56,10 +53,9 @@ function PublicPlaylist() {
     fetchPlaylistData();
   }, [playlistId]);
 
-  // New effect to check if the user has already saved this playlist
   useEffect(() => {
     const checkIfSaved = async () => {
-      if (!user || !playlist) return; // Only run if user is logged in and playlist is loaded
+      if (!user || !user._id || !playlist) return;
       
       const savedPlaylistRef = doc(db, `users/${user._id}/savedPlaylists`, playlist.id);
       const docSnap = await getDoc(savedPlaylistRef);
@@ -67,23 +63,21 @@ function PublicPlaylist() {
     };
 
     checkIfSaved();
-  }, [user, playlist]); // Re-run when user or playlist changes
+  }, [user, playlist]);
 
-  // Function to handle saving the playlist
   const handleSavePlaylist = async () => {
-    if (!user) {
+    if (!user || !user._id) {
       alert("Please log in to save a playlist.");
       return;
     }
 
     setIsSaving(true);
     try {
-      // We use setDoc here because the document ID is the playlist ID, preventing duplicates
       const savedPlaylistRef = doc(db, `users/${user._id}/savedPlaylists`, playlist.id);
       await setDoc(savedPlaylistRef, {
         originalPlaylistId: playlist.id,
         savedAt: serverTimestamp(),
-        playlistName: playlist.name, // Store a copy of the name for easy display
+        playlistName: playlist.name,
         ownerId: playlist.userId
       });
       setIsAlreadySaved(true);
@@ -103,7 +97,10 @@ function PublicPlaylist() {
     return <div className="container mt-5"><div className="alert alert-danger text-center">{error}</div></div>;
   }
 
-  // Determine button state
+  if (!playlist) {
+      return null;
+  }
+
   const isOwner = user && user._id === playlist.userId;
   
   return (
@@ -112,8 +109,7 @@ function PublicPlaylist() {
       <div className="container mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
             <h2>{playlist.name}</h2>
-            {/* --- Conditional Button Logic --- */}
-            {user && ( // Only show the button if the user is logged in
+            {user && (
               <button 
                 className={`btn ${isAlreadySaved ? 'btn-secondary' : 'btn-success'}`}
                 onClick={handleSavePlaylist}

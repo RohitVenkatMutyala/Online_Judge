@@ -15,7 +15,7 @@ function Audiobook() {
   // State for managing playlists and files
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null); // Will hold the full playlist object
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [playlistItems, setPlaylistItems] = useState([]);
 
   // State for the "Add File" modal
@@ -28,25 +28,36 @@ function Audiobook() {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Fetch the user's playlists
-  const fetchPlaylists = async () => {
-    if (!user || !user._id) return;
-    try {
-      const q = query(collection(db, "playlists"), where("userId", "==", user._id), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setUserPlaylists(playlists);
-    } catch (err) {
-      console.error("Error fetching playlists:", err);
-      setError("Could not fetch your playlists.");
-    }
-  };
-
   useEffect(() => {
+    // Add a cleanup function to prevent memory leaks
+    let isMounted = true;
+
+    const fetchPlaylists = async () => {
+      if (!user || !user._id) return;
+      try {
+        const q = query(collection(db, "playlists"), where("userId", "==", user._id), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        if (isMounted) { // Only update state if the component is still mounted
+          setUserPlaylists(playlists);
+        }
+      } catch (err) {
+        console.error("Error fetching playlists:", err);
+        if (isMounted) {
+          setError("Could not fetch your playlists.");
+        }
+      }
+    };
+
     fetchPlaylists();
+
+    return () => {
+      // This is the cleanup function
+      isMounted = false;
+    };
   }, [user]);
 
-  // Fetch items for the selected playlist
   const fetchPlaylistItems = async (playlistId) => {
     setIsLoading(true);
     setLoadingMessage('Loading files...');
@@ -66,18 +77,26 @@ function Audiobook() {
 
   const handleCreatePlaylist = async (e) => {
     e.preventDefault();
+    if (!user || !user._id) {
+        setError("User not fully loaded. Please try again in a moment.");
+        return;
+    }
+
     if (!newPlaylistName.trim()) return;
     setIsLoading(true);
     setLoadingMessage('Creating playlist...');
     try {
-      await addDoc(collection(db, "playlists"), {
+      const newPlaylistRef = await addDoc(collection(db, "playlists"), {
         name: newPlaylistName,
         userId: user._id,
         isPublic: true,
         createdAt: serverTimestamp(),
       });
+      
+      const newPlaylist = { id: newPlaylistRef.id, name: newPlaylistName };
+      setUserPlaylists([newPlaylist, ...userPlaylists]);
       setNewPlaylistName('');
-      fetchPlaylists(); // Refresh the playlist list
+
     } catch (err) {
       console.error("Error creating playlist:", err);
       setError('Failed to create playlist.');
@@ -94,6 +113,11 @@ function Audiobook() {
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
+    if (!user || !user._id) {
+        setError("User not fully loaded. Please try again in a moment.");
+        return;
+    }
+
     if (!fileToUpload || !fileTitle.trim()) {
       setError("Please select a file and provide a title.");
       return;
@@ -116,11 +140,10 @@ function Audiobook() {
         createdAt: serverTimestamp(),
       });
       
-      // Reset form and close modal
       setShowAddFileModal(false);
       setFileToUpload(null);
       setFileTitle('');
-      fetchPlaylistItems(selectedPlaylist.id); // Refresh the file list
+      fetchPlaylistItems(selectedPlaylist.id);
     } catch (err) {
       console.error("Error uploading file:", err);
       setError("File upload failed. Please try again.");
@@ -138,61 +161,40 @@ function Audiobook() {
       <div className="container mt-4">
         <h2 className="mb-4">Playlist Manager</h2>
         {error && <div className="alert alert-danger" onClick={() => setError('')}>{error}</div>}
-
         <div className="row">
-          {/* Left Column: Playlist Creation and List */}
           <div className="col-md-4">
             <div className="card bg-light mb-4">
               <div className="card-body">
                 <h5 className="card-title">Create New Playlist</h5>
                 <form onSubmit={handleCreatePlaylist}>
                   <div className="input-group">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Playlist Name"
-                      value={newPlaylistName}
-                      onChange={(e) => setNewPlaylistName(e.target.value)}
-                      disabled={isLoading}
-                    />
+                    <input type="text" className="form-control" placeholder="Playlist Name" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} disabled={isLoading} />
                     <button className="btn btn-primary" type="submit" disabled={isLoading || !newPlaylistName.trim()}>Create</button>
                   </div>
                 </form>
               </div>
             </div>
-
             <h3>Your Playlists</h3>
             <div className="list-group">
               {userPlaylists.map(playlist => (
-                <button
-                  key={playlist.id}
-                  type="button"
-                  className={`list-group-item list-group-item-action ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`}
-                  onClick={() => handleSelectPlaylist(playlist)}
-                >
+                <button key={playlist.id} type="button" className={`list-group-item list-group-item-action ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`} onClick={() => handleSelectPlaylist(playlist)}>
                   {playlist.name}
                 </button>
               ))}
             </div>
           </div>
-
-          {/* Right Column: Selected Playlist Content */}
           <div className="col-md-8">
             {selectedPlaylist ? (
               <div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h3>Files in "{selectedPlaylist.name}"</h3>
                   <div>
-                    <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}>
-                      <i className="bi bi-plus-lg me-2"></i>Add New File
-                    </button>
+                    <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}><i className="bi bi-plus-lg me-2"></i>Add New File</button>
                     <button className="btn btn-outline-secondary" onClick={() => {
                         const shareUrl = `${window.location.origin}/playlist/${selectedPlaylist.id}`;
                         navigator.clipboard.writeText(shareUrl);
                         alert(`Copied share link to clipboard:\n${shareUrl}`);
-                    }}>
-                        <i className="bi bi-share-fill me-2"></i>Share
-                    </button>
+                    }}><i className="bi bi-share-fill me-2"></i>Share</button>
                   </div>
                 </div>
                 {isLoading && loadingMessage ? <p>{loadingMessage}</p> : (
@@ -213,8 +215,6 @@ function Audiobook() {
             )}
           </div>
         </div>
-
-        {/* Add File Modal */}
         {showAddFileModal && (
           <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered">
