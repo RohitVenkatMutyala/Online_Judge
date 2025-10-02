@@ -347,25 +347,22 @@ function Dashboard() {
         }
         setIsReviewing(true);
         setReviewFeedback("Connecting to AI Reviewer...");
-        const prompt = `Act as an expert technical recruiter and resume reviewer for a software engineering role. Analyze the following resume text, providing constructive, actionable feedback. Structure your review with sections for: 
-    1. **Overall Impression**: A brief summary.
-    2. **Strengths**: 2-3 key strengths of the resume.
-    3. **Areas for Improvement**: Detailed suggestions on clarity, impact (using metrics), project descriptions, and technical skills. Provide specific examples of how to rephrase bullet points.
-    4. **Final Polish**: Tips on formatting and language.
-    5. **Additional Resources**: Links to relevant articles, tools, or examples for further improvement.
-    6. **Common Mistakes**: Highlight frequent errors found in resumes and how to avoid them.
-    7. **ATS Optimization**: Advice on keywords and formatting to pass Applicant Tracking Systems.
-    8. **ATS Score**: Provide an estimated ATS score out of 100 based on the content and formatting.
-    9.**Dont Inlude anything related to the QID given was 2 as the dummy question ID.
-    10.**In the last give the latex code of the resume with all the changes that have been made based on all the above instructions**
-    Here is the resume:
-    ---
-    ${resumeText}`;
+
+        const shortenedPrompt = `
+    Act as an expert technical recruiter for a software engineering role. 
+    Provide a structured review of the following resume. 
+    Include sections for: Overall Impression, Strengths, Areas for Improvement (with specific examples), an estimated ATS Score out of 100, and finally, provide the fully revised resume in LaTeX code.
+    Resume to review:
+    ---
+    ${resumeText}`;
 
         try {
-            const response = await axios.post(`${API_URL}/help`, { code: prompt, QID:2 });
+            // The request still goes to the same backend endpoint
+            const response = await axios.post(`${API_URL}/help`, { code: shortenedPrompt, QID: 2 });
+
             const result = response.data.result || "The AI could not provide a review at this time.";
             setReviewFeedback(result);
+
             const reviewDocRef = doc(db, 'resumeReviews', user._id);
             const newReview = {
                 feedback: result,
@@ -374,6 +371,7 @@ function Dashboard() {
             };
             await setDoc(reviewDocRef, newReview);
             setLatestReview(newReview);
+
         } catch (error) {
             console.error("AI Resume Review error:", error);
             setReviewFeedback("An error occurred while contacting the AI service. Please try again or try later.");
@@ -567,16 +565,16 @@ function Dashboard() {
                                                 <div className="col-12"><NavCard title="Live Sessions" description="Collaborative coding with integrated chat" icon="bi-broadcast-pin" path="/new-chat" /></div>
                                                 <div className="col-12"><NavCard title="Solve Problems" description="Practice coding with our curated problem sets" icon="bi-puzzle-fill" path="/problems" /></div>
                                                 <div className="col-12"><NavCard title="Fundamentals" description="Master the core concepts and principles" icon="bi-book-half" path="/funda" /></div>
-                                                 <div className="col-12"><NavCard
-                                                        title="Folders"
-                                                        description="Create, manage, and share your collaborative folders and files."
-                                                        icon="bi-collection-fill"
-                                                        path="/folders"
-                                                    />
+                                                <div className="col-12"><NavCard
+                                                    title="Folders"
+                                                    description="Create, manage, and share your collaborative folders and files."
+                                                    icon="bi-collection-fill"
+                                                    path="/folders"
+                                                />
                                                 </div>
                                                 <div className="col-12"><NavCard title="Contests" description="Explore real-world examples and use cases" icon="bi-collection-fill" path="/contexts" /></div>
                                                 <div className="col-12"><NavCard title="Submissions" description="Review your previous solutions and progress" icon="bi-check2-square" path="/sub" /></div>
-                                               
+
                                             </div>
                                         </div>
                                     </>
