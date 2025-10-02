@@ -10,183 +10,183 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage
 import { v4 as uuidv4 } from 'uuid';
 
 function Audiobook() {
-  const { user } = useAuth();
-  const theme = 'dark';
+    const { user } = useAuth();
+    const theme = 'dark';
 
-  const [userPlaylists, setUserPlaylists] = useState([]);
-  const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-  const [playlistItems, setPlaylistItems] = useState([]);
-  const [showAddFileModal, setShowAddFileModal] = useState(false);
-  const [fileToUpload, setFileToUpload] = useState(null);
-  const [fileTitle, setFileTitle] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState('');
-  const [error, setError] = useState('');
+    const [userPlaylists, setUserPlaylists] = useState([]);
+    const [newPlaylistName, setNewPlaylistName] = useState('');
+    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+    const [playlistItems, setPlaylistItems] = useState([]);
+    const [showAddFileModal, setShowAddFileModal] = useState(false);
+    const [fileToUpload, setFileToUpload] = useState(null);
+    const [fileTitle, setFileTitle] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState('');
+    const [error, setError] = useState('');
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchPlaylists = async () => {
-      if (!user || !user._id) return;
-      try {
-        const q = query(collection(db, "playlists"), where("memberIds", "array-contains", user._id), orderBy("createdAt", "desc"));
-        const querySnapshot = await getDocs(q);
-        const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (isMounted) setUserPlaylists(playlists);
-      } catch (err) {
-        console.error("Error fetching playlists:", err);
-        if (isMounted) setError("Could not fetch playlists.");
-      }
+    useEffect(() => {
+        let isMounted = true;
+        const fetchPlaylists = async () => {
+            if (!user || !user._id) return;
+            try {
+                const q = query(collection(db, "playlists"), where("memberIds", "array-contains", user._id), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                const playlists = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (isMounted) setUserPlaylists(playlists);
+            } catch (err) {
+                console.error("Error fetching playlists:", err);
+                if (isMounted) setError("Could not fetch playlists.");
+            }
+        };
+        fetchPlaylists();
+        return () => { isMounted = false; };
+    }, [user]);
+
+    const fetchPlaylistItems = async (playlistId) => {
+        setIsLoading(true);
+        setLoadingMessage('Loading files...');
+        try {
+            const q = query(collection(db, "playlistItems"), where("playlistId", "==", playlistId), orderBy("createdAt", "asc"));
+            const querySnapshot = await getDocs(q);
+            const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setPlaylistItems(items);
+        } catch (err) {
+            console.error("Error fetching playlist items:", err);
+            setError("Could not load files.");
+        } finally {
+            setIsLoading(false);
+            setLoadingMessage('');
+        }
     };
-    fetchPlaylists();
-    return () => { isMounted = false; };
-  }, [user]);
 
-  const fetchPlaylistItems = async (playlistId) => {
-    setIsLoading(true);
-    setLoadingMessage('Loading files...');
-    try {
-      const q = query(collection(db, "playlistItems"), where("playlistId", "==", playlistId), orderBy("createdAt", "asc"));
-      const querySnapshot = await getDocs(q);
-      const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setPlaylistItems(items);
-    } catch (err) {
-      console.error("Error fetching playlist items:", err);
-      setError("Could not load files.");
-    } finally {
-      setIsLoading(false);
-      setLoadingMessage('');
-    }
-  };
+    const handleCreatePlaylist = async (e) => {
+        e.preventDefault();
+        if (!user || !user._id) { setError("User not loaded."); return; }
+        if (!newPlaylistName.trim()) return;
+        try {
+            await addDoc(collection(db, "playlists"), {
+                name: newPlaylistName,
+                originalOwner: user._id, // NEW: Using originalOwner field
+                memberIds: [user._id],
+                isPublic: true,
+                createdAt: serverTimestamp(),
+            });
+            setNewPlaylistName('');
+            // Refresh list
+            const q = query(collection(db, "playlists"), where("memberIds", "array-contains", user._id), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            setUserPlaylists(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        } catch (err) {
+            console.error("Error creating playlist:", err);
+            setError('Failed to create playlist.');
+        }
+    };
 
-  const handleCreatePlaylist = async (e) => {
-    e.preventDefault();
-    if (!user || !user._id) { setError("User not loaded."); return; }
-    if (!newPlaylistName.trim()) return;
-    try {
-      await addDoc(collection(db, "playlists"), {
-        name: newPlaylistName,
-        originalOwner: user._id, // NEW: Using originalOwner field
-        memberIds: [user._id],
-        isPublic: true,
-        createdAt: serverTimestamp(),
-      });
-      setNewPlaylistName('');
-      // Refresh list
-      const q = query(collection(db, "playlists"), where("memberIds", "array-contains", user._id), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      setUserPlaylists(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    } catch (err) {
-      console.error("Error creating playlist:", err);
-      setError('Failed to create playlist.');
-    }
-  };
+    const handleSelectPlaylist = (playlist) => {
+        setSelectedPlaylist(playlist);
+        setPlaylistItems([]);
+        fetchPlaylistItems(playlist.id);
+    };
 
-  const handleSelectPlaylist = (playlist) => {
-    setSelectedPlaylist(playlist);
-    setPlaylistItems([]);
-    fetchPlaylistItems(playlist.id);
-  };
-  
-  const handleFileUpload = async (e) => {
-    e.preventDefault();
-    if (!user || !user._id) { setError("User not loaded."); return; }
-    if (!fileToUpload || !fileTitle.trim()) { setError("Please provide a file and a title."); return; }
-    setIsLoading(true);
-    setLoadingMessage('Uploading file...');
-    try {
-      const fileId = uuidv4();
-      const storageRef = ref(storage, `playlistFiles/${selectedPlaylist.originalOwner}/${selectedPlaylist.id}/${fileId}-${fileToUpload.name}`);
-      const snapshot = await uploadBytes(storageRef, fileToUpload);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      await addDoc(collection(db, "playlistItems"), {
-        title: fileTitle, fileUrl: downloadURL, fileName: fileToUpload.name,
-        fileType: fileToUpload.type, playlistId: selectedPlaylist.id, userId: user._id,
-        createdAt: serverTimestamp(),
-      });
-      setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
-      fetchPlaylistItems(selectedPlaylist.id);
-    } catch (err) {
-      console.error("Error uploading file:", err);
-      setError("File upload failed.");
-    } finally {
-      setIsLoading(false); setLoadingMessage('');
-    }
-  };
+    const handleFileUpload = async (e) => {
+        e.preventDefault();
+        if (!user || !user._id) { setError("User not loaded."); return; }
+        if (!fileToUpload || !fileTitle.trim()) { setError("Please provide a file and a title."); return; }
+        setIsLoading(true);
+        setLoadingMessage('Uploading file...');
+        try {
+            const fileId = uuidv4();
+            const storageRef = ref(storage, `playlistFiles/${selectedPlaylist.originalOwner}/${selectedPlaylist.id}/${fileId}-${fileToUpload.name}`);
+            const snapshot = await uploadBytes(storageRef, fileToUpload);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            await addDoc(collection(db, "playlistItems"), {
+                title: fileTitle, fileUrl: downloadURL, fileName: fileToUpload.name,
+                fileType: fileToUpload.type, playlistId: selectedPlaylist.id, userId: user._id,
+                createdAt: serverTimestamp(),
+            });
+            setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
+            fetchPlaylistItems(selectedPlaylist.id);
+        } catch (err) {
+            console.error("Error uploading file:", err);
+            setError("File upload failed.");
+        } finally {
+            setIsLoading(false); setLoadingMessage('');
+        }
+    };
 
-  // --- NEW: FUNCTION TO DELETE A SINGLE FILE ---
-  const handleDeleteFile = async (fileToDelete) => {
-    if (!window.confirm(`Are you sure you want to delete the file "${fileToDelete.title}"?`)) return;
-    setIsLoading(true);
-    setLoadingMessage('Deleting file...');
-    try {
-      // 1. Delete the file from Firebase Storage
-      const fileRef = ref(storage, fileToDelete.fileUrl);
-      await deleteObject(fileRef);
+    // --- NEW: FUNCTION TO DELETE A SINGLE FILE ---
+    const handleDeleteFile = async (fileToDelete) => {
+        if (!window.confirm(`Are you sure you want to delete the file "${fileToDelete.title}"?`)) return;
+        setIsLoading(true);
+        setLoadingMessage('Deleting file...');
+        try {
+            // 1. Delete the file from Firebase Storage
+            const fileRef = ref(storage, fileToDelete.fileUrl);
+            await deleteObject(fileRef);
 
-      // 2. Delete the file metadata from Firestore
-      await deleteDoc(doc(db, "playlistItems", fileToDelete.id));
+            // 2. Delete the file metadata from Firestore
+            await deleteDoc(doc(db, "playlistItems", fileToDelete.id));
 
-      // 3. Update the UI by removing the file from the local state
-      setPlaylistItems(prevItems => prevItems.filter(item => item.id !== fileToDelete.id));
-    } catch (err) {
-      console.error("Error deleting file:", err);
-      setError("Failed to delete file.");
-    } finally {
-      setIsLoading(false);
-      setLoadingMessage('');
-    }
-  };
+            // 3. Update the UI by removing the file from the local state
+            setPlaylistItems(prevItems => prevItems.filter(item => item.id !== fileToDelete.id));
+        } catch (err) {
+            console.error("Error deleting file:", err);
+            setError("Failed to delete file.");
+        } finally {
+            setIsLoading(false);
+            setLoadingMessage('');
+        }
+    };
 
-  // --- NEW: FUNCTION TO DELETE AN ENTIRE PLAYLIST ---
-  const handleDeletePlaylist = async (playlistToDelete) => {
-    if (!window.confirm(`Are you sure you want to permanently delete the playlist "${playlistToDelete.name}" and all of its files? This action cannot be undone.`)) return;
-    setIsLoading(true);
-    setLoadingMessage(`Deleting ${playlistToDelete.name}...`);
-    try {
-      // 1. Find all file items in the playlist from Firestore
-      const itemsQuery = query(collection(db, "playlistItems"), where("playlistId", "==", playlistToDelete.id));
-      const itemsSnapshot = await getDocs(itemsQuery);
-      
-      // 2. Delete each file from Firebase Storage
-      for (const itemDoc of itemsSnapshot.docs) {
-        const fileData = itemDoc.data();
-        const fileRef = ref(storage, fileData.fileUrl);
-        await deleteObject(fileRef);
-      }
-      
-      // 3. Use a batch write to delete all Firestore documents atomically
-      const batch = writeBatch(db);
-      // Add all playlist item documents to the batch for deletion
-      itemsSnapshot.forEach(doc => {
-        batch.delete(doc.ref);
-      });
-      // Add the main playlist document to the batch for deletion
-      const playlistDocRef = doc(db, "playlists", playlistToDelete.id);
-      batch.delete(playlistDocRef);
-      
-      // 4. Commit the batch
-      await batch.commit();
+    // --- NEW: FUNCTION TO DELETE AN ENTIRE PLAYLIST ---
+    const handleDeletePlaylist = async (playlistToDelete) => {
+        if (!window.confirm(`Are you sure you want to permanently delete the playlist "${playlistToDelete.name}" and all of its files? This action cannot be undone.`)) return;
+        setIsLoading(true);
+        setLoadingMessage(`Deleting ${playlistToDelete.name}...`);
+        try {
+            // 1. Find all file items in the playlist from Firestore
+            const itemsQuery = query(collection(db, "playlistItems"), where("playlistId", "==", playlistToDelete.id));
+            const itemsSnapshot = await getDocs(itemsQuery);
 
-      // 5. Update the UI
-      setUserPlaylists(prev => prev.filter(p => p.id !== playlistToDelete.id));
-      setSelectedPlaylist(null);
-      setPlaylistItems([]);
+            // 2. Delete each file from Firebase Storage
+            for (const itemDoc of itemsSnapshot.docs) {
+                const fileData = itemDoc.data();
+                const fileRef = ref(storage, fileData.fileUrl);
+                await deleteObject(fileRef);
+            }
 
-    } catch (err) {
-      console.error("Error deleting playlist:", err);
-      setError("Failed to delete playlist.");
-    } finally {
-      setIsLoading(false);
-      setLoadingMessage('');
-    }
-  };
+            // 3. Use a batch write to delete all Firestore documents atomically
+            const batch = writeBatch(db);
+            // Add all playlist item documents to the batch for deletion
+            itemsSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            // Add the main playlist document to the batch for deletion
+            const playlistDocRef = doc(db, "playlists", playlistToDelete.id);
+            batch.delete(playlistDocRef);
 
-  if (!user) { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div> ); }
+            // 4. Commit the batch
+            await batch.commit();
 
-  return (
-    <>
-      <style>{`
+            // 5. Update the UI
+            setUserPlaylists(prev => prev.filter(p => p.id !== playlistToDelete.id));
+            setSelectedPlaylist(null);
+            setPlaylistItems([]);
+
+        } catch (err) {
+            console.error("Error deleting playlist:", err);
+            setError("Failed to delete playlist.");
+        } finally {
+            setIsLoading(false);
+            setLoadingMessage('');
+        }
+    };
+
+    if (!user) { return (<div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div>); }
+
+    return (
+        <>
+            <style>{`
         /* Your Provided CSS Styles */
         .theme-dark .dashboard-page { background-color: #12121c; }
         .theme-light .dashboard-page { background-color: #f8f9fa; }
@@ -200,111 +200,115 @@ function Audiobook() {
         .theme-dark .list-group-item.active { background-color: #3b82f6; border-color: #3b82f6; }
         .theme-light .list-group-item { background-color: #fff; color: #212529; border-color: #dee2e6; }
       `}</style>
-      <Navbar />
-      <div className={`theme-${theme} dashboard-page py-4`}>
-        <div className="container">
-          <div className="dashboard-container p-4 rounded-3 shadow-sm">
-            <h2 className="mb-4">Playlist Manager</h2>
-            {error && <div className="alert alert-danger" onClick={() => setError('')}>{error}</div>}
-            <div className="row">
-              <div className="col-md-4">
-                <div className="card bg-transparent mb-4">
-                  <div className="card-body">
-                    <h5 className="card-title">Create New Playlist</h5>
-                    <form onSubmit={handleCreatePlaylist}>
-                      <div className="input-group">
-                        <input type="text" className="form-control" placeholder="Playlist Name" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} disabled={isLoading} />
-                        <button className="btn btn-primary" type="submit" disabled={isLoading || !newPlaylistName.trim()}>Create</button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                <h3>Your Playlists</h3>
-                <div className="list-group">
-                  {userPlaylists.map(playlist => (
-                    <div key={playlist.id} className="list-group-item d-flex justify-content-between align-items-center p-0">
-                      <button type="button" className={`list-group-item-action flex-grow-1 text-start border-0 ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`} onClick={() => handleSelectPlaylist(playlist)}>
-                        {playlist.name}
-                      </button>
-                      {/* --- NEW: DELETE PLAYLIST BUTTON (OWNER ONLY) --- */}
-                      {user._id === playlist.originalOwner && (
-                        <button className="btn btn-sm btn-outline-danger ms-2 me-2" onClick={() => handleDeletePlaylist(playlist)} title="Delete Playlist">
-                          <i className="bi bi-trash-fill"></i>
-                        </button>
-                      )}
+            <Navbar />
+            <div className={`theme-${theme} dashboard-page py-4`}>
+                <div className="container">
+                    <div className="dashboard-container p-4 rounded-3 shadow-sm">
+                        <h2 className="mb-4">Playlist Manager</h2>
+                        {error && <div className="alert alert-danger" onClick={() => setError('')}>{error}</div>}
+                        <div className="row">
+                            <div className="col-md-4">
+                                <div className="card bg-transparent mb-4">
+                                    <div className="card-body">
+                                        <h5 className="card-title">Create New Playlist</h5>
+                                        <form onSubmit={handleCreatePlaylist}>
+                                            <div className="input-group">
+                                                <input type="text" className="form-control" placeholder="Playlist Name" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} disabled={isLoading} />
+                                                <button className="btn btn-primary" type="submit" disabled={isLoading || !newPlaylistName.trim()}>Create</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <h3>Your Playlists</h3>
+                                <div className="list-group">
+                                    {userPlaylists.map(playlist => (
+                                        <div key={playlist.id} className="list-group-item d-flex justify-content-between align-items-center p-0">
+                                            <button type="button" className={`list-group-item-action flex-grow-1 text-start border-0 ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`} onClick={() => handleSelectPlaylist(playlist)}>
+                                                {playlist.name}
+                                            </button>
+                                            {/* --- NEW: DELETE PLAYLIST BUTTON (OWNER ONLY) --- */}
+                                            {user._id === playlist.originalOwner && (
+                                                <button className="btn btn-sm btn-outline-danger ms-2 me-2" onClick={() => handleDeletePlaylist(playlist)} title="Delete Playlist">
+                                                    <i className="bi bi-trash-fill"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="col-md-8">
+                                {selectedPlaylist ? (
+                                    <div>
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <h3>Files in "{selectedPlaylist.name}"</h3>
+                                            <div>
+                                                <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}><i className="bi bi-plus-lg me-2"></i>Add New File</button>
+                                                <button className="btn btn-share" onClick={() => {
+                                                    const shareUrl = `${window.location.origin}/playlist/${selectedPlaylist.id}`;
+                                                    navigator.clipboard.writeText(shareUrl);
+                                                    alert(`Copied share link to clipboard:\n${shareUrl}`);
+                                                }}><i className="bi bi-share-fill me-2"></i>Share</button>
+                                            </div>
+                                        </div>
+                                        {isLoading && loadingMessage ? <p>{loadingMessage}</p> : (
+                                            <ul className="list-group">
+                                                {playlistItems.length > 0 ? playlistItems.map(item => (
+                                                    <li key={item.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                                        <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-decoration-none flex-grow-1">
+                                                            {item.title}
+                                                        </a>
+                                                        {/* --- NEW: DELETE FILE BUTTON (OWNER ONLY) --- */}
+                                                        {user._id === selectedPlaylist.originalOwner && (
+                                                            <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => handleDeleteFile(item)} title="Delete File">
+                                                                <i className="bi bi-x-lg"></i>
+                                                            </button>
+                                                        )}
+                                                    </li>
+                                                )) : <li className="list-group-item">This playlist is empty.</li>}
+                                            </ul>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="text-center mt-5 pt-5">
+                                        <h4>Select a playlist to view its files.</h4>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                  ))}
                 </div>
-              </div>
-              <div className="col-md-8">
-                {selectedPlaylist ? (
-                  <div>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                      <h3>Files in "{selectedPlaylist.name}"</h3>
-                      <div>
-                        <button className="btn btn-success me-2" onClick={() => setShowAddFileModal(true)}><i className="bi bi-plus-lg me-2"></i>Add New File</button>
-                        <button className="btn btn-share" onClick={() => {/* ... share logic ... */}}><i className="bi bi-share-fill me-2"></i>Share</button>
-                      </div>
-                    </div>
-                    {isLoading && loadingMessage ? <p>{loadingMessage}</p> : (
-                      <ul className="list-group">
-                        {playlistItems.length > 0 ? playlistItems.map(item => (
-                          <li key={item.id} className="list-group-item d-flex justify-content-between align-items-center">
-                            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-decoration-none flex-grow-1">
-                              {item.title}
-                            </a>
-                            {/* --- NEW: DELETE FILE BUTTON (OWNER ONLY) --- */}
-                            {user._id === selectedPlaylist.originalOwner && (
-                              <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => handleDeleteFile(item)} title="Delete File">
-                                <i className="bi bi-x-lg"></i>
-                              </button>
-                            )}
-                          </li>
-                        )) : <li className="list-group-item">This playlist is empty.</li>}
-                      </ul>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center mt-5 pt-5">
-                    <h4>Select a playlist to view its files.</h4>
-                  </div>
-                )}
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {showAddFileModal && selectedPlaylist && (
-        <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <form onSubmit={handleFileUpload}>
-                <div className="modal-header">
-                  <h5 className="modal-title">Add File to "{selectedPlaylist.name}"</h5>
-                  <button type="button" className="btn-close" onClick={() => setShowAddFileModal(false)}></button>
+            {showAddFileModal && selectedPlaylist && (
+                <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <form onSubmit={handleFileUpload}>
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Add File to "{selectedPlaylist.name}"</h5>
+                                    <button type="button" className="btn-close" onClick={() => setShowAddFileModal(false)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="mb-3">
+                                        <label htmlFor="fileTitle" className="form-label">File Title</label>
+                                        <input type="text" id="fileTitle" className="form-control" value={fileTitle} onChange={(e) => setFileTitle(e.target.value)} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="fileUpload" className="form-label">Select File</label>
+                                        <input type="file" id="fileUpload" className="form-control" onChange={(e) => setFileToUpload(e.target.files[0])} required />
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)}>Cancel</button>
+                                    <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Uploading...' : 'Upload'}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label htmlFor="fileTitle" className="form-label">File Title</label>
-                    <input type="text" id="fileTitle" className="form-control" value={fileTitle} onChange={(e) => setFileTitle(e.target.value)} required />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="fileUpload" className="form-label">Select File</label>
-                    <input type="file" id="fileUpload" className="form-control" onChange={(e) => setFileToUpload(e.target.files[0])} required />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Uploading...' : 'Upload'}</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
+            )}
+        </>
+    );
 }
 
 export default Audiobook;
