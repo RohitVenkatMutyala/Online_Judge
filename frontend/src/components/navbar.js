@@ -167,13 +167,29 @@ function Navbar() {
                                     {isAdmin ? (
                                         <>
                                             <li className="nav-item">
-                                                <Link className={`nav-link nav-link-custom ${isActive('/admindashboard') ? 'active' : ''}`} to="/admindashboard"><i className="bi bi-speedometer2"></i><span>Dashboard</span></Link>
+                                                <Link className={`nav-link nav-link-custom ${isActive('/admindashboard') ? 'active' : ''}`} to="/admindashboard">
+                                                    <i className="bi bi-speedometer2"></i><span>Dashboard</span>
+                                                </Link>
                                             </li>
                                             <li className="nav-item">
-                                                <Link className={`nav-link nav-link-custom ${isActive('/postproblem') ? 'active' : ''}`} to="/postproblem"><i className="bi bi-plus-circle-fill"></i><span>Create</span></Link>
+                                                <Link className={`nav-link nav-link-custom ${isActive('/postproblem') ? 'active' : ''}`} to="/postproblem">
+                                                    <i className="bi bi-plus-circle-fill"></i><span>Create Problem</span>
+                                                </Link>
                                             </li>
                                             <li className="nav-item">
-                                                <Link className={`nav-link nav-link-custom ${isActive('/new-chat') ? 'active' : ''}`} to="/new-chat"><i className="bi bi-broadcast-pin"></i><span>Sessions</span></Link>
+                                                <Link className={`nav-link nav-link-custom ${isActive('/adminproblems') ? 'active' : ''}`} to="/adminproblems">
+                                                    <i className="bi bi-collection-fill"></i><span>Manage Problems</span>
+                                                </Link>
+                                            </li>
+                                            <li className="nav-item">
+                                                <Link className={`nav-link nav-link-custom ${isActive('/test') ? 'active' : ''}`} to="/test">
+                                                    <i className="bi bi-gear-fill"></i><span>Test Cases</span>
+                                                </Link>
+                                            </li>
+                                            <li className="nav-item">
+                                                <Link className={`nav-link nav-link-custom ${isActive('/new-chat') ? 'active' : ''}`} to="/new-chat">
+                                                    <i className="bi bi-broadcast-pin"></i><span>Sessions</span>
+                                                </Link>
                                             </li>
                                         </>
                                     ) : (
@@ -187,7 +203,7 @@ function Navbar() {
                                             <li className="nav-item">
                                                 <Link className={`nav-link nav-link-custom ${isActive('/new-chat') ? 'active' : ''}`} to="/new-chat"><i className="bi bi-broadcast-pin"></i><span>Sessions</span></Link>
                                             </li>
-                                             <li className="nav-item">
+                                            <li className="nav-item">
                                                 <Link className={`nav-link nav-link-custom ${isActive('/pod') ? 'active' : ''}`} to="/pod"><i className="bi bi-broadcast-pin"></i><span>Audio</span></Link>
                                             </li>
                                             <li className="nav-item">
@@ -216,7 +232,7 @@ function Navbar() {
                                                     </div>
                                                 </li>
                                                 <li><hr className="dropdown-divider" /></li>
-                                                 <li><Link className="dropdown-item d-flex align-items-center gap-2" to="/dashboard"><i className="bi bi-house-fill"></i><span>Dashboard</span></Link></li>
+                                                <li><Link className="dropdown-item d-flex align-items-center gap-2" to="/dashboard"><i className="bi bi-house-fill"></i><span>Dashboard</span></Link></li>
                                                 <li><hr className="dropdown-divider" /></li>
                                                 <li>
                                                     <button className="dropdown-item d-flex align-items-center gap-2" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>

@@ -103,7 +103,7 @@ function Audiobook() {
         - The final output should ONLY be the script text itself, with no extra explanations, titles, or conversational filler like "Hello and welcome...".
         - Do not mention that the script is based on a document.
         - Ensure the total length is suitable for a 2-3 minute audio clip (approximately 300-400 words).
-
+        - the QID mentioned in these was dummy dont include anything related to that question id 2
         Here is the document text:
         ---
         ${fullText}
@@ -176,7 +176,7 @@ function Audiobook() {
 
   // (No changes to access control or JSX)
   if (!user) { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not logged in.</div></div> ); }
-  if (user.role !== 'admin') { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not authorized to access this page.</div></div> ); }
+  //if (user.role !== 'admin') { return ( <div className="container mt-5"><div className="alert alert-danger text-center">You are not authorized to access this page.</div></div> ); }
 
   return (
     <>
