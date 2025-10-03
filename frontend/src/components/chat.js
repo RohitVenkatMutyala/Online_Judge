@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
 import {
     doc, onSnapshot, updateDoc, collection, addDoc, query,
-    orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc
+    orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, deleteField
 } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import Editor from '@monaco-editor/react';
@@ -24,6 +24,7 @@ function Chat() {
     const { sessionId } = useParams();
 
     // --- State Variables ---
+    const heartbeatIntervalRef = useRef(null);
     const [code, setCode] = useState('');
     const [activeTab, setActiveTab] = useState('input');
     const [output, setOutput] = useState('');
@@ -53,23 +54,31 @@ function Chat() {
     }, [messages]);
 
     // Main useEffect to handle session data and user presence
+    // Main useEffect to handle session data and user presence
     useEffect(() => {
-        console.log("Debug 1: Hook started. Session ID:", sessionId, "User:", user);
-
-        if (!sessionId) {
-            console.error("Debug Fail: No Session ID found.");
-            setAccessDenied(true);
-            setLoading(false);
+        if (!sessionId || !user) {
+            setLoading(!sessionId);
             return;
         }
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
 
-        const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
-            console.log("Debug 2: onSnapshot listener fired.");
+        // --- CHANGE 1: START ---
+        // Setup the heartbeat to run every 30 seconds
+        const updatePresence = () => {
+            updateDoc(sessionDocRef, {
+                [`activeParticipants.${user._id}`]: { // Use a map with user ID as key
+                    name: `${user.firstname} ${user.lastname}`,
+                    lastSeen: serverTimestamp()
+                }
+            }).catch(console.error);
+        };
+        updatePresence(); // Call it once immediately
+        heartbeatIntervalRef.current = setInterval(updatePresence, 30000);
+        // --- CHANGE 1: END ---
 
+        const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (!docSnap.exists()) {
-                console.error("Debug Fail: Session document does not exist.");
                 setAccessDenied(true);
                 setLoading(false);
                 return;
@@ -77,42 +86,36 @@ function Chat() {
 
             const data = docSnap.data();
             setSessionOwnerId(data.ownerId);
-            console.log("Debug 3: Session data loaded. Access type:", data.access);
-
-            if (data.access === 'private' && !user) {
-                console.warn("Debug Wait: Private session, waiting for user object to load...");
-                return; // Wait for user to load
-            }
 
             const isOwner = user && data.ownerId === user._id;
             const hasAccess = data.access === 'public' || (user && data.allowedEmails?.includes(user.email)) || isOwner;
 
-            console.log("Debug 4: Checking access. Has Access:", hasAccess);
-
             if (!hasAccess) {
-                console.error("Debug Fail: Access Denied.");
                 setAccessDenied(true);
                 setLoading(false);
                 return;
             }
 
-            console.log("Debug 5: Access granted. Updating state.");
+            // --- CHANGE 2: START ---
+            // Filter the participants map to show only those seen in the last minute
+            const participantsMap = data.activeParticipants || {};
+            const oneMinuteAgo = Date.now() - 60000; // 1 minute in milliseconds
 
-            if (user) {
-                const participantExists = data.activeParticipants?.some(p => p.id === user._id);
-                if (!participantExists) {
-                    updateDoc(sessionDocRef, {
-                        activeParticipants: arrayUnion({ id: user._id, name: `${user.firstname} ${user.lastname}` })
-                    }).catch(console.error);
-                }
-            }
+            const currentUsers = Object.entries(participantsMap)
+                .filter(([_, userData]) => userData.lastSeen && userData.lastSeen.toDate().getTime() > oneMinuteAgo)
+                .map(([userId, userData]) => ({
+                    id: userId,
+                    name: userData.name,
+                }));
+
+            setActiveUsers(currentUsers);
+            // --- CHANGE 2: END ---
 
             const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
             setUserRole(role);
             setCode(data.code || '');
             setInput(data.codeInput || '');
             setSessionAccess(data.access || 'public');
-            setActiveUsers(data.activeParticipants || []);
             setCodeLanguage(data.language || 'javascript');
             setMuteStatus(data.muteStatus || {});
             setVerdicts(data.lastRunVerdicts || []);
@@ -123,10 +126,9 @@ function Chat() {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(setStream).catch(err => toast.error("Could not access microphone."));
             }
 
-            console.log("Debug 6: State updated. Turning off loading screen.");
             setLoading(false);
         }, (error) => {
-            console.error("Debug Fail: Error in onSnapshot listener:", error);
+            console.error("Error in onSnapshot listener:", error);
             setAccessDenied(true);
             setLoading(false);
         });
@@ -134,10 +136,14 @@ function Chat() {
         const messagesQuery = query(collection(db, 'sessions', sessionId, 'messages'), orderBy('timestamp'));
         const unsubscribeMessages = onSnapshot(messagesQuery, qSnap => setMessages(qSnap.docs.map(d => ({ id: d.id, ...d.data() }))));
 
+        // --- CHANGE 3: START ---
+        // This is the cleanup function that runs when the user leaves
         return () => {
+            clearInterval(heartbeatIntervalRef.current); // Stop the heartbeat
             if (user) {
+                // Remove the user's entry from the map using deleteField
                 updateDoc(doc(db, 'sessions', sessionId), {
-                    activeParticipants: arrayRemove({ id: user._id, name: `${user.firstname} ${user.lastname}` })
+                    [`activeParticipants.${user._id}`]: deleteField()
                 }).catch(console.error);
             }
             if (stream) { stream.getTracks().forEach(track => track.stop()); }
@@ -145,6 +151,7 @@ function Chat() {
             unsubscribeSession();
             unsubscribeMessages();
         };
+        // --- CHANGE 3: END ---
     }, [sessionId, user, stream]);
 
     // useEffect for WebRTC connections
