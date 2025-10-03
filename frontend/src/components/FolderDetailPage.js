@@ -30,11 +30,8 @@ function FolderDetailPage() {
     const [fileToUpload, setFileToUpload] = useState(null);
     const [fileTitle, setFileTitle] = useState('');
 
-    // Main page loading state
     const [isLoading, setIsLoading] = useState(true);
-    // FIX #2: Separate loading state for the upload modal to prevent "vibrating"
     const [isUploading, setIsUploading] = useState(false);
-
     const [error, setError] = useState('');
 
     const STORAGE_LIMIT_BYTES = 250 * 1024 * 1024;
@@ -85,7 +82,6 @@ function FolderDetailPage() {
         } finally {
             setIsLoading(false);
         }
-        // FIX #1: Removed userMap from dependency array to prevent infinite loop
     }, [folderId, user]);
 
     useEffect(() => {
@@ -94,9 +90,9 @@ function FolderDetailPage() {
 
     const handleFileUpload = async (e) => {
         e.preventDefault();
+        setError(''); // <-- FIX: Clears any previous errors.
         if (!user || !user._id || !fileToUpload || !fileTitle.trim()) return;
 
-        // FIX #2: Use the separate loading state
         setIsUploading(true);
         const userDocRef = doc(db, "persons", user._id);
         try {
@@ -117,6 +113,14 @@ function FolderDetailPage() {
                 playlistId: folder.id, userId: user._id,
                 createdAt: serverTimestamp(),
             });
+
+            // <-- FIX: Optimistically update userMap to prevent "Unknown User" flash.
+            // This assumes your `user` object from useAuth has firstname/lastname properties.
+            setUserMap(prevMap => ({
+                ...prevMap,
+                [user._id]: `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Unknown User'
+            }));
+
             await updateDoc(userDocRef, { storageUsed: increment(fileToUpload.size) });
             setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
 
@@ -124,13 +128,13 @@ function FolderDetailPage() {
         } catch (err) {
             setError("File upload failed.");
         } finally {
-            // FIX #2: Reset the separate loading state
             setIsUploading(false);
         }
     };
 
     const handleDeleteFile = async (fileToDelete) => {
         if (!window.confirm(`Are you sure you want to delete "${fileToDelete.title}"?`)) return;
+        setError(''); // <-- FIX: Clears any previous errors.
         const fileOwnerRef = doc(db, "persons", fileToDelete.userId);
         try {
             const fileRef = ref(storage, fileToDelete.fileUrl);
@@ -152,6 +156,7 @@ function FolderDetailPage() {
     return (
         <>
             <style>{`
+                /* ... (your existing CSS styles) ... */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
                 .dashboard-container { min-height: 85vh; }
@@ -170,93 +175,27 @@ function FolderDetailPage() {
                 .theme-light .file-title a { color: #212529; }
                 .file-title a:hover { text-decoration: underline; }
                 .file-meta { font-size: 0.85rem; color: #8c98a9; }
-                .btn-back {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.375rem 0.75rem;
-    border-radius: 50rem; /* Creates the pill shape */
-    font-weight: 500;
-    text-decoration: none;
-    transition: background-color 0.2s ease-in-out;
-}
-
-/* Dark Theme Styles */
-.theme-dark .btn-back {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #adb5bd;
-}
-
-.theme-dark .btn-back:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-/* Light Theme Styles */
-.theme-light .btn-back {
-    background-color: #e9ecef;
-    color: #495057;
-}
-
-.theme-light .btn-back:hover {
-    background-color: #dee2e6;
-    color: #212529;
-}
-    /* Container for the entire header/toolbar */
-.page-header {
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-}
-.theme-dark .page-header {
-    border-bottom: 1px solid #3a3a5a;
-}
-.theme-light .page-header {
-    border-bottom: 1px solid #dee2e6;
-}
-
-/* Breadcrumb navigation styles */
-.breadcrumb-nav {
-    font-size: 1.75rem; /* h3 equivalent */
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.breadcrumb-link {
-    color: #8c98a9; /* Muted color for the link part */
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-.breadcrumb-link:hover {
-    color: #3b82f6;
-    text-decoration: underline;
-}
-.breadcrumb-separator {
-    color: #495057;
-}
-.theme-light .breadcrumb-separator {
-    color: #ced4da;
-}
-
-/* A prominent style for the main action button */
-.btn-primary-action {
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-    color: white;
-    border: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-.btn-primary-action:hover {
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-}
+                .btn-back { display: inline-flex; align-items: center; padding: 0.375rem 0.75rem; border-radius: 50rem; font-weight: 500; text-decoration: none; transition: background-color 0.2s ease-in-out; }
+                .theme-dark .btn-back { background-color: rgba(255, 255, 255, 0.05); color: #adb5bd; }
+                .theme-dark .btn-back:hover { background-color: rgba(255, 255, 255, 0.1); color: #fff; }
+                .theme-light .btn-back { background-color: #e9ecef; color: #495057; }
+                .theme-light .btn-back:hover { background-color: #dee2e6; color: #212529; }
+                .page-header { padding-bottom: 1rem; margin-bottom: 1.5rem; }
+                .theme-dark .page-header { border-bottom: 1px solid #3a3a5a; }
+                .theme-light .page-header { border-bottom: 1px solid #dee2e6; }
+                .breadcrumb-nav { font-size: 1.75rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+                .breadcrumb-link { color: #8c98a9; text-decoration: none; transition: color 0.2s ease; }
+                .breadcrumb-link:hover { color: #3b82f6; text-decoration: underline; }
+                .breadcrumb-separator { color: #495057; }
+                .theme-light .breadcrumb-separator { color: #ced4da; }
+                .btn-primary-action { background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; border: none; font-weight: 500; transition: all 0.3s ease; }
+                .btn-primary-action:hover { color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
             `}</style>
             <Navbar />
             <div className={`theme-${theme} dashboard-page py-4`}>
                 <div className="container">
                     <div className="dashboard-container p-4 p-md-5 rounded-3 shadow-sm">
                         <div className="page-header d-flex justify-content-between align-items-center flex-wrap">
-                            {/* Breadcrumb Navigation on the left */}
                             <div className="breadcrumb-nav mb-2 mb-md-0">
                                 <a href="#" className="breadcrumb-link" onClick={(e) => { e.preventDefault(); navigate('/folders'); }}>
                                     Folders
@@ -264,8 +203,6 @@ function FolderDetailPage() {
                                 <span className="breadcrumb-separator">/</span>
                                 <span>{folder.name}</span>
                             </div>
-
-                            {/* Action Buttons on the right */}
                             <div>
                                 <button className="btn btn-primary-action me-2" onClick={() => setShowAddFileModal(true)}>
                                     <i className="bi bi-plus-lg me-2"></i>Upload File
@@ -273,8 +210,6 @@ function FolderDetailPage() {
                                 <button className="btn btn-share" onClick={() => {
                                     const shareUrl = `${window.location.origin}/playlist/${folder.id}`;
                                     navigator.clipboard.writeText(shareUrl);
-
-                                    // Replace the alert() with this toast notification
                                     toast.success(
                                         <div>
                                             Copied link to clipboard!
@@ -322,7 +257,6 @@ function FolderDetailPage() {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={() => setShowAddFileModal(false)} disabled={isUploading}>Cancel</button>
-                                    {/* FIX #2: Use the separate isUploading state here */}
                                     <button type="submit" className="btn btn-primary" disabled={isUploading}>
                                         {isUploading ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Uploading...</> : 'Upload'}
                                     </button>
