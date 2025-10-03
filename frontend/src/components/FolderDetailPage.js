@@ -90,7 +90,7 @@ function FolderDetailPage() {
 
     const handleFileUpload = async (e) => {
         e.preventDefault();
-        setError(''); // <-- FIX: Clears any previous errors.
+        setError('');
         if (!user || !user._id || !fileToUpload || !fileTitle.trim()) return;
 
         setIsUploading(true);
@@ -104,28 +104,36 @@ function FolderDetailPage() {
                 return;
             }
             const fileId = uuidv4();
-            const storageRef = ref(storage, `playlistFiles/${folder.originalOwner}/${folder.id}/${fileId}-${fileToUpload.name}`);
+            const filePath = `playlistFiles/${folder.originalOwner}/${folder.id}/${fileId}-${fileToUpload.name}`;
+            const storageRef = ref(storage, filePath);
+
             const snapshot = await uploadBytes(storageRef, fileToUpload);
             const downloadURL = await getDownloadURL(snapshot.ref);
             await addDoc(collection(db, "playlistItems"), {
-                title: fileTitle, fileUrl: downloadURL, fileName: fileToUpload.name,
-                fileType: fileToUpload.type, size: fileToUpload.size,
-                playlistId: folder.id, userId: user._id,
+                title: fileTitle,
+                fileUrl: downloadURL,
+                filePath: filePath,
+                fileName: fileToUpload.name,
+                fileType: fileToUpload.type,
+                size: fileToUpload.size,
+                playlistId: folder.id,
+                userId: user._id,
                 createdAt: serverTimestamp(),
             });
 
-            // <-- FIX: Optimistically update userMap to prevent "Unknown User" flash.
-            // This assumes your `user` object from useAuth has firstname/lastname properties.
             setUserMap(prevMap => ({
                 ...prevMap,
                 [user._id]: `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Unknown User'
             }));
 
-            await updateDoc(userDocRef, { storageUsed: increment(fileToUpload.size) });
+            // --- FIX 3: Use setDoc to handle both new and existing users ---
+            await setDoc(userDocRef, { storageUsed: increment(fileToUpload.size) }, { merge: true });
+
             setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
 
             await fetchFolderAndItems();
         } catch (err) {
+            console.error("Upload failed:", err);
             setError("File upload failed.");
         } finally {
             setIsUploading(false);
@@ -134,17 +142,21 @@ function FolderDetailPage() {
 
     const handleDeleteFile = async (fileToDelete) => {
         if (!window.confirm(`Are you sure you want to delete "${fileToDelete.title}"?`)) return;
-        setError(''); // <-- FIX: Clears any previous errors.
+        setError('');
         const fileOwnerRef = doc(db, "persons", fileToDelete.userId);
         try {
-            const fileRef = ref(storage, fileToDelete.fileUrl);
+            const storagePath = fileToDelete.filePath || fileToDelete.fileUrl;
+            const fileRef = ref(storage, storagePath);
+
             await deleteObject(fileRef);
             await deleteDoc(doc(db, "playlistItems", fileToDelete.id));
             if (fileToDelete.size > 0) {
-                await updateDoc(fileOwnerRef, { storageUsed: increment(-fileToDelete.size) });
+                // --- FIX 3 (Consistency): Use setDoc here as well ---
+                await setDoc(fileOwnerRef, { storageUsed: increment(-fileToDelete.size) }, { merge: true });
             }
             setFolderItems(prev => prev.filter(item => item.id !== fileToDelete.id));
         } catch (err) {
+            console.error("Delete failed:", err);
             setError("Failed to delete file.");
         }
     };
