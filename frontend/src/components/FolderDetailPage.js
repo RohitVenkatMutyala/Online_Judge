@@ -110,15 +110,10 @@ function FolderDetailPage() {
             const snapshot = await uploadBytes(storageRef, fileToUpload);
             const downloadURL = await getDownloadURL(snapshot.ref);
             await addDoc(collection(db, "playlistItems"), {
-                title: fileTitle,
-                fileUrl: downloadURL,
-                filePath: filePath,
-                fileName: fileToUpload.name,
-                fileType: fileToUpload.type,
-                size: fileToUpload.size,
-                playlistId: folder.id,
-                userId: user._id,
-                createdAt: serverTimestamp(),
+                title: fileTitle, fileUrl: downloadURL, filePath: filePath,
+                fileName: fileToUpload.name, fileType: fileToUpload.type,
+                size: fileToUpload.size, playlistId: folder.id,
+                userId: user._id, createdAt: serverTimestamp(),
             });
 
             setUserMap(prevMap => ({
@@ -126,11 +121,9 @@ function FolderDetailPage() {
                 [user._id]: `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Unknown User'
             }));
 
-            // --- FIX 3: Use setDoc to handle both new and existing users ---
             await setDoc(userDocRef, { storageUsed: increment(fileToUpload.size) }, { merge: true });
 
             setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
-
             await fetchFolderAndItems();
         } catch (err) {
             console.error("Upload failed:", err);
@@ -151,7 +144,6 @@ function FolderDetailPage() {
             await deleteObject(fileRef);
             await deleteDoc(doc(db, "playlistItems", fileToDelete.id));
             if (fileToDelete.size > 0) {
-                // --- FIX 3 (Consistency): Use setDoc here as well ---
                 await setDoc(fileOwnerRef, { storageUsed: increment(-fileToDelete.size) }, { merge: true });
             }
             setFolderItems(prev => prev.filter(item => item.id !== fileToDelete.id));
@@ -164,7 +156,6 @@ function FolderDetailPage() {
     if (isLoading) { return <div className={`theme-${theme} dashboard-page d-flex justify-content-center align-items-center`} style={{ minHeight: '100vh' }}><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>; }
     if (error) { return <div className="container mt-5"><div className="alert alert-danger">{error}</div></div>; }
     if (!folder) { return <div className={`theme-${theme} dashboard-page text-center py-5`}><div className="container"><h4>Folder not found or you don't have access.</h4></div></div>; }
-
     return (
         <>
             <style>{`
@@ -219,19 +210,24 @@ function FolderDetailPage() {
                                 <button className="btn btn-primary-action me-2" onClick={() => setShowAddFileModal(true)}>
                                     <i className="bi bi-plus-lg me-2"></i>Upload File
                                 </button>
-                                <button className="btn btn-share" onClick={() => {
-                                    const shareUrl = `${window.location.origin}/playlist/${folder.id}`;
-                                    navigator.clipboard.writeText(shareUrl);
-                                    toast.success(
-                                        <div>
-                                            Copied link to clipboard!
-                                            <br />
-                                            <small style={{ wordBreak: 'break-all' }}>{shareUrl}</small>
-                                        </div>
-                                    );
-                                }}>
-                                    <i className="bi bi-share-fill me-2"></i>Share
-                                </button>
+
+                                {/* --- THE FIX IS HERE --- */}
+                                {/* Condition now correctly shows button only for the folder owner */}
+                                {user._id === folder.originalOwner && (
+                                    <button className="btn btn-share" onClick={() => {
+                                        const shareUrl = `${window.location.origin}/playlist/${folder.id}`;
+                                        navigator.clipboard.writeText(shareUrl);
+                                        toast.success(
+                                            <div>
+                                                Copied link to clipboard!
+                                                <br />
+                                                <small style={{ wordBreak: 'break-all' }}>{shareUrl}</small>
+                                            </div>
+                                        );
+                                    }}>
+                                        <i className="bi bi-share-fill me-2"></i>Share
+                                    </button>
+                                )}
                             </div>
                         </div>
                         <div className="table-responsive">
