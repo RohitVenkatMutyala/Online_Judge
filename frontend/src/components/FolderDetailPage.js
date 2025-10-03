@@ -36,6 +36,18 @@ function FolderDetailPage() {
 
     const STORAGE_LIMIT_BYTES = 250 * 1024 * 1024;
 
+    // --- DEBUGGING LOG ---
+    // This will print the owner check to your browser's console (F12)
+    useEffect(() => {
+        if (folder && user) {
+            console.log('--- DEBUGGING SHARE BUTTON ---');
+            console.log('Is Owner Check:', user._id === folder.originalOwner);
+            console.log('Current User ID:', user._id);
+            console.log('Folder Owner ID:', folder.originalOwner);
+        }
+    }, [folder, user]);
+
+
     const fetchFolderAndItems = useCallback(async () => {
         if (!folderId || !user) return;
         setIsLoading(true);
@@ -121,7 +133,12 @@ function FolderDetailPage() {
                 [user._id]: `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Unknown User'
             }));
 
-            await setDoc(userDocRef, { storageUsed: increment(fileToUpload.size) }, { merge: true });
+            // FIX: When creating a new user's doc, also save their name.
+            await setDoc(userDocRef, {
+                storageUsed: increment(fileToUpload.size),
+                firstname: user.firstname || '',
+                lastname: user.lastname || ''
+            }, { merge: true });
 
             setShowAddFileModal(false); setFileToUpload(null); setFileTitle('');
             await fetchFolderAndItems();
@@ -156,10 +173,10 @@ function FolderDetailPage() {
     if (isLoading) { return <div className={`theme-${theme} dashboard-page d-flex justify-content-center align-items-center`} style={{ minHeight: '100vh' }}><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>; }
     if (error) { return <div className="container mt-5"><div className="alert alert-danger">{error}</div></div>; }
     if (!folder) { return <div className={`theme-${theme} dashboard-page text-center py-5`}><div className="container"><h4>Folder not found or you don't have access.</h4></div></div>; }
+
     return (
         <>
             <style>{`
-                /* ... (your existing CSS styles) ... */
                 .theme-dark .dashboard-page { background-color: #12121c; }
                 .theme-light .dashboard-page { background-color: #f8f9fa; }
                 .dashboard-container { min-height: 85vh; }
@@ -178,13 +195,7 @@ function FolderDetailPage() {
                 .theme-light .file-title a { color: #212529; }
                 .file-title a:hover { text-decoration: underline; }
                 .file-meta { font-size: 0.85rem; color: #8c98a9; }
-                .btn-back { display: inline-flex; align-items: center; padding: 0.375rem 0.75rem; border-radius: 50rem; font-weight: 500; text-decoration: none; transition: background-color 0.2s ease-in-out; }
-                .theme-dark .btn-back { background-color: rgba(255, 255, 255, 0.05); color: #adb5bd; }
-                .theme-dark .btn-back:hover { background-color: rgba(255, 255, 255, 0.1); color: #fff; }
-                .theme-light .btn-back { background-color: #e9ecef; color: #495057; }
-                .theme-light .btn-back:hover { background-color: #dee2e6; color: #212529; }
-                .page-header { padding-bottom: 1rem; margin-bottom: 1.5rem; }
-                .theme-dark .page-header { border-bottom: 1px solid #3a3a5a; }
+                .page-header { padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #3a3a5a; }
                 .theme-light .page-header { border-bottom: 1px solid #dee2e6; }
                 .breadcrumb-nav { font-size: 1.75rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
                 .breadcrumb-link { color: #8c98a9; text-decoration: none; transition: color 0.2s ease; }
@@ -211,8 +222,6 @@ function FolderDetailPage() {
                                     <i className="bi bi-plus-lg me-2"></i>Upload File
                                 </button>
 
-                                {/* --- THE FIX IS HERE --- */}
-                                {/* Condition now correctly shows button only for the folder owner */}
                                 {user._id === folder.originalOwner && (
                                     <button className="btn btn-share" onClick={() => {
                                         const shareUrl = `${window.location.origin}/playlist/${folder.id}`;
