@@ -349,7 +349,7 @@ function Dashboard() {
         setReviewFeedback("Connecting to AI Reviewer...");
 
         const shortenedPrompt = `
-    Act as an expert technical recruiter for a software engineering role. 
+    Act as an expert technical recruiter for a software engineering role or any other related position based on the resume not only the software engineering role. 
     Provide a structured review of the following resume. 
     Include sections for: Overall Impression, Strengths, Areas for Improvement (with specific examples), an estimated ATS Score out of 100, and finally, provide the fully revised resume in LaTeX code.
     Resume to review:
