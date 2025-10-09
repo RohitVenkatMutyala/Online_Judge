@@ -230,7 +230,7 @@ function Home() {
           </div>
         </section>
 
-        {/* Languages Section */}
+        {/* Languages Section 
         <section className="container py-5">
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold gradient-text">Wide Language Support</h2>
@@ -240,7 +240,7 @@ function Home() {
             <LanguageChip icon="bi-filetype-java" name="Java (OpenJDK)" />
             <LanguageChip icon="bi-filetype-py" name="Python 3" />
           </div>
-        </section>
+        </section>*/}
 
         {/* Final CTA */}
         <section className="container text-center py-5">
