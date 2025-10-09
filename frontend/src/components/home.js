@@ -53,20 +53,33 @@ function Home() {
         <section className="container py-5">
           <div className="row g-4">
             <FeatureCard
-              icon="bi-lightning-charge-fill"
-              title="Optimized Performance"
-              description="Blazing-fast code compilation and execution for a seamless coding experience."
-            />
-            <FeatureCard
               icon="bi-people-fill"
               title="Live Collaboration"
               description="Code with peers in real-time with our integrated collaborative sessions and live chat."
             />
             <FeatureCard
+              icon="bi-lightning-charge-fill"
+              title="Optimized Performance"
+              description="Blazing-fast code compilation and execution for a seamless coding experience."
+            />
+
+            <FeatureCard
               icon="bi-graph-up-arrow"
               title="Progress Tracking"
               description="Visualize your journey with in-depth stats, submission heatmaps, and topic-wise analysis."
             />
+            <FeatureCard
+              icon="bi-share-fill"
+              title="Public Profile Sharing"
+              description="Showcase your progress publicly — just like GitHub! Generate a live sharing link for your CodeHub profile so others can view your solved problems and achievements. Your public page updates dynamically in real time whenever you make changes."
+            />
+            <FeatureCard
+              icon="bi-robot"
+              title="AI Resume Analyzer"
+              description="Get intelligent feedback on your resume with CodeHub’s AI-powered Resume Analyzer. It evaluates your resume for recruiter appeal, identifies strengths and weaknesses, calculates an ATS score, and saves your latest reviews for continuous improvement. Unlike regular reviewers, it even generates improved code snippets and a polished LaTeX version of your resume for professional presentation."
+            />
+
+
             <FeatureCard
               icon="bi bi-tools"
               title="Software Collaborative Tool"
@@ -96,6 +109,14 @@ function Home() {
                 description="Experience CodeHub’s new real-time cloud storage — a shared workspace where users can collaborate securely. Each folder is owner-controlled, allowing shared file access without letting others modify the owner’s files."
               />
             </div>
+            <div className="col-lg-4 col-md-6">
+              <InfoCard
+                icon="bi-calendar-check-fill"
+                title="Curated Problem Sets"
+                description="Practice with problems from top companies and contests, curated by industry experts to match real-world interviews."
+              />
+            </div>
+
 
           </div>
         </section>
