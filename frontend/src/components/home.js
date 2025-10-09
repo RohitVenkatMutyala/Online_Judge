@@ -97,7 +97,7 @@ function Home() {
             <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
             <p className="lead subtitle mx-auto">Features that set us apart from the competition.</p>
           </div>
-          <div className="row g-4 justify-content-center">
+          <div className="feature-tree">
             <div className="col-lg-4 col-md-6">
               <InfoCard
                 icon="bi-cpu-fill"
