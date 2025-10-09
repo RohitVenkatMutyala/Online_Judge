@@ -51,7 +51,8 @@ function Home() {
 
         {/* Features Section */}
         <section className="container py-5">
-          <div className="row g-4">
+          <div className="feature-tree">
+
             <FeatureCard
               icon="bi-people-fill"
               title="Live Collaboration"
@@ -408,6 +409,86 @@ function Home() {
         .theme-dark .footer-link { color: #8b5cf6; }
         .theme-light .footer-link { color: #3b82f6; }
         .footer-link:hover { color: #ef4444; }
+        .feature-tree {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 3rem auto;
+  width: 100%;
+  gap: 3rem;
+}
+
+/* Vertical connecting line */
+.feature-tree::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  background-color: rgba(138, 92, 246, 0.5);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+/* Each feature card container */
+.feature-tree > * {
+  position: relative;
+  width: 45%;
+  background: #111827;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  z-index: 1;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+/* Alternating positions */
+.feature-tree > *:nth-child(odd) {
+  align-self: flex-start;
+  transform: translateX(-5%);
+}
+
+.feature-tree > *:nth-child(even) {
+  align-self: flex-end;
+  transform: translateX(5%);
+}
+
+/* Connector lines to the center line */
+.feature-tree > *::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: 3px;
+  background-color: rgba(138, 92, 246, 0.5);
+  transform: translateY(-50%);
+}
+
+.feature-tree > *:nth-child(odd)::after {
+  right: -30px;
+}
+
+.feature-tree > *:nth-child(even)::after {
+  left: -30px;
+}
+
+/* Responsive fix for mobile view */
+@media (max-width: 768px) {
+  .feature-tree::before {
+    left: 4px;
+  }
+  .feature-tree > * {
+    width: 90%;
+    align-self: center;
+    transform: none;
+  }
+  .feature-tree > *::after {
+    display: none;
+  }
+}
+
       `}</style>
     </>
   );
