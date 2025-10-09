@@ -193,7 +193,7 @@ function Home() {
               <div className="text-center p-4">
                 <i className="bi bi-code-slash" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
                 <h4 className="mt-3">Practice</h4>
-                <p className="text-muted">1000+ curated problems</p>
+                <p className="text-muted"> curated problems</p>
               </div>
             </div>
 
