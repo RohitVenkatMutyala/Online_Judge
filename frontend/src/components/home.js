@@ -142,54 +142,8 @@ function Home() {
           </div>
         </section>
 
-// ============================================
-        // OPTIONAL: Add this new section after "Why CodeHub?"
-        // ============================================
 
-        <section className="container py-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold gradient-text">All-in-One Platform</h2>
-            <p className="lead subtitle mx-auto">
-              Everything you need to master coding and land your dream job—no switching between tools.
-            </p>
-          </div>
 
-          <div className="row g-4">
-
-            <div className="col-lg-3 col-md-6">
-              <div className="text-center p-4">
-                <i className="bi bi-code-slash" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
-                <h4 className="mt-3">Practice</h4>
-                <p className="text-muted">1000+ curated problems</p>
-              </div>
-            </div>
-
-            <div className="col-lg-3 col-md-6">
-              <div className="text-center p-4">
-                <i className="bi bi-people-fill" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
-                <h4 className="mt-3">Collaborate</h4>
-                <p className="text-muted">Voice + video coding sessions</p>
-              </div>
-            </div>
-
-            <div className="col-lg-3 col-md-6">
-              <div className="text-center p-4">
-                <i className="bi bi-file-earmark-text" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
-                <h4 className="mt-3">Optimize Resume</h4>
-                <p className="text-muted">AI-powered ATS scoring</p>
-              </div>
-            </div>
-
-            <div className="col-lg-3 col-md-6">
-              <div className="text-center p-4">
-                <i className="bi bi-briefcase-fill" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
-                <h4 className="mt-3">Get Hired</h4>
-                <p className="text-muted">Shareable profile for recruiters</p>
-              </div>
-            </div>
-
-          </div>
-        </section>
 
 
 
@@ -229,6 +183,50 @@ function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+        <section className="container py-5">
+          <div className="text-center mb-5">
+            <h2 className="display-5 fw-bold gradient-text">All-in-One Platform</h2>
+            <p className="lead subtitle mx-auto">
+              Everything you need to master coding and land your dream job—no switching between tools.
+            </p>
+          </div>
+
+          <div className="row g-4">
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-code-slash" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Practice</h4>
+                <p className="text-muted">1000+ curated problems</p>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-people-fill" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Collaborate</h4>
+                <p className="text-muted">Voice Enabled coding sessions</p>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-file-earmark-text" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Optimize Resume</h4>
+                <p className="text-muted">AI-powered ATS scoring</p>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-briefcase-fill" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Get Hired</h4>
+                <p className="text-muted">Shareable profile for recruiters</p>
+              </div>
+            </div>
+
           </div>
         </section>
 
