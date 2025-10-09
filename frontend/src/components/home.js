@@ -71,13 +71,15 @@ function Home() {
             <FeatureCard
               icon="bi-share-fill"
               title="Public Profile Sharing"
-              description="Showcase your progress publicly — just like GitHub! Generate a live sharing link for your CodeHub profile so others can view your solved problems and achievements. Your public page updates dynamically in real time whenever you make changes."
+              description="Share your CodeHub profile with a live link showing your solved problems and achievements. Your public page updates in real time as you progress."
             />
+
             <FeatureCard
               icon="bi-robot"
-              title="AI Resume Analyzer"
-              description="Get intelligent feedback on your resume with CodeHub’s AI-powered Resume Analyzer. It evaluates your resume for recruiter appeal, identifies strengths and weaknesses, calculates an ATS score, and saves your latest reviews for continuous improvement. Unlike regular reviewers, it even generates improved code snippets and a polished LaTeX version of your resume for professional presentation."
+              title=" Randoman AI Resume Analyzer"
+              description="Analyze your resume with AI-powered feedback, ATS scoring, and improvement suggestions. Get real-time insights, saved reviews, and an auto-generated LaTeX version for a professional finish."
             />
+
 
 
             <FeatureCard
