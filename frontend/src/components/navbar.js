@@ -149,7 +149,7 @@ function Navbar() {
             <nav className={`navbar navbar-expand-lg sticky-top shadow-sm navbar-custom theme-${theme}`}>
                 <div className="container-fluid px-4">
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
-                        Randoman
+                        CodeHUb
                     </Link>
 
                     <button

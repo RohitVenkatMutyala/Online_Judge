@@ -78,7 +78,7 @@ function Home() {
         {/* Why Choose Us Section */}
         <section className="container py-5">
             <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold gradient-text">Why Randoman?</h2>
+                <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
                 <p className="lead subtitle mx-auto">Features that set us apart from the competition.</p>
             </div>
             <div className="row g-4 justify-content-center">
@@ -161,7 +161,7 @@ function Home() {
         {/* Footer */}
         <footer className="footer mt-auto py-4">
             <div className="container text-center">
-                <p className="mb-1">&copy; 2025 Randoman. All rights reserved.</p>
+                <p className="mb-1">&copy; 2025 CodeHub. All rights reserved.</p>
                 <a href="mailto:heisenberg@randoman.online" className="footer-link">
                     <i className="bi bi-envelope-fill me-2"></i>Contact Us
                 </a>
