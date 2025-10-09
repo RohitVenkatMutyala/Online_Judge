@@ -28,42 +28,26 @@ function Home() {
       <Dnav />
       <div className={`home-page theme-${theme}`}>
         {/* Hero Section */}
-        <section className="hero-section text-center py-5" style={{ backgroundColor: '#0d0d23', minHeight: '80vh' }}>
+        <section className="hero-section text-center">
           <div className="container">
-            <h1 className="display-3 fw-bold mb-3" style={{ color: '#c0c0ff' }}>
+            <h1 className="display-3 fw-bold mb-4 gradient-text">
               Enter the Arena of Code
             </h1>
-            <p className="lead subtitle mx-auto mb-4" style={{ color: '#a0a0c0', maxWidth: '600px' }}>
+            <p className="lead subtitle mx-auto mb-5">
               A next-generation platform designed for speed, collaboration, and excellence. Sharpen your skills, compete with peers, and land your dream job.
             </p>
             <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-              <button
-                onClick={handleLogin}
-                className="btn fw-semibold px-5 py-2"
-                style={{
-                  background: 'linear-gradient(90deg, #6b5bff, #ff5b9c)',
-                  color: '#fff',
-                  borderRadius: '6px',
-                }}
-              >
+              <button onClick={handleLogin} className="btn btn-lg btn-gradient-primary fw-semibold px-5 py-3">
+                <i className="bi bi-code-slash me-2"></i>
                 Start Solving
               </button>
-              <button
-                onClick={handleWatchDemo}
-                className="btn fw-semibold px-5 py-2"
-                style={{
-                  backgroundColor: '#1a1a2e',
-                  color: '#fff',
-                  border: '1px solid #5555ff',
-                  borderRadius: '6px',
-                }}
-              >
+              <button onClick={handleWatchDemo} className="btn btn-lg btn-secondary-custom fw-semibold px-5 py-3">
+                <i className="bi bi-play-circle-fill me-2"></i>
                 Watch Demo
               </button>
             </div>
           </div>
         </section>
-
 
         {/* Features Section */}
         <section className="container py-5">
