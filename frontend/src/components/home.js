@@ -119,6 +119,14 @@ function Home() {
                 description="Practice with problems from top companies and contests, curated by industry experts to match real-world interviews."
               />
             </div>
+            <div className="col-lg-4 col-md-6">
+              <InfoCard
+                icon="bi-trophy-fill"
+                title="Integrated CodeForces Contests"
+                description="Stay updated with the latest CodeForces contests directly from our platform. Add contests to your Google Calendar and receive notifications before the events."
+              />
+            </div>
+
 
 
           </div>
