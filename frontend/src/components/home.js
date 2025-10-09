@@ -51,7 +51,8 @@ function Home() {
 
         {/* Features Section */}
         <section className="container py-5">
-          <div className="row g-4">
+          <div className="feature-tree">
+
             <FeatureCard
               icon="bi-people-fill"
               title="Live Collaboration"
@@ -408,6 +409,47 @@ function Home() {
         .theme-dark .footer-link { color: #8b5cf6; }
         .theme-light .footer-link { color: #3b82f6; }
         .footer-link:hover { color: #ef4444; }
+        .feature-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.feature-tree::before {
+  content: "";
+  position: absolute;
+  width: 3px;
+  background-color: rgba(138, 92, 246, 0.6); /* light purple line */
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.feature-tree > * {
+  position: relative;
+  background: #111827;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: 60%;
+  text-align: center;
+  z-index: 1;
+}
+
+.feature-tree > *::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 3px;
+  background-color: rgba(138, 92, 246, 0.6);
+  top: 50%;
+  left: -20px;
+  transform: translateY(-50%);
+}
+
       `}</style>
     </>
   );
