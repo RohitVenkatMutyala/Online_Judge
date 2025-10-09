@@ -82,7 +82,7 @@ function Home() {
             <FeatureCard
               icon="bi-share-fill"
               title="Live Public Profile Sharing"
-              description="Share your CodeHub profile with a live link that updates in real-time. Showcase solved problems, contest rankings, and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically."
+              description="Share your CodeHub profile with a live link that updates in real-time. Showcase solved problems , and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically."
             />
 
           </div>
