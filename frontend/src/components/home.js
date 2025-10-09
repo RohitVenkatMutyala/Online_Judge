@@ -25,7 +25,7 @@ function Home() {
 
   return (
     <>
-      <Dnav />
+      
       <div className={`home-page theme-${theme}`}>
         {/* Hero Section */}
         <section className="hero-section text-center">
