@@ -53,41 +53,38 @@ function Home() {
         <section className="container py-5">
           <div className="feature-tree">
 
+            {/* HERO FEATURE #1 - Make this stand out! */}
             <FeatureCard
               icon="bi-people-fill"
-              title="Live Collaboration"
-              description="Code with peers in real-time with our integrated collaborative sessions and live chat."
+              title="Live Collaboration "
+              description="Code together with built-in voice no need for Zoom or Discord. Share your IDE, collaborate in real-time, and solve problems together. Perfect for mock interviews, pair programming, and study sessions."
             />
+
+            {/* HERO FEATURE #2 - Your unique selling point! */}
+            <FeatureCard
+              icon="bi-robot"
+              title="AI Resume Analyzer & Optimizer"
+              description="Transform your resume with AI-powered analysis, ATS compatibility scoring, and smart improvement suggestions. Get real-time feedback, save multiple versions, and export a professional LaTeX resume that beats applicant tracking systems."
+            />
+
             <FeatureCard
               icon="bi-lightning-charge-fill"
-              title="Optimized Performance"
-              description="Blazing-fast code compilation and execution for a seamless coding experience."
+              title="Blazing-Fast Performance"
+              description="Experience sub-100ms code compilation and execution. Our optimized infrastructure handles everything from simple algorithms to complex programs without lag, keeping you in your coding flow."
             />
 
             <FeatureCard
               icon="bi-graph-up-arrow"
-              title="Progress Tracking"
-              description="Visualize your journey with in-depth stats, submission heatmaps, and topic-wise analysis."
+              title="Smart Progress Tracking"
+              description="Visualize your coding journey with interactive heatmaps, detailed submission statistics, and topic-wise analytics. Track streaks, achievements, and improvement patterns that keep you motivated."
             />
+
             <FeatureCard
               icon="bi-share-fill"
-              title="Public Profile Sharing"
-              description="Share your CodeHub profile with a live link showing your solved problems and achievements. Your public page updates in real time as you progress."
+              title="Live Public Profile Sharing"
+              description="Share your CodeHub profile with a live link that updates in real-time. Showcase solved problems, contest rankings, and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically."
             />
 
-            <FeatureCard
-              icon="bi-robot"
-              title=" Randoman AI Resume Analyzer"
-              description="Analyze your resume with AI-powered feedback, ATS scoring, and improvement suggestions. Get real-time insights, saved reviews, and an auto-generated LaTeX version for a professional finish."
-            />
-
-
-
-            <FeatureCard
-              icon="bi bi-tools"
-              title="Software Collaborative Tool"
-              description="AI-Powered UML-to-code & code-to-UML generation for a faster workflow"
-            />
           </div>
         </section>
 
@@ -95,42 +92,106 @@ function Home() {
         <section className="container py-5">
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
-            <p className="lead subtitle mx-auto">Features that set us apart from the competition.</p>
+            <p className="lead subtitle mx-auto">
+              Features that set us apart from LeetCode, HackerRank, and the competition.
+            </p>
           </div>
+
           <div className="feature-tree">
+
             <div className="col-lg-4 col-md-6">
               <InfoCard
                 icon="bi-cpu-fill"
-                title="AI-Powered Mentorship"
-                description="Our smart AI adapts to your learning pace, offering hints, debugging help, and explanations to elevate your skills."
+                title="24/7 AI Coding Mentor"
+                description="Never get stuck again. Our adaptive AI provides contextual hints, debugging assistance, and step-by-step explanations tailored to your skill level. Learn faster with a mentor that's always available—no waiting, no judgment."
               />
             </div>
+
+            <div className="col-lg-4 col-md-6">
+              <InfoCard
+                icon="bi-diagram-3-fill"
+                title="AI-Powered UML & Code Converter"
+                description="Accelerate your workflow with intelligent UML-to-code and code-to-UML conversion. Perfect for system design interviews and team planning. Visualize complex architectures or generate implementation code instantly."
+              />
+            </div>
+
             <div className="col-lg-4 col-md-6">
               <InfoCard
                 icon="bi-cloud-fill"
-                title="Real-Time Cloud Storage"
-                description="Experience CodeHub’s new real-time cloud storage — a shared workspace where users can collaborate securely. Each folder is owner-controlled, allowing shared file access without letting others modify the owner’s files."
+                title="Real-Time Cloud Workspace"
+                description="Access your code from anywhere with secure cloud storage that syncs instantly. Create shared folders with granular permission controls for team projects. Owner-controlled sharing means your files stay protected while enabling seamless collaboration."
               />
             </div>
+
             <div className="col-lg-4 col-md-6">
               <InfoCard
                 icon="bi-calendar-check-fill"
-                title="Curated Problem Sets"
-                description="Practice with problems from top companies and contests, curated by industry experts to match real-world interviews."
+                title="Interview-Ready Problem Sets"
+                description="Practice with problems curated from actual FAANG and top company interviews. Expert-selected challenges match real-world patterns with detailed editorials, multiple solution approaches, and company-specific tags to target your dream job."
               />
             </div>
+
             <div className="col-lg-4 col-md-6">
               <InfoCard
                 icon="bi-trophy-fill"
-                title="Integrated CodeForces Contests"
-                description="Stay updated with the latest CodeForces contests directly from our platform. Add contests to your Google Calendar and receive notifications before the events."
+                title="Auto-Synced Contest Calendar"
+                description="Stay competition-ready with CodeForces contests automatically added to your Google Calendar. Get pre-event notifications, track upcoming competitions, and never miss an opportunity to test your skills against the global community."
               />
             </div>
 
+          </div>
+        </section>
 
+// ============================================
+        // OPTIONAL: Add this new section after "Why CodeHub?"
+        // ============================================
+
+        <section className="container py-5">
+          <div className="text-center mb-5">
+            <h2 className="display-5 fw-bold gradient-text">All-in-One Platform</h2>
+            <p className="lead subtitle mx-auto">
+              Everything you need to master coding and land your dream job—no switching between tools.
+            </p>
+          </div>
+
+          <div className="row g-4">
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-code-slash" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Practice</h4>
+                <p className="text-muted">1000+ curated problems</p>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-people-fill" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Collaborate</h4>
+                <p className="text-muted">Voice + video coding sessions</p>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-file-earmark-text" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Optimize Resume</h4>
+                <p className="text-muted">AI-powered ATS scoring</p>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-4">
+                <i className="bi bi-briefcase-fill" style={{ fontSize: '3rem', color: '#8b5cf6' }}></i>
+                <h4 className="mt-3">Get Hired</h4>
+                <p className="text-muted">Shareable profile for recruiters</p>
+              </div>
+            </div>
 
           </div>
         </section>
+
+
 
         {/* Products Section */}
         <section className="container py-5">
