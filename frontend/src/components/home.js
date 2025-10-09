@@ -67,7 +67,7 @@ function Home() {
               title="Progress Tracking"
               description="Visualize your journey with in-depth stats, submission heatmaps, and topic-wise analysis."
             />
-             <FeatureCard
+            <FeatureCard
               icon="bi bi-tools"
               title="Software Collaborative Tool"
               description="AI-Powered UML-to-code & code-to-UML generation for a faster workflow"
@@ -77,95 +77,96 @@ function Home() {
 
         {/* Why Choose Us Section */}
         <section className="container py-5">
-            <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
-                <p className="lead subtitle mx-auto">Features that set us apart from the competition.</p>
+          <div className="text-center mb-5">
+            <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
+            <p className="lead subtitle mx-auto">Features that set us apart from the competition.</p>
+          </div>
+          <div className="row g-4 justify-content-center">
+            <div className="col-lg-4 col-md-6">
+              <InfoCard
+                icon="bi-cpu-fill"
+                title="AI-Powered Mentorship"
+                description="Our smart AI adapts to your learning pace, offering hints, debugging help, and explanations to elevate your skills."
+              />
             </div>
-            <div className="row g-4 justify-content-center">
-                <div className="col-lg-4 col-md-6">
-                    <InfoCard
-                        icon="bi-cpu-fill"
-                        title="AI-Powered Mentorship"
-                        description="Our smart AI adapts to your learning pace, offering hints, debugging help, and explanations to elevate your skills."
-                    />
-                </div>
-                <div className="col-lg-4 col-md-6">
-                    <InfoCard
-                        icon="bi-calendar-check-fill"
-                        title="Curated Problem Sets"
-                        description="Practice with problems from top companies and contests, curated by industry experts to match real-world interviews."
-                    />
-                </div>
+            <div className="col-lg-4 col-md-6">
+              <InfoCard
+                icon="bi-cloud-fill"
+                title="Real-Time Cloud Storage"
+                description="Experience CodeHub’s new real-time cloud storage — a shared workspace where users can collaborate securely. Each folder is owner-controlled, allowing shared file access without letting others modify the owner’s files."
+              />
             </div>
+
+          </div>
         </section>
 
         {/* Products Section */}
         <section className="container py-5">
-            <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold gradient-text">Our Products</h2>
-                <p className="lead subtitle mx-auto">Discover the cutting-edge tools built for passionate developers.</p>
-            </div>
-            <div className="row justify-content-center">
-                <div className="col-lg-8 col-xl-7">
-                    <div className="product-card p-4 p-md-5">
-                        <div className="text-center mb-4">
-                            <span className="product-badge px-3 py-2 fw-semibold">
-                                <i className="bi bi-stars me-2"></i>
-                                FEATURED TOOL
-                            </span>
-                        </div>
-                        <div className="text-center mb-4">
-                            <div className="product-icon mx-auto">
-                                <i className="bi bi-tools"></i>
-                            </div>
-                            <h4 className="fw-bold mt-3 mb-1">Software Collaborative Tool</h4>
-                            <p className="opacity-75">AI-Powered UML & Code Generation</p>
-                        </div>
-                        <div className="row g-3 mb-4">
-                            <ProductFeature icon="bi-robot" title="AI-Powered Engine" description="UML-to-code & code-to-UML" />
-                            <ProductFeature icon="bi-lightning-fill" title="80% Faster Workflow" description="Minutes instead of hours" />
-                            <ProductFeature icon="bi-people-fill" title="Team Collaboration" description="Real-time editing & live preview" />
-                            <ProductFeature icon="bi-bug-fill" title="Debug & Export" description="Inline debugging & seamless sharing" />
-                        </div>
-                        <div className="text-center">
-                            <a href="https://uml.randoman.online" target="_blank" rel="noopener noreferrer" className="btn btn-lg btn-gradient-primary fw-semibold px-5 py-3 text-decoration-none">
-                                <i className="bi bi-rocket-takeoff me-2"></i>
-                                Launch Tool
-                            </a>
-                        </div>
-                    </div>
+          <div className="text-center mb-5">
+            <h2 className="display-5 fw-bold gradient-text">Our Products</h2>
+            <p className="lead subtitle mx-auto">Discover the cutting-edge tools built for passionate developers.</p>
+          </div>
+          <div className="row justify-content-center">
+            <div className="col-lg-8 col-xl-7">
+              <div className="product-card p-4 p-md-5">
+                <div className="text-center mb-4">
+                  <span className="product-badge px-3 py-2 fw-semibold">
+                    <i className="bi bi-stars me-2"></i>
+                    FEATURED TOOL
+                  </span>
                 </div>
+                <div className="text-center mb-4">
+                  <div className="product-icon mx-auto">
+                    <i className="bi bi-tools"></i>
+                  </div>
+                  <h4 className="fw-bold mt-3 mb-1">Software Collaborative Tool</h4>
+                  <p className="opacity-75">AI-Powered UML & Code Generation</p>
+                </div>
+                <div className="row g-3 mb-4">
+                  <ProductFeature icon="bi-robot" title="AI-Powered Engine" description="UML-to-code & code-to-UML" />
+                  <ProductFeature icon="bi-lightning-fill" title="80% Faster Workflow" description="Minutes instead of hours" />
+                  <ProductFeature icon="bi-people-fill" title="Team Collaboration" description="Real-time editing & live preview" />
+                  <ProductFeature icon="bi-bug-fill" title="Debug & Export" description="Inline debugging & seamless sharing" />
+                </div>
+                <div className="text-center">
+                  <a href="https://uml.randoman.online" target="_blank" rel="noopener noreferrer" className="btn btn-lg btn-gradient-primary fw-semibold px-5 py-3 text-decoration-none">
+                    <i className="bi bi-rocket-takeoff me-2"></i>
+                    Launch Tool
+                  </a>
+                </div>
+              </div>
             </div>
+          </div>
         </section>
 
         {/* Languages Section */}
         <section className="container py-5">
-            <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold gradient-text">Wide Language Support</h2>
-            </div>
-            <div className="d-flex flex-wrap justify-content-center align-items-center gap-4">
-                <LanguageChip icon="bi-code" name="C++ (GCC)" />
-                <LanguageChip icon="bi-filetype-java" name="Java (OpenJDK)" />
-                <LanguageChip icon="bi-filetype-py" name="Python 3" />
-            </div>
+          <div className="text-center mb-5">
+            <h2 className="display-5 fw-bold gradient-text">Wide Language Support</h2>
+          </div>
+          <div className="d-flex flex-wrap justify-content-center align-items-center gap-4">
+            <LanguageChip icon="bi-code" name="C++ (GCC)" />
+            <LanguageChip icon="bi-filetype-java" name="Java (OpenJDK)" />
+            <LanguageChip icon="bi-filetype-py" name="Python 3" />
+          </div>
         </section>
 
         {/* Final CTA */}
         <section className="container text-center py-5">
-            <h2 className="fw-bold mb-4">Ready to Transform Your Coding Experience?</h2>
-            <button onClick={handleLogin} className="btn btn-lg btn-gradient-primary fw-semibold px-5 py-3">
-                Get Started for Free <i className="bi bi-arrow-right ms-2"></i>
-            </button>
+          <h2 className="fw-bold mb-4">Ready to Transform Your Coding Experience?</h2>
+          <button onClick={handleLogin} className="btn btn-lg btn-gradient-primary fw-semibold px-5 py-3">
+            Get Started for Free <i className="bi bi-arrow-right ms-2"></i>
+          </button>
         </section>
 
         {/* Footer */}
         <footer className="footer mt-auto py-4">
-            <div className="container text-center">
-                <p className="mb-1">&copy; 2025 CodeHub. All rights reserved.</p>
-                <a href="mailto:heisenberg@randoman.online" className="footer-link">
-                    <i className="bi bi-envelope-fill me-2"></i>Contact Us
-                </a>
-            </div>
+          <div className="container text-center">
+            <p className="mb-1">&copy; 2025 CodeHub. All rights reserved.</p>
+            <a href="mailto:heisenberg@randoman.online" className="footer-link">
+              <i className="bi bi-envelope-fill me-2"></i>Contact Us
+            </a>
+          </div>
         </footer>
       </div>
 
@@ -401,34 +402,34 @@ const FeatureCard = ({ icon, title, description }) => (
 );
 
 const InfoCard = ({ icon, title, description }) => (
-    <div className="card-custom text-center">
-        <i className={`${icon} card-icon`}></i>
-        <h5 className="fw-bold mb-2">{title}</h5>
-        <p className="mb-0 opacity-75">{description}</p>
-    </div>
+  <div className="card-custom text-center">
+    <i className={`${icon} card-icon`}></i>
+    <h5 className="fw-bold mb-2">{title}</h5>
+    <p className="mb-0 opacity-75">{description}</p>
+  </div>
 );
 
 const LanguageChip = ({ icon, name }) => (
-    <div className="language-chip d-flex align-items-center gap-3">
-        <i className={icon}></i>
-        <span>{name}</span>
-    </div>
+  <div className="language-chip d-flex align-items-center gap-3">
+    <i className={icon}></i>
+    <span>{name}</span>
+  </div>
 );
 
 const ProductFeature = ({ icon, title, description }) => (
-    <div className="col-md-6">
-        <div className="feature-item">
-            <div className="d-flex align-items-center">
-                <div className="feature-item-icon me-3">
-                    <i className={icon}></i>
-                </div>
-                <div>
-                    <h6 className="fw-bold mb-0">{title}</h6>
-                    <small className="opacity-75">{description}</small>
-                </div>
-            </div>
+  <div className="col-md-6">
+    <div className="feature-item">
+      <div className="d-flex align-items-center">
+        <div className="feature-item-icon me-3">
+          <i className={icon}></i>
         </div>
+        <div>
+          <h6 className="fw-bold mb-0">{title}</h6>
+          <small className="opacity-75">{description}</small>
+        </div>
+      </div>
     </div>
+  </div>
 );
 
 
