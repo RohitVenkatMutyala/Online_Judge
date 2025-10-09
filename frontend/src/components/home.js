@@ -64,7 +64,7 @@ function Home() {
             <FeatureCard
               icon="bi-robot"
               title="AI Resume Analyzer & Optimizer"
-              description="Transform your resume with AI-powered analysis, ATS compatibility scoring, and smart improvement suggestions. Get real-time feedback,Auto save of most recent versions, and export a professional LaTeX resume that beats applicant tracking systems."
+              description="Transform your resume with AI-powered analysis, ATS compatibility scoring, and smart improvement suggestions. Get real-time feedback , auto save of most recent versions, and export a professional LaTeX resume that beats applicant tracking systems."
             />
 
             <FeatureCard
