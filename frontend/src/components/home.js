@@ -107,13 +107,7 @@ function Home() {
               />
             </div>
 
-            <div className="col-lg-4 col-md-6">
-              <InfoCard
-                icon="bi-diagram-3-fill"
-                title="AI-Powered UML & Code Converter"
-                description="Accelerate your workflow with intelligent UML-to-code and code-to-UML conversion. Perfect for system design interviews and team planning. Visualize complex architectures or generate implementation code instantly."
-              />
-            </div>
+        
 
             <div className="col-lg-4 col-md-6">
               <InfoCard
