@@ -52,7 +52,6 @@ function Home() {
         {/* Features Section */}
         <section className="container py-5">
           <div className="feature-tree">
-            <AnimatedBackground /> 
 
             {/* HERO FEATURE #1 - Make this stand out! */}
             <FeatureCard
@@ -99,7 +98,7 @@ function Home() {
           </div>
 
           <div className="feature-tree">
-           <AnimatedBackground />
+
             <div className="col-lg-4 col-md-6">
               <InfoCard
                 icon="bi-cpu-fill"
@@ -550,52 +549,7 @@ function Home() {
     display: none;
   }
 }
-/* Add these new styles to your <style> block */
 
-.animated-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0; /* Places the animation behind the cards */
-  pointer-events: none; /* Allows clicks to pass through to elements behind it */
-}
-
-.animated-column {
-  position: absolute;
-  top: -100%; /* Start the animation from above the container */
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 1.1rem;
-  color: rgba(138, 92, 246, 0.1); /* A faint, theme-appropriate color */
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  animation-name: fall;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  user-select: none; /* Prevents text selection */
-}
-
-@keyframes fall {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(200%); /* Make it fall twice the height to disappear completely */
-  }
-}
-
-/* UPDATE this existing style */
-.feature-tree {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 3rem auto;
-  width: 100%;
-  gap: 3rem;
-  overflow: hidden; /* <-- ADD THIS LINE to contain the animation */
-}
       `}</style>
     </>
   );
@@ -642,31 +596,7 @@ const ProductFeature = ({ icon, title, description }) => (
     </div>
   </div>
 );
-// Add this new component inside your Home.js file
 
-const AnimatedBackground = () => {
-  // Create an array to render multiple columns of the animation
-  const columns = Array.from({ length: 25 }); 
-  const binaryString = "01101001011011100110100101110100011010010110000101101100011010010111101001100101";
-
-  return (
-    <div className="animated-background">
-      {columns.map((_, index) => (
-        <div
-          key={index}
-          className="animated-column"
-          style={{
-            left: `${index * 4}%`, // Spread columns across the container
-            animationDuration: `${Math.random() * 8 + 5}s`, // Randomize speed
-            animationDelay: `${Math.random() * 5}s`,      // Randomize start time
-          }}
-        >
-          {binaryString}
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export default Home;
 
