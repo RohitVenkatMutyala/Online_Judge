@@ -51,9 +51,8 @@ function Home() {
 
         {/* Features Section */}
         <section className="container py-5">
-           <AnimatedBackground /> 
           <div className="feature-tree">
-           
+            <AnimatedBackground /> 
 
             {/* HERO FEATURE #1 - Make this stand out! */}
             <FeatureCard
@@ -92,7 +91,6 @@ function Home() {
 
         {/* Why Choose Us Section */}
         <section className="container py-5">
-          <AnimatedBackground />
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
             <p className="lead subtitle mx-auto">
@@ -101,7 +99,7 @@ function Home() {
           </div>
 
           <div className="feature-tree">
-           
+           <AnimatedBackground />
             <div className="col-lg-4 col-md-6">
               <InfoCard
                 icon="bi-cpu-fill"
