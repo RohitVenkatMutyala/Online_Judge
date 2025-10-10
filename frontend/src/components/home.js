@@ -471,6 +471,40 @@ function Home() {
         .theme-dark .footer-link { color: #8b5cf6; }
         .theme-light .footer-link { color: #3b82f6; }
         .footer-link:hover { color: #ef4444; }
+
+        .animated-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Places the animation behind the cards */
+  pointer-events: none; /* Allows clicks to pass through to elements behind it */
+}
+
+.animated-column {
+  position: absolute;
+  top: -100%; /* Start the animation from above the container */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.1rem;
+  color: rgba(138, 92, 246, 0.1); /* A faint, theme-appropriate color */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  user-select: none; /* Prevents text selection */
+}
+
+@keyframes fall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(200%); /* Make it fall twice the height to disappear completely */
+  }
+}
+
         .feature-tree {
   position: relative;
   display: flex;
@@ -479,6 +513,7 @@ function Home() {
   margin: 3rem auto;
   width: 100%;
   gap: 3rem;
+  overflow: hidden;
 }
 
 /* Vertical connecting line */
@@ -550,52 +585,7 @@ function Home() {
     display: none;
   }
 }
-/* Add these new styles to your <style> block */
 
-.animated-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0; /* Places the animation behind the cards */
-  pointer-events: none; /* Allows clicks to pass through to elements behind it */
-}
-
-.animated-column {
-  position: absolute;
-  top: -100%; /* Start the animation from above the container */
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 1.1rem;
-  color: rgba(138, 92, 246, 0.1); /* A faint, theme-appropriate color */
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  animation-name: fall;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  user-select: none; /* Prevents text selection */
-}
-
-@keyframes fall {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(200%); /* Make it fall twice the height to disappear completely */
-  }
-}
-
-/* UPDATE this existing style */
-.feature-tree {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 3rem auto;
-  width: 100%;
-  gap: 3rem;
-  overflow: hidden; /* <-- ADD THIS LINE to contain the animation */
-}
       `}</style>
     </>
   );
