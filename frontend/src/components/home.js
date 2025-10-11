@@ -483,14 +483,15 @@ function Home() {
     box-shadow: 0 8px 25px rgba(0,0,0,0.1);
   }
 
-  .feature-image-container img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: 1rem;
-    transition: transform 0.3s ease;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  }
+.feature-image-container img {
+  /* ✅ Change width from 100% to a smaller value */
+  width: 80%; 
+  height: auto;
+  object-fit: cover;
+  border-radius: 1rem;
+  transition: transform 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
   .feature-image-container img:hover {
     transform: scale(1.03);
   }
@@ -508,6 +509,9 @@ function Home() {
     }
     .feature-image-container {
       grid-row: 1; /* Image appears first */
+        display: flex;
+  justify-content: center;
+  align-items: center;
     }
     .feature-content-card {
       grid-row: 2; /* Card appears second */
