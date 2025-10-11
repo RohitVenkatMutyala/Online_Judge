@@ -17,6 +17,66 @@ function Home() {
   const handleWatchDemo = () => {
     window.open('https://drive.google.com/file/d/1erYInNK5HJpp7k4vX7VTQPeqH-djlgld/view', '_blank');
   };
+ const coreFeatures = [
+    {
+      icon: "bi-people-fill",
+      title: "Live Collaboration ",
+      description: "Code together in real time and clarify doubts through live voice conversations — no need for Zoom or Discord. Share your session, collaborate seamlessly, and solve problems together. Perfect for mock interviews, pair programming, and study sessions.",
+      imageUrl: "https://i.imgur.com/3Z6OqfJ.png" // Replace with your image
+    },
+    {
+      icon: "bi-robot",
+      title: "AI Resume Analyzer & Optimizer",
+      description: "Transform your resume with AI-powered analysis, ATS compatibility scoring, and smart improvement suggestions. Get real-time feedback , auto save of most recent versions, and export a professional LaTeX resume that beats applicant tracking systems.",
+      imageUrl: "https://i.imgur.com/Y8zVaf8.png" // Replace with your image
+    },
+    {
+      icon: "bi-lightning-charge-fill",
+      title: "Blazing-Fast Performance",
+      description: "Experience sub-100ms code compilation and execution. Our optimized infrastructure handles everything from simple algorithms to complex programs without lag, keeping you in your coding flow.",
+      imageUrl: "https://i.imgur.com/vHqYv2d.png" // Replace with your image
+    },
+    {
+      icon: "bi-graph-up-arrow",
+      title: "Smart Progress Tracking",
+      description: "Visualize your coding journey with interactive heatmaps, detailed submission statistics, and topic-wise analytics. Track streaks, achievements, and improvement patterns that keep you motivated.",
+      imageUrl: "https://i.imgur.com/o2P8mGz.png" // Replace with your image
+    },
+    {
+      icon: "bi-share-fill",
+      title: "Live Public Profile Sharing",
+      description: "Share your CodeHub profile with a live link that updates in real-time. Showcase solved problems , and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically.",
+      imageUrl: "https://i.imgur.com/mJ5FqYh.png" // Replace with your image
+    }
+  ];
+
+  // --- Data for "Why Choose Us" Features ---
+  const whyChooseUsFeatures = [
+    {
+      icon: "bi-cpu-fill",
+      title: "24/7 AI Coding Mentor",
+      description: "Never get stuck again. Our adaptive AI provides contextual hints, debugging assistance, and step-by-step explanations tailored to your skill level. Learn faster with a mentor that's always available—no waiting, no judgment.",
+      imageUrl: "https://i.imgur.com/pB3k5aL.png" // Replace with your image
+    },
+    {
+      icon: "bi-cloud-fill",
+      title: "Real-Time Cloud Workspace",
+      description: "Access your code from anywhere with secure cloud storage that syncs instantly. Create shared folders with granular permission controls for team projects. Owner-controlled sharing means your files stay protected while enabling seamless collaboration.",
+      imageUrl: "https://i.imgur.com/Qk9s7jC.png" // Replace with your image
+    },
+    {
+      icon: "bi-calendar-check-fill",
+      title: "Interview-Ready Problem Sets",
+      description: "Practice with problems curated from actual FAANG and top company interviews. Expert-selected challenges match real-world patterns with detailed editorials, multiple solution approaches, and company-specific tags to target your dream job.",
+      imageUrl: "https://i.imgur.com/dE8wVfG.png" // Replace with your image
+    },
+    {
+      icon: "bi-trophy-fill",
+      title: "Auto-Synced Contest Calendar",
+      description: "Stay competition-ready with CodeForces contests automatically added to your Google Calendar. Get pre-event notifications, track upcoming competitions, and never miss an opportunity to test your skills against the global community.",
+      imageUrl: "https://i.imgur.com/R5Yt6sH.png" // Replace with your image
+    }
+  ];
 
   if (user) {
     navigate("/dashboard");
@@ -50,45 +110,34 @@ function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="container py-5">
+         <section className="container py-5">
+          <div className="text-center mb-5">
+              <h2 className="display-5 fw-bold gradient-text">Core Features</h2>
+              <p className="lead subtitle mx-auto">
+                Discover the tools that make our platform next-generation.
+              </p>
+          </div>
           <div className="feature-tree">
-
-            {/* HERO FEATURE #1 - Make this stand out! */}
-            <FeatureCard
-              icon="bi-people-fill"
-              title="Live Collaboration "
-              description="Code together in real time and clarify doubts through live voice conversations — no need for Zoom or Discord. Share your session, collaborate seamlessly, and solve problems together. Perfect for mock interviews, pair programming, and study sessions."
-            />
-
-            {/* HERO FEATURE #2 - Your unique selling point! */}
-            <FeatureCard
-              icon="bi-robot"
-              title="AI Resume Analyzer & Optimizer"
-              description="Transform your resume with AI-powered analysis, ATS compatibility scoring, and smart improvement suggestions. Get real-time feedback , auto save of most recent versions, and export a professional LaTeX resume that beats applicant tracking systems."
-            />
-
-            <FeatureCard
-              icon="bi-lightning-charge-fill"
-              title="Blazing-Fast Performance"
-              description="Experience sub-100ms code compilation and execution. Our optimized infrastructure handles everything from simple algorithms to complex programs without lag, keeping you in your coding flow."
-            />
-
-            <FeatureCard
-              icon="bi-graph-up-arrow"
-              title="Smart Progress Tracking"
-              description="Visualize your coding journey with interactive heatmaps, detailed submission statistics, and topic-wise analytics. Track streaks, achievements, and improvement patterns that keep you motivated."
-            />
-
-            <FeatureCard
-              icon="bi-share-fill"
-              title="Live Public Profile Sharing"
-              description="Share your CodeHub profile with a live link that updates in real-time. Showcase solved problems , and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically."
-            />
-
+            {coreFeatures.map((feature, index) => (
+              <div key={index} className="feature-row">
+                {/* Feature Card Content */}
+                <div className="feature-content-card">
+                  <i className={`${feature.icon} card-icon`}></i>
+                  <h5 className="fw-bold mb-2">{feature.title}</h5>
+                  <p className="mb-0 opacity-75">{feature.description}</p>
+                </div>
+                {/* Feature Image */}
+                <div className="feature-image-container">
+                  <img src={feature.imageUrl} alt={`${feature.title} illustration`} className="img-fluid" />
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
+        {/* ====================================================== */}
+        {/* UPDATED: Why Choose Us Section */}
+        {/* ====================================================== */}
         <section className="container py-5">
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
@@ -96,43 +145,22 @@ function Home() {
               Features that set us apart from LeetCode, HackerRank, and the competition.
             </p>
           </div>
-
+          {/* We reuse the SAME .feature-tree class here */}
           <div className="feature-tree">
-
-            <div className="col-lg-4 col-md-6">
-              <InfoCard
-                icon="bi-cpu-fill"
-                title="24/7 AI Coding Mentor"
-                description="Never get stuck again. Our adaptive AI provides contextual hints, debugging assistance, and step-by-step explanations tailored to your skill level. Learn faster with a mentor that's always available—no waiting, no judgment."
-              />
-            </div>
-
-        
-
-            <div className="col-lg-4 col-md-6">
-              <InfoCard
-                icon="bi-cloud-fill"
-                title="Real-Time Cloud Workspace"
-                description="Access your code from anywhere with secure cloud storage that syncs instantly. Create shared folders with granular permission controls for team projects. Owner-controlled sharing means your files stay protected while enabling seamless collaboration."
-              />
-            </div>
-
-            <div className="col-lg-4 col-md-6">
-              <InfoCard
-                icon="bi-calendar-check-fill"
-                title="Interview-Ready Problem Sets"
-                description="Practice with problems curated from actual FAANG and top company interviews. Expert-selected challenges match real-world patterns with detailed editorials, multiple solution approaches, and company-specific tags to target your dream job."
-              />
-            </div>
-
-            <div className="col-lg-4 col-md-6">
-              <InfoCard
-                icon="bi-trophy-fill"
-                title="Auto-Synced Contest Calendar"
-                description="Stay competition-ready with CodeForces contests automatically added to your Google Calendar. Get pre-event notifications, track upcoming competitions, and never miss an opportunity to test your skills against the global community."
-              />
-            </div>
-
+            {whyChooseUsFeatures.map((feature, index) => (
+               <div key={index} className="feature-row">
+                {/* Feature Card Content */}
+                <div className="feature-content-card">
+                  <i className={`${feature.icon} card-icon`}></i>
+                  <h5 className="fw-bold mb-2">{feature.title}</h5>
+                  <p className="mb-0 opacity-75">{feature.description}</p>
+                </div>
+                {/* Feature Image */}
+                <div className="feature-image-container">
+                  <img src={feature.imageUrl} alt={`${feature.title} illustration`} className="img-fluid" />
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -254,303 +282,231 @@ function Home() {
           </div>
         </footer>
       </div>
+<style>{`
+  /* ======================================= */
+  /* Global & Component Styles             */
+  /* ======================================= */
 
-      <style>{`
-        /* Global Styles */
-        .home-page {
-          transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .gradient-text {
-          background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          text-fill-color: transparent;
-        }
-        .subtitle {
-          max-width: 700px;
-        }
-        
-        /* Theme Colors */
-        .theme-dark {
-          background-color: #12121c;
-          color: #fff;
-        }
-        .theme-light {
-          background-color: #f8f9fa;
-          color: #212529;
-        }
-        .theme-dark .subtitle { color: rgba(255, 255, 255, 0.7); }
-        .theme-light .subtitle { color: #6c757d; }
+  .home-page {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .gradient-text {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    max-width: 700px;
+  }
+  
+  /* --- Theme Colors --- */
+  .theme-dark {
+    background-color: #12121c;
+    color: #fff;
+  }
+  .theme-light {
+    background-color: #f8f9fa;
+    color: #212529;
+  }
+  .theme-dark .subtitle { color: rgba(255, 255, 255, 0.7); }
+  .theme-light .subtitle { color: #6c757d; }
 
-        /* Hero Section */
-        .hero-section {
-          padding: 8rem 0;
-          min-height: 80vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        /* Buttons */
-        .btn-gradient-primary {
-          background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
-          border: none;
-          color: white;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        .btn-gradient-primary:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-          color: white;
-        }
-        
-        .btn-secondary-custom {
-          border: 1px solid;
-          transition: all 0.3s ease;
-        }
-        .theme-dark .btn-secondary-custom {
-          background-color: transparent;
-          border-color: #3a3a5a;
-          color: #fff;
-        }
-        .theme-light .btn-secondary-custom {
-          background-color: #e9ecef;
-          border-color: #dee2e6;
-          color: #212529;
-        }
-        .theme-dark .btn-secondary-custom:hover {
-          background-color: rgba(255, 255, 255, 0.1);
-          border-color: #8b5cf6;
-        }
-        .theme-light .btn-secondary-custom:hover {
-          background-color: #dee2e6;
-          border-color: #3b82f6;
-        }
+  /* --- Hero Section --- */
+  .hero-section {
+    padding: 8rem 0;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* --- Buttons --- */
+  .btn-gradient-primary {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  .btn-gradient-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    color: white;
+  }
+  .btn-secondary-custom {
+    border: 1px solid;
+    transition: all 0.3s ease;
+  }
+  .theme-dark .btn-secondary-custom {
+    background-color: transparent;
+    border-color: #3a3a5a;
+    color: #fff;
+  }
+  .theme-light .btn-secondary-custom {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #212529;
+  }
+  .theme-dark .btn-secondary-custom:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #8b5cf6;
+  }
+  .theme-light .btn-secondary-custom:hover {
+    background-color: #dee2e6;
+    border-color: #3b82f6;
+  }
 
-        /* Feature & Info Cards */
-        .card-custom {
-          border-radius: 1rem;
-          padding: 2rem;
-          height: 100%;
-          transition: all 0.3s ease;
-          border: 1px solid;
-        }
-        .theme-dark .card-custom {
-          background-color: #1e1e2f;
-          border-color: #3a3a5a;
-        }
-        .theme-light .card-custom {
-          background-color: #ffffff;
-          border-color: #dee2e6;
-        }
-        .card-custom:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        .theme-dark .card-custom:hover {
-          border-color: #8b5cf6;
-        }
-        .theme-light .card-custom:hover {
-          border-color: #3b82f6;
-        }
+  /* --- Generic & Product Card Styles --- */
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    color: #8b5cf6;
+  }
+  .product-card {
+    border-radius: 1rem;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+  }
+  .theme-dark .product-card {
+    background-color: #1e1e2f;
+    border-color: #3a3a5a;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  .theme-light .product-card {
+    background-color: #ffffff;
+    border-color: #dee2e6;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  }
 
-        .card-icon {
-          font-size: 2.5rem;
-          margin-bottom: 1rem;
-          display: inline-block;
-          color: #8b5cf6;
-        }
+  /* --- Footer --- */
+  .footer {
+    border-top: 1px solid;
+  }
+  .theme-dark .footer {
+    background-color: #1e1e2f;
+    border-color: #3a3a5a;
+  }
+  .theme-light .footer {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+  }
+  .footer-link {
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  .theme-dark .footer-link { color: #8b5cf6; }
+  .theme-light .footer-link { color: #3b82f6; }
+  .footer-link:hover { color: #ef4444; }
 
-        /* Product Card */
-        .product-card {
-            border-radius: 1rem;
-            border: 1px solid;
-            position: relative;
-            overflow: hidden;
-        }
-        .theme-dark .product-card {
-            background-color: #1e1e2f;
-            border-color: #3a3a5a;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        .theme-light .product-card {
-            background-color: #ffffff;
-            border-color: #dee2e6;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        }
 
-        .product-badge {
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            color: white !important;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .product-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: white;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
-        }
+  /* ====================================================== */
+  /* CORRECTED: Feature Tree with Alternating Image Layout  */
+  /* ====================================================== */
+  .feature-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 5rem; /* Spacing between rows */
+    position: relative;
+    margin: 4rem 0;
+  }
 
-        .feature-item {
-            padding: 1rem;
-            border-radius: 0.75rem;
-            border: 1px solid;
-            transition: background-color 0.3s ease;
-        }
-        .theme-dark .feature-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-color: #3a3a5a;
-        }
-        .theme-light .feature-item {
-            background-color: #f8f9fa;
-            border-color: #e9ecef;
-        }
-        .theme-dark .feature-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .theme-light .feature-item:hover {
-            background-color: #e9ecef;
-        }
-        .feature-item-icon {
-            font-size: 1.25rem;
-            color: #8b5cf6;
-        }
-
-        /* Language Chips */
-        .language-chip {
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid;
-        }
-        .language-chip i {
-            font-size: 1.5rem;
-        }
-        .theme-dark .language-chip {
-            background-color: #1e1e2f;
-            border-color: #3a3a5a;
-        }
-        .theme-light .language-chip {
-            background-color: #ffffff;
-            border-color: #dee2e6;
-        }
-        .language-chip:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* Footer */
-        .footer {
-          border-top: 1px solid;
-        }
-        .theme-dark .footer {
-            background-color: #1e1e2f;
-            border-color: #3a3a5a;
-        }
-        .theme-light .footer {
-            background-color: #e9ecef;
-            border-color: #dee2e6;
-        }
-        .footer-link {
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.3s ease;
-        }
-        .theme-dark .footer-link { color: #8b5cf6; }
-        .theme-light .footer-link { color: #3b82f6; }
-        .footer-link:hover { color: #ef4444; }
-        .feature-tree {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 3rem auto;
-  width: 100%;
-  gap: 3rem;
-}
-
-/* Vertical connecting line */
-.feature-tree::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 3px;
-  background-color: rgba(138, 92, 246, 0.5);
-  transform: translateX(-50%);
-  z-index: 0;
-}
-
-/* Each feature card container */
-.feature-tree > * {
-  position: relative;
-  width: 45%;
-  background: #111827;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  z-index: 1;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
-}
-
-/* Alternating positions */
-.feature-tree > *:nth-child(odd) {
-  align-self: flex-start;
-  transform: translateX(-5%);
-}
-
-.feature-tree > *:nth-child(even) {
-  align-self: flex-end;
-  transform: translateX(5%);
-}
-
-/* Connector lines to the center line */
-.feature-tree > *::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 30px;
-  height: 3px;
-  background-color: rgba(138, 92, 246, 0.5);
-  transform: translateY(-50%);
-}
-
-.feature-tree > *:nth-child(odd)::after {
-  right: -30px;
-}
-
-.feature-tree > *:nth-child(even)::after {
-  left: -30px;
-}
-
-/* Responsive fix for mobile view */
-@media (max-width: 768px) {
+  /* The vertical timeline bar */
   .feature-tree::before {
-    left: 4px;
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 3px;
+    background-image: linear-gradient(to bottom, #3b82f6, #8b5cf6, #ef4444);
+    opacity: 0.2;
+    transform: translateX(-50%);
+    z-index: 0;
   }
-  .feature-tree > * {
-    width: 90%;
-    align-self: center;
-    transform: none;
-  }
-  .feature-tree > *::after {
-    display: none;
-  }
-}
 
-      `}</style>
+  .feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* This is the key to alternating sides */
+  .feature-row:nth-child(even) {
+    direction: rtl; /* Reverses the order of grid columns */
+  }
+  .feature-row:nth-child(even) > * {
+    direction: ltr; /* Resets text direction for the content inside */
+  }
+
+  .feature-content-card {
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    text-align: left;
+  }
+
+  /* ✅ FIX: Theme-aware backgrounds for cards */
+  .theme-dark .feature-content-card {
+    background-color: #1e1e2f;
+    border-color: #3a3a5a;
+  }
+  .theme-light .feature-content-card {
+    background-color: #ffffff; /* Correct background for light mode */
+    border-color: #dee2e6;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+  }
+
+  /* --- Hover Effects --- */
+  .theme-dark .feature-content-card:hover {
+    transform: translateY(-5px);
+    border-color: #8b5cf6;
+  }
+  .theme-light .feature-content-card:hover {
+    transform: translateY(-5px);
+    border-color: #3b82f6;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+
+  .feature-image-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 1rem;
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+  .feature-image-container img:hover {
+    transform: scale(1.03);
+  }
+
+  /* --- Responsive Adjustments --- */
+  @media (max-width: 992px) {
+    .feature-tree::before {
+      left: 1.5rem; 
+    }
+    .feature-row, .feature-row:nth-child(even) {
+      grid-template-columns: 1fr; /* Stack columns vertically */
+      direction: ltr; /* Reset direction */
+      gap: 2rem;
+      padding-left: 3rem; 
+    }
+    .feature-image-container {
+      grid-row: 1; /* Image appears first */
+    }
+    .feature-content-card {
+      grid-row: 2; /* Card appears second */
+    }
+  }
+
+`}</style>
     </>
   );
 }
