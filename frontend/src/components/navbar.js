@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { db } from '../firebaseConfig';
 import { doc, onSnapshot } from 'firebase/firestore';
-
+import logo from '../assets/logo.png';
 function Navbar() {
     const { user, logout } = useAuth();
     const { theme, setTheme } = useTheme();
@@ -143,11 +143,22 @@ function Navbar() {
                 .dropdown-toggle.no-caret::after {
                     display: none !important;
                 }
+                    /* This class will be applied to the logo image in dark mode */
+.logo-dark-theme {
+    filter: invert(1) brightness(2);
+}
                 `}
             </style>
 
             <nav className={`navbar navbar-expand-lg sticky-top shadow-sm navbar-custom theme-${theme}`}>
                 <div className="container-fluid px-4">
+                     <img 
+                                    src={logo} // Assuming you import it like: import logo from './path/to/your/logo.png';
+                                    alt="CodeHub Logo" 
+                                    width="55" 
+                                    height="55" 
+                                    className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
+                                />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
                         CodeHub
                     </Link>
