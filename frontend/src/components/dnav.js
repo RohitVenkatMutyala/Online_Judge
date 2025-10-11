@@ -162,6 +162,10 @@ function Dnav() {
 
                     <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
+                            <button className="dropdown-item d-flex align-items-center gap-2" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                                <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
+                                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                            </button>
                             {user && (
                                 <>
                                     <li className="nav-item">
@@ -169,7 +173,7 @@ function Dnav() {
                                             <i className="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
                                         </Link>
                                     </li>
-                                    
+
                                     <li className="nav-item ms-lg-3">
                                         <div className="dropdown profile-dropdown">
                                             <a href="#" className="d-block text-decoration-none dropdown-toggle no-caret" data-bs-toggle="dropdown" aria-expanded="false">
