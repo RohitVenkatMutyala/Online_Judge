@@ -5,6 +5,14 @@ import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import collaborationImage from '../assets/collaboration.jpg';
+import resumeImage from '../assets/resume-analyzer.png';
+import performanceImage from '../assets/performance.png';
+import trackingImage from '../assets/tracking.png';
+import sharingImage from '../assets/sharing.png';
+import mentorImage from '../assets/mentor.png';
+import workspaceImage from '../assets/workspace.png';
+import problemsImage from '../assets/problems.png';
+import calendarImage from '../assets/calendar.png';
 function Home() {
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -28,25 +36,25 @@ function Home() {
       icon: "bi-robot",
       title: "AI Resume Analyzer & Optimizer",
       description: "Transform your resume with AI-powered analysis, ATS compatibility scoring, and smart improvement suggestions. Get real-time feedback , auto save of most recent versions, and export a professional LaTeX resume that beats applicant tracking systems.",
-      imageUrl: "https://i.imgur.com/Y8zVaf8.png" // Replace with your image
+      imageUrl: resumeImage // Replace with your image
     },
     {
       icon: "bi-lightning-charge-fill",
       title: "Blazing-Fast Performance",
       description: "Experience sub-100ms code compilation and execution. Our optimized infrastructure handles everything from simple algorithms to complex programs without lag, keeping you in your coding flow.",
-      imageUrl: "https://i.imgur.com/vHqYv2d.png" // Replace with your image
+      imageUrl: performanceImage // Replace with your image
     },
     {
       icon: "bi-graph-up-arrow",
       title: "Smart Progress Tracking",
       description: "Visualize your coding journey with interactive heatmaps, detailed submission statistics, and topic-wise analytics. Track streaks, achievements, and improvement patterns that keep you motivated.",
-      imageUrl: "https://i.imgur.com/o2P8mGz.png" // Replace with your image
+      imageUrl: trackingImage // Replace with your image
     },
     {
       icon: "bi-share-fill",
       title: "Live Public Profile Sharing",
       description: "Share your CodeHub profile with a live link that updates in real-time. Showcase solved problems , and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically.",
-      imageUrl: "https://i.imgur.com/mJ5FqYh.png" // Replace with your image
+      imageUrl: sharingImage // Replace with your image
     }
   ];
 
@@ -56,25 +64,25 @@ function Home() {
       icon: "bi-cpu-fill",
       title: "24/7 AI Coding Mentor",
       description: "Never get stuck again. Our adaptive AI provides contextual hints, debugging assistance, and step-by-step explanations tailored to your skill level. Learn faster with a mentor that's always available—no waiting, no judgment.",
-      imageUrl: "https://i.imgur.com/pB3k5aL.png" // Replace with your image
+      imageUrl: mentorImage // Replace with your image
     },
     {
       icon: "bi-cloud-fill",
       title: "Real-Time Cloud Workspace",
-      description: "Access your code from anywhere with secure cloud storage that syncs instantly. Create shared folders with granular permission controls for team projects. Owner-controlled sharing means your files stay protected while enabling seamless collaboration.",
-      imageUrl: "https://i.imgur.com/Qk9s7jC.png" // Replace with your image
+      description: "Access your codes and saved files from anywhere with secure cloud storage that syncs instantly. Create shared folders with granular permission controls for team projects. Owner-controlled sharing means your files stay protected while enabling seamless collaboration.",
+      imageUrl: workspaceImage // Replace with your image
     },
     {
       icon: "bi-calendar-check-fill",
       title: "Interview-Ready Problem Sets",
       description: "Practice with problems curated from actual FAANG and top company interviews. Expert-selected challenges match real-world patterns with detailed editorials, multiple solution approaches, and company-specific tags to target your dream job.",
-      imageUrl: "https://i.imgur.com/dE8wVfG.png" // Replace with your image
+      imageUrl: problemsImage // Replace with your image
     },
     {
       icon: "bi-trophy-fill",
       title: "Auto-Synced Contest Calendar",
       description: "Stay competition-ready with CodeForces contests automatically added to your Google Calendar. Get pre-event notifications, track upcoming competitions, and never miss an opportunity to test your skills against the global community.",
-      imageUrl: "https://i.imgur.com/R5Yt6sH.png" // Replace with your image
+      imageUrl: calendarImage // Replace with your image
     }
   ];
 
