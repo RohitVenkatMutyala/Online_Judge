@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import collaborationImage from '../assets/collaboration.jpg';
 function Home() {
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -22,7 +22,7 @@ function Home() {
       icon: "bi-people-fill",
       title: "Live Collaboration ",
       description: "Code together in real time and clarify doubts through live voice conversations — no need for Zoom or Discord. Share your session, collaborate seamlessly, and solve problems together. Perfect for mock interviews, pair programming, and study sessions.",
-      imageUrl: "https://i.imgur.com/3Z6OqfJ.png" // Replace with your image
+      imageUrl: collaborationImage // Replace with your image
     },
     {
       icon: "bi-robot",
