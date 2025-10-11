@@ -57,7 +57,7 @@ function Home() {
             <FeatureCard
               icon="bi-people-fill"
               title="Live Collaboration "
-              description="Code together with built-in voice no need for Zoom or Discord. Share your Session, collaborate in real-time, and solve problems together. Perfect for mock interviews, pair programming, and study sessions."
+              description="Code together in real time and clarify doubts through live voice conversations — no need for Zoom or Discord. Share your session, collaborate seamlessly, and solve problems together. Perfect for mock interviews, pair programming, and study sessions."
             />
 
             {/* HERO FEATURE #2 - Your unique selling point! */}
