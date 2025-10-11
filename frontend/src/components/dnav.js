@@ -155,12 +155,12 @@ function Dnav() {
                     <img 
                 src={logo} // Assuming you import it like: import logo from './path/to/your/logo.png';
                 alt="CodeHub Logo" 
-                width="30" 
-                height="30" 
+                width="45" 
+                height="45" 
                 className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
             />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
-                        CodeHub
+                         CodeHub
                     </Link>
 
                     <button
