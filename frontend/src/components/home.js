@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Dnav from './dnav';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import collaborationImage from '../assets/collaboration.jpg';
+import collaborationImage from '../assets/collaboration.png';
 import resumeImage from '../assets/resume-analyzer.png';
 import performanceImage from '../assets/performance.png';
 import trackingImage from '../assets/tracking.png';
