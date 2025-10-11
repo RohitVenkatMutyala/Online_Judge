@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { db } from '../firebaseConfig';
 import { doc, onSnapshot } from 'firebase/firestore';
+import logo from '../assets/logo.png';
 
 function Dnav() {
     const { user, logout } = useAuth();
@@ -135,7 +136,10 @@ function Dnav() {
                     transition: all 0.3s ease;
                     transform: translateX(-50%);
                 }
-
+                /* This class will be applied to the logo image in dark mode */
+.logo-dark-theme {
+    filter: invert(1) brightness(2);
+}
                 .nav-link-custom:hover::after, .nav-link-custom.active::after {
                     width: 70%;
                 }
@@ -148,6 +152,13 @@ function Dnav() {
 
             <nav className={`navbar navbar-expand-lg sticky-top shadow-sm navbar-custom theme-${theme}`}>
                 <div className="container-fluid px-4">
+                    <img 
+                src={logo} // Assuming you import it like: import logo from './path/to/your/logo.png';
+                alt="CodeHub Logo" 
+                width="30" 
+                height="30" 
+                className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
+            />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
                         CodeHub
                     </Link>
