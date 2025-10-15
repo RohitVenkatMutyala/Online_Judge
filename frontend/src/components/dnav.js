@@ -176,7 +176,7 @@ function Dnav() {
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
                             <button className="dropdown-item d-flex align-items-center gap-2" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
                                 <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                                {theme === 'dark' ? 'Sunshine' : 'Moonbeam'}
                             </button>
                             <br></br>
                             {user && (
