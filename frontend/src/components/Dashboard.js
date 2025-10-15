@@ -826,6 +826,24 @@ function Dashboard() {
           background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
           color: #e2e8f0;
         }
+             [data-bs-theme="dark"] .info-section {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+          border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        [data-bs-theme="dark"] .problem-card {
+          background: #1a202c;
+        }
+        
+        [data-bs-theme="dark"] .card-header,
+        [data-bs-theme="dark"] .card-footer {
+          background: #1a202c !important;
+        }
+        
+        .info-section {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+          border: 1px solid rgba(102, 126, 234, 0.1);
+        }
             `}</style>
 
             {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
