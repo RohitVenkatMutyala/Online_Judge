@@ -446,7 +446,7 @@ function Dashboard() {
                                     </div>
 
                                     <div className="col-12 col-md">
-                                        <h1 className="fw-bold mb-1">Welcome Back, {user.firstname}!</h1>
+                                        <h1 className="fw-bold mb-1">Hello 👋, {user.firstname}!</h1>
                                         <p className="lead text-muted mb-2">{user.email}</p>
                                         <div className="d-flex align-items-center flex-wrap gap-2">
                                             <div className="user-badge d-inline-flex align-items-center px-3 py-1 rounded-pill">
