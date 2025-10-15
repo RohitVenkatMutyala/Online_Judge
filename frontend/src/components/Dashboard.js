@@ -715,6 +715,117 @@ function Dashboard() {
   transform: translateY(-3px); /* Lifts the button slightly */
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important; /* Enhance shadow on hover */
 }
+  .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3,
+        .markdown-content h4,
+        .markdown-content h5,
+        .markdown-content h6 {
+          font-weight: 600;
+          margin-top: 2rem;
+          margin-bottom: 1rem;
+        }
+        
+        .markdown-content p {
+          margin-bottom: 1.5rem;
+        }
+        
+        .markdown-content code {
+          padding: 0.25rem 0.5rem;
+          border-radius: 6px;
+          font-size: 0.9em;
+          color: #e53e3e;
+        }
+        
+        .markdown-content pre {
+          background: linear-gradient(135deg, #2d3748, #4a5568);
+          color: #e2e8f0;
+          padding: 1.5rem;
+          border-radius: 12px;
+          overflow-x: auto;
+          margin: 1.5rem 0;
+          border-left: 4px solid #ff416c;
+        }
+        
+        .markdown-content pre code {
+          background: transparent;
+          color: inherit;
+          border: none;
+          padding: 0;
+        }
+        
+        .markdown-content ul,
+        .markdown-content ol {
+          margin-bottom: 1.5rem;
+          padding-left: 2rem;
+        }
+        
+        .markdown-content li {
+          margin-bottom: 0.5rem;
+        }
+        
+        .markdown-content blockquote {
+          border-left: 4px solid #11998e;
+          padding: 1rem 1.5rem;
+          margin: 1.5rem 0;
+          border-radius: 8px;
+        }
+        
+        /* Light theme styles */
+        [data-bs-theme="light"] .markdown-content h1,
+        [data-bs-theme="light"] .markdown-content h2,
+        [data-bs-theme="light"] .markdown-content h3,
+        [data-bs-theme="light"] .markdown-content h4,
+        [data-bs-theme="light"] .markdown-content h5,
+        [data-bs-theme="light"] .markdown-content h6 {
+          color: #2d3748;
+        }
+        
+        [data-bs-theme="light"] .markdown-content p,
+        [data-bs-theme="light"] .markdown-content li {
+          color: #4a5568;
+        }
+        
+        [data-bs-theme="light"] .markdown-content code {
+          background: linear-gradient(135deg, #f7fafc, #edf2f7);
+          border: 1px solid #e2e8f0;
+        }
+        
+        [data-bs-theme="light"] .markdown-content blockquote {
+          background: linear-gradient(135deg, #f0fff4, #e6fffa);
+          color: #2d3748;
+        }
+        
+        [data-bs-theme="light"] .info-section {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+          border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Dark theme styles */
+        [data-bs-theme="dark"] .markdown-content h1,
+        [data-bs-theme="dark"] .markdown-content h2,
+        [data-bs-theme="dark"] .markdown-content h3,
+        [data-bs-theme="dark"] .markdown-content h4,
+        [data-bs-theme="dark"] .markdown-content h5,
+        [data-bs-theme="dark"] .markdown-content h6 {
+          color: #e2e8f0;
+        }
+        
+        [data-bs-theme="dark"] .markdown-content p,
+        [data-bs-theme="dark"] .markdown-content li {
+          color: #a0aec0;
+        }
+        
+        [data-bs-theme="dark"] .markdown-content code {
+          background: linear-gradient(135deg, #2d3748, #4a5568);
+          border: 1px solid #4a5568;
+          color: #fbb6ce;
+        }
+        
+        [data-bs-theme="dark"] .markdown-content blockquote {
+          background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+          color: #e2e8f0;
+        }
             `}</style>
 
             {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
