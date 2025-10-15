@@ -152,16 +152,16 @@ function Navbar() {
 
             <nav className={`navbar navbar-expand-lg sticky-top shadow-sm navbar-custom theme-${theme}`}>
                 <div className="container-fluid px-4">
-                     <img 
-                                    src={logo} 
+                       <img 
+                                    src={logo}
                                     alt="CodeHub Logo" 
                                     width="55" 
                                     height="55" 
-                                    className={`logo-image ${logo-dark-theme}`}
+                                    className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : 'logo-dark-theme'}`}
                                      style={{ transform: 'rotate(90deg)' }}
                                 />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
-                        CodeHub
+                       Randoman
                     </Link>
 
                     <button

@@ -53,7 +53,7 @@ function Home() {
     {
       icon: "bi-share-fill",
       title: "Live Public Profile Sharing",
-      description: "Share your CodeHub profile with a live link that updates in real-time. Showcase solved problems , and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically.",
+      description: "Share your Randoman profile with a live link that updates in real-time. Showcase solved problems , and achievements to recruiters instantly—no manual updates needed, your progress syncs automatically.",
       imageUrl: sharingImage // Replace with your image
     }
   ];
@@ -148,7 +148,7 @@ function Home() {
         {/* ====================================================== */}
         <section className="container py-5">
           <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold gradient-text">Why CodeHub?</h2>
+            <h2 className="display-5 fw-bold gradient-text">Why Randoman?</h2>
             <p className="lead subtitle mx-auto">
               Features that set us apart from LeetCode, HackerRank, and the competition.
             </p>
@@ -283,7 +283,7 @@ function Home() {
         {/* Footer */}
         <footer className="footer mt-auto py-4">
           <div className="container text-center">
-            <p className="mb-1">&copy; 2025 CodeHub. All rights reserved.</p>
+            <p className="mb-1">&copy; 2025 Randoman. All rights reserved.</p>
             <a href="mailto:heisenberg@randoman.online" className="footer-link">
               <i className="bi bi-envelope-fill me-2"></i>Contact Us
             </a>
