@@ -884,7 +884,9 @@ function Dashboard() {
                                             <div>
                                                 <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
                                                 <hr />
+                                                <div data-bs-theme={theme}>
                                                 <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
+                                            </div>
                                             </div>
                                         ) : (
                                             <p>No review history found.</p>
