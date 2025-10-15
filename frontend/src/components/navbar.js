@@ -157,8 +157,8 @@ function Navbar() {
                                     alt="CodeHub Logo" 
                                     width="55" 
                                     height="55" 
-                                    className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : 'logo-dark-theme'}`}
-                                     style={{ transform: 'rotate(90deg)' }}
+                                    className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
+                                     style={{ transform: 'rotate(97deg)' }}
                                 />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
                        Randoman

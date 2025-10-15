@@ -157,10 +157,11 @@ function Dnav() {
                 alt="CodeHub Logo" 
                 width="55" 
                 height="55" 
-                className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : 'logo-dark-theme'}`}
+                className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
+                 style={{ transform: 'rotate(97deg)' }}
             />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
-                         CodeHub
+                        Randoman
                     </Link>
 
                     <button
@@ -177,6 +178,7 @@ function Dnav() {
                                 <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
                                 {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                             </button>
+                            <br></br>
                             {user && (
                                 <>
                                     <li className="nav-item">
