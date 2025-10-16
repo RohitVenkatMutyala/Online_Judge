@@ -15,7 +15,7 @@ import 'react-calendar-heatmap/dist/styles.css';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import ReactMarkdown from "react-markdown";
-
+import CircularProgressChart from './CircularProgressChart';
 // --- ADD THIS NEW BLOCK: Badge Definitions ---
 const STREAK_BADGES = [
     { days: 7, name: 'Weekly Warrior', icon: 'bi-calendar-week-fill', color: 'success' },
@@ -480,16 +480,27 @@ function Dashboard() {
                                         <div className="mb-5">
                                             <div className="d-flex justify-content-between align-items-center mb-3">
                                                 <h4 className="fw-semibold mb-0">Progress Overview</h4>
-                                                <select className="form-select form-select-sm" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: 'auto' }}>
+                                                <select
+                                                    className="form-select form-select-sm"
+                                                    value={selectedTopic}
+                                                    onChange={(e) => setSelectedTopic(e.target.value)}
+                                                    style={{ width: 'auto' }}
+                                                >
                                                     {stats.topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
                                                 </select>
                                             </div>
-                                            <div className="row g-3">
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Total Solved" value={displayedStats.solved} total={displayedStats.total} icon="bi-check-all" color="primary" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Easy" value={displayedStats.easySolved} total={displayedStats.totalEasy} icon="bi-circle-square" color="success" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Medium" value={displayedStats.mediumSolved} total={displayedStats.totalMedium} icon="bi-square-half" color="warning" /></div>
-                                                <div className="col-md-6 col-xl-3"><StatCard title="Hard" value={displayedStats.hardSolved} total={displayedStats.totalHard} icon="bi-square-fill" color="danger" /></div>
-                                            </div>
+
+                                            {/* The old row of StatCards is now replaced by this single component */}
+                                            <CircularProgressChart
+                                                solved={displayedStats.solved}
+                                                total={displayedStats.total}
+                                                easySolved={displayedStats.easySolved}
+                                                totalEasy={displayedStats.totalEasy}
+                                                mediumSolved={displayedStats.mediumSolved}
+                                                totalMedium={displayedStats.totalMedium}
+                                                hardSolved={displayedStats.hardSolved}
+                                                totalHard={displayedStats.totalHard}
+                                            />
                                         </div>
 
                                         {/* --- ADD THIS NEW BLOCK: Achievements & Streaks Section --- */}
@@ -844,6 +855,75 @@ function Dashboard() {
           background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
           border: 1px solid rgba(102, 126, 234, 0.1);
         }
+          /* Styling for the new Circular Progress Chart */
+
+.progress-container.card {
+    background-color: #282828 !important; /* A dark gray background */
+    border: none;
+    border-radius: 12px;
+}
+
+/* Styles for the text in the center of the chart */
+.center-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    line-height: 1;
+}
+
+.center-text .solved-count {
+    font-size: 2.25rem; /* 36px */
+    font-weight: 700;
+}
+
+.center-text .total-count {
+    font-size: 1rem; /* 16px */
+    color: #888;
+    margin-top: -5px;
+}
+
+.center-text .solved-label {
+    font-size: 0.9rem; /* 14px */
+    color: #6c757d;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+
+/* Styles for the breakdown items (Easy, Med, Hard) */
+.stat-item {
+    background-color: #3a3a3a;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    width: 180px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Remove margin from the last item */
+.stat-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+.stat-item .stat-label {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.stat-item .stat-value {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #ced4da;
+    font-weight: 500;
+}
             `}</style>
 
             {/* All Modals (Link Modal, Resume Review Modal) remain unchanged */}
@@ -885,8 +965,8 @@ function Dashboard() {
                                                 <p className="text-muted small">Reviewed on: {new Date(latestReview.reviewedAt).toLocaleString()}</p>
                                                 <hr />
                                                 <div data-bs-theme={theme}>
-                                                <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
-                                            </div>
+                                                    <div className="markdown-content mt-4"><ReactMarkdown>{latestReview.feedback}</ReactMarkdown></div>
+                                                </div>
                                             </div>
                                         ) : (
                                             <p>No review history found.</p>
