@@ -16,6 +16,7 @@ import { Tooltip as ReactTooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import ReactMarkdown from "react-markdown";
 import CircularProgressChart from './CircularProgressChart';
+import badgeConfig from '../badgeConfig';
 // --- ADD THIS NEW BLOCK: Badge Definitions ---
 const STREAK_BADGES = [
     { days: 7, name: 'Weekly Warrior', icon: 'bi-calendar-week-fill', color: 'success' },
@@ -25,7 +26,14 @@ const STREAK_BADGES = [
     { days: 81, name: 'Legendary Loremaster', icon: 'bi-gem', color: 'danger' },
 ];
 // --- END OF NEW BLOCK ---
-
+const badgeConfig = [
+    { id: 'streak-5', name: '5-Day Streak Star', type: 'streak', threshold: 5, icon: 'star', color: '#FFD700', tooltip: 'Solve problems for 5 consecutive days.' },
+    { id: 'streak-10', name: '10-Day Streak Master', type: 'streak', threshold: 10, icon: 'lightning', color: '#8A2BE2', tooltip: 'Solve problems for 10 consecutive days.' },
+    { id: 'streak-30', name: 'Month-Long Streak Hero', type: 'streak', threshold: 30, icon: 'diamond', color: '#00CED1', tooltip: 'Solve problems for 30 consecutive days.' },
+    { id: 'solved-easy-10', name: 'Easy Explorer', type: 'solved_easy', threshold: 10, icon: 'leaf', color: '#9ACD32', tooltip: 'Unlock by solving 10 Easy problems.' },
+    { id: 'solved-medium-5', name: 'Medium Maven', type: 'solved_medium', threshold: 5, icon: 'flask', color: '#FF8C00', tooltip: 'Unlock by solving 5 Medium problems.' },
+    { id: 'solved-hard-1', name: 'Hard Conqueror', type: 'solved_hard', threshold: 1, icon: 'sword', color: '#DC143C', tooltip: 'Unlock by solving 1 Hard problem.' },
+];
 function Dashboard() {
     const { user } = useAuth();
     const { theme } = useTheme();
@@ -505,47 +513,71 @@ function Dashboard() {
 
                                         {/* --- ADD THIS NEW BLOCK: Achievements & Streaks Section --- */}
                                         <div className="mb-5">
-                                            <h4 className="fw-semibold mb-3">Achievements & Streaks</h4>
+                                            <h4 className="fw-semibold mb-3 text-white">Achievements & Streaks</h4> {/* Added text-white for visibility */}
                                             <div className="row g-3">
                                                 <div className="col-md-6">
-                                                    <div className="streak-card card h-100 p-3">
+                                                    <div className="streak-card card h-100 p-3 bg-darker-card"> {/* Added bg-darker-card class */}
                                                         <div className="d-flex align-items-center">
-                                                            <div className="icon-container text-danger bg-danger-subtle me-3">
-                                                                <i className="bi bi-fire fs-4"></i>
+                                                            <div className="icon-container-lg bg-danger-subtle me-3"> {/* Updated class for consistent sizing */}
+                                                                <i className="bi bi-fire fs-4 text-danger"></i>
                                                             </div>
                                                             <div>
                                                                 <p className="text-muted mb-0">Current Streak</p>
-                                                                <h4 className="fw-bold mb-0">{streakInfo.current} Days</h4>
+                                                                <h4 className="fw-bold mb-0 text-white">{streakInfo.current} Days</h4>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="col-md-6">
-                                                    <div className="streak-card card h-100 p-3">
+                                                    <div className="streak-card card h-100 p-3 bg-darker-card"> {/* Added bg-darker-card class */}
                                                         <div className="d-flex align-items-center">
-                                                            <div className="icon-container text-warning bg-warning-subtle me-3">
-                                                                <i className="bi bi-trophy-fill fs-4"></i>
+                                                            <div className="icon-container-lg bg-warning-subtle me-3"> {/* Updated class for consistent sizing */}
+                                                                <i className="bi bi-trophy-fill fs-4 text-warning"></i>
                                                             </div>
                                                             <div>
                                                                 <p className="text-muted mb-0">Longest Streak</p>
-                                                                <h4 className="fw-bold mb-0">{streakInfo.longest} Days</h4>
+                                                                <h4 className="fw-bold mb-0 text-white">{streakInfo.longest} Days</h4>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            {awardedBadges.length > 0 && (
-                                                <div className="mt-4">
-                                                    <h5 className="fw-semibold mb-3">Badges Earned</h5>
-                                                    <div className="d-flex flex-wrap gap-3">
-                                                        {awardedBadges.map(badge => (
-                                                            <div key={badge.name} className={`badge-card text-center p-3 rounded-3 bg-${badge.color}-subtle`} data-bs-toggle="tooltip" title={`${badge.name} - ${badge.days} Day Streak`}>
-                                                                <i className={`${badge.icon} fs-2 text-${badge.color}`}></i>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+
+                                            {/* This is the new section for badges */}
+                                            <div className="mt-4">
+                                                <h5 className="fw-semibold mb-3 text-white">Badges Earned & In Progress</h5> {/* Updated title */}
+                                                <div className="d-flex flex-wrap gap-3">
+                                                    {badgeConfig.map(badge => {
+                                                        let currentProgress = 0;
+                                                        let isAwarded = false;
+
+                                                        // Determine current progress based on badge type
+                                                        if (badge.type === 'streak') {
+                                                            currentProgress = streakInfo.current;
+                                                            isAwarded = streakInfo.current >= badge.threshold;
+                                                        } else if (badge.type === 'solved_easy') {
+                                                            currentProgress = displayedStats.easySolved;
+                                                            isAwarded = displayedStats.easySolved >= badge.threshold;
+                                                        } else if (badge.type === 'solved_medium') {
+                                                            currentProgress = displayedStats.mediumSolved;
+                                                            isAwarded = displayedStats.mediumSolved >= badge.threshold;
+                                                        } else if (badge.type === 'solved_hard') {
+                                                            currentProgress = displayedStats.hardSolved;
+                                                            isAwarded = displayedStats.hardSolved >= badge.threshold;
+                                                        }
+                                                        // Add more conditions for other badge types
+
+                                                        return (
+                                                            <BadgeComponent
+                                                                key={badge.id}
+                                                                badge={badge}
+                                                                currentProgress={currentProgress}
+                                                                isAwarded={isAwarded}
+                                                            />
+                                                        );
+                                                    })}
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
                                         {/* --- END OF NEW BLOCK --- */}
 
@@ -929,6 +961,113 @@ function Dashboard() {
     font-size: 1rem;
     color: #ced4da;
     font-weight: 500;
+}
+    /* --- Achievements & Streaks Section --- */
+
+.bg-darker-card {
+    background-color: #2D2D2D !important; /* Consistent dark background for cards */
+    border: 1px solid #444; /* Consistent border */
+    border-radius: 10px;
+}
+
+.streak-card .icon-container-lg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 48px;  /* Larger icon container */
+    height: 48px;
+    border-radius: 8px; /* Slightly rounded */
+}
+
+/* Adjustments for the streak cards text */
+.streak-card p.text-muted {
+    color: #999 !important; /* Softer muted text */
+}
+.streak-card h4.fw-bold {
+    color: #E0E0E0 !important; /* Lighter white for titles */
+}
+
+
+/* --- BadgeComponent Specific Styling --- */
+
+.badge-wrapper {
+    position: relative;
+    display: inline-block; /* For proper spacing with flex-wrap */
+}
+
+.badge-card-custom {
+    display: flex;
+    align-items: center;
+    background-color: #2D2D2D; /* Consistent dark background */
+    border: 1px solid; /* Border color will be set by JS */
+    border-radius: 10px;
+    padding: 10px 15px;
+    min-width: 250px; /* Adjust as needed */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+}
+
+.badge-card-custom:hover {
+    transform: translateY(-3px);
+}
+
+.badge-icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Circular icon background */
+    margin-right: 15px;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.badge-icon-container svg {
+    display: block; /* Ensure SVG takes full space */
+}
+
+.badge-info {
+    flex-grow: 1; /* Allow info to take remaining space */
+}
+
+.badge-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.badge-progress-bar-bg {
+    width: 100%;
+    height: 18px; /* Height of the progress bar */
+    border-radius: 9px; /* Pill shape */
+    position: relative;
+    overflow: hidden; /* Keep fill within bounds */
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 8px; /* Padding for text inside */
+}
+
+.badge-progress-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 9px;
+    transition: width 0.5s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.badge-progress-text {
+    position: relative; /* Bring text above the fill */
+    z-index: 1;
+    color: inherit; /* Inherit color from parent */
+    width: 100%;
+    text-align: center;
 }
             `}</style>
 
