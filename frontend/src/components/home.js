@@ -96,34 +96,17 @@ function Home() {
       <Dnav />
       <div className={`home-page theme-${theme}`}>
         {/* Hero Section */}
-        <section className="hero-section text-center">
-          <div className="container">
-            <h1 className="display-3 fw-bold mb-4 gradient-text">
+
+
+        {/* Features Section */}
+         <section className="container py-5">
+          <div className="text-center mb-5">
+               <h1 className="display-3 fw-bold mb-4 gradient-text">
               Enter the Arena of Code
             </h1>
             <p className="lead subtitle mx-auto mb-5">
               A next-generation platform designed for speed, collaboration, and excellence. Sharpen your skills, compete with peers, and land your dream job.
             </p>
-            <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-              <button onClick={handleLogin} className="btn btn-lg btn-gradient-primary fw-semibold px-5 py-3">
-                <i className="bi bi-code-slash me-2"></i>
-                Start Solving
-              </button>
-              <button onClick={handleWatchDemo} className="btn btn-lg btn-secondary-custom fw-semibold px-5 py-3">
-                <i className="bi bi-play-circle-fill me-2"></i>
-                Watch Demo
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-         <section className="container py-5">
-          <div className="text-center mb-5">
-              <h2 className="display-5 fw-bold gradient-text">Core Features</h2>
-              <p className="lead subtitle mx-auto">
-                Discover the tools that make our platform next-generation.
-              </p>
           </div>
           <div className="feature-tree">
             {coreFeatures.map((feature, index) => (
