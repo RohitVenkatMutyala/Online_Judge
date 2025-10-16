@@ -178,12 +178,7 @@ function Dnav() {
                             <br></br>
                             {user && (
                                 <>
-                                    <li className="nav-item">
-                                        <button className="dropdown-item d-flex align-items-center gap-2" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                                            <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`}></i>
-                                            {theme === 'dark' ? 'Sunshine' : 'Moonbeam'}
-                                        </button>
-                                    </li>
+                                
                                     <li className="nav-item">
                                         <Link className={`nav-link nav-link-custom ${isActive('/dashboard') ? 'active' : ''}`} to="/dashboard">
                                             <i className="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
