@@ -890,9 +890,10 @@ function Dashboard() {
           /* Styling for the new Circular Progress Chart */
 
 .progress-container.card {
-    background-color: #282828 !important; /* A dark gray background */
-    border: none;
-    border-radius: 12px;
+    background-color: #2D2D2D !important; /* Slightly lighter dark background from image */
+    border: 1px solid #444; /* Darker border for contrast */
+    border-radius: 10px; /* Slightly more rounded corners */
+    padding: 20px 30px; /* Adjusted padding */
 }
 
 /* Styles for the text in the center of the chart */
@@ -907,37 +908,41 @@ function Dashboard() {
     justify-content: center;
     align-items: center;
     color: white;
-    line-height: 1;
+    line-height: 1.2; /* Adjusted line height */
+    text-align: center;
 }
 
 .center-text .solved-count {
-    font-size: 2.25rem; /* 36px */
-    font-weight: 700;
+    font-size: 2.5rem; /* Larger font size for solved count */
+    font-weight: 600; /* Slightly less bold */
+    color: #E0E0E0; /* Lighter white for the number */
 }
 
 .center-text .total-count {
-    font-size: 1rem; /* 16px */
-    color: #888;
-    margin-top: -5px;
+    font-size: 1.1rem; /* Slightly larger total count */
+    color: #999; /* Softer gray */
+    margin-top: 5px; /* More space between solved and total */
 }
 
 .center-text .solved-label {
-    font-size: 0.9rem; /* 14px */
-    color: #6c757d;
-    margin-top: 8px;
+    font-size: 0.95rem; /* Adjusted font size */
+    color: #6C757D; /* Bootstrap muted gray, consistent */
+    margin-top: 8px; /* Space below total count */
     font-weight: 500;
 }
 
 
-/* Styles for the breakdown items (Easy, Med, Hard) */
+/* Styles for the breakdown items (Easy, Med, Hard) on the right side */
 .stat-item {
-    background-color: #3a3a3a;
-    padding: 0.6rem 1rem;
+    background-color: #3C3C3C; /* Darker background for stat items */
+    padding: 0.7rem 1.2rem; /* Adjusted padding */
     border-radius: 8px;
-    width: 180px;
+    width: 180px; /* Fixed width as in the image */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 15px; /* Space between items */
+    font-size: 0.95rem; /* Consistent font size */
 }
 
 /* Remove margin from the last item */
@@ -946,13 +951,14 @@ function Dashboard() {
 }
 
 .stat-item .stat-label {
-    font-weight: 600;
-    font-size: 1rem;
+    font-weight: 500; /* Medium weight */
+    margin-right: 10px; /* Space between label and value */
+    color: #E0E0E0; /* Lighter color for labels */
 }
 
 .stat-item .stat-value {
-    font-family: monospace;
-    font-size: 1.1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* More modern font */
+    font-size: 1rem;
     color: #ced4da;
     font-weight: 500;
 }
