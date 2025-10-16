@@ -16,7 +16,7 @@ import { Tooltip as ReactTooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import ReactMarkdown from "react-markdown";
 import CircularProgressChart from './CircularProgressChart';
-import BadgeComponent from './BadgeComponent';
+import badgeConfig from '../badgeConfig';
 // --- ADD THIS NEW BLOCK: Badge Definitions ---
 const STREAK_BADGES = [
     { days: 7, name: 'Weekly Warrior', icon: 'bi-calendar-week-fill', color: 'success' },
