@@ -96,7 +96,7 @@ function Home() {
       <Dnav />
       <div className={`home-page theme-${theme}`}>
         {/* Hero Section */}
-
+ <br></br>
 
         {/* Features Section */}
          <section className="container py-5">
