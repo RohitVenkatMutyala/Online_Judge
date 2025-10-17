@@ -158,7 +158,7 @@ function Navbar() {
                         width="40"
                         height="40"
                         className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
-                        style={{ transform: 'rotate(104deg)' }}
+                       // style={{ transform: 'rotate(104deg)' }}
                     />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
                         Randoman
