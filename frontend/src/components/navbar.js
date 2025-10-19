@@ -155,8 +155,8 @@ function Navbar() {
                     <img
                         src={logo} 
                         alt="CodeHub Logo"
-                        width="44"
-                        height="44"
+                        width="41"
+                        height="41"
                         className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
                         style={{ transform: 'rotate(104deg)' }}
                     />
