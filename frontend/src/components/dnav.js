@@ -155,8 +155,8 @@ function Dnav() {
                     <img
                         src={logo} // Assuming you import it like: import logo from './path/to/your/logo.png';
                         alt="CodeHub Logo"
-                        width="40"
-                        height="40"
+                        width="44"
+                        height="44"
                         className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
                        style={{ transform: 'rotate(104deg)' }}
                     />
