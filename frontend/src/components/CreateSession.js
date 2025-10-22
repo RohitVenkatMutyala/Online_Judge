@@ -140,7 +140,7 @@ function CreateSession() {
                         <p className="text-muted mb-4">Enter emails separated by commas .</p>
                         <textarea
                             className="form-control" rows="4"
-                            placeholder="randoman1@gmail.com, randoman2@gmail.com"
+                            placeholder="CodeHub1@gmail.com, CodeHub2@gmail.com"
                             value={emailsInput} onChange={(e) => setEmailsInput(e.target.value)}
                         />
                         <div className="d-flex justify-content-between mt-4">

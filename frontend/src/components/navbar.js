@@ -161,7 +161,7 @@ function Navbar() {
                         style={{ transform: 'rotate(104deg)' }}
                     />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
-                        Randoman
+                        CodeHub
                     </Link>
 
                     <button

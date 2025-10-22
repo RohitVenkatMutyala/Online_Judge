@@ -62,7 +62,7 @@ function LoginForm() {
                     WebkitTextFillColor: 'transparent',
                   }}
                 >
-                  Welcome Back to Randoman
+                  Welcome Back to CodeHub
                 </h1>
               
                 
@@ -300,7 +300,7 @@ function LoginForm() {
                   </button>
 
                   <div className="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
-                    <p className="text-muted mb-2">New to Randoman?</p>
+                    <p className="text-muted mb-2">New to CodeHub?</p>
                     <button
                       type="button"
                       className="btn fw-bold"

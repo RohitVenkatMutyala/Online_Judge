@@ -74,7 +74,7 @@ function RegisterForm() {
                     WebkitTextFillColor: 'transparent',
                   }}
                 >
-                  Join Randoman Today
+                  Join CodeHub Today
                 </h1>
              
                 {/* Feature Highlights */}
