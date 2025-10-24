@@ -602,8 +602,7 @@ function Dashboard() {
                 onClick={() => setShowResumeModal(true)}
                 data-bs-toggle="tooltip"
                 data-bs-placement="left"
-                title="Randoman AI Resume Reviewer"
-            >
+                title="CodeHub AI Resume Reviewer" >
                 <i className="bi bi-robot fs-4"></i>
             </button>
 
@@ -681,7 +680,7 @@ function Dashboard() {
                 .badge-card:hover {
                     transform: scale(1.1);
                 }
-                    .btn-randoman-ai {
+                    .btn-CodeHub-ai {
   background: linear-gradient(90deg, #6e48aa, #9448a0); /* A nice purple gradient */
   color: #ffffff;
   border: none;
@@ -693,7 +692,7 @@ function Dashboard() {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.btn-randoman-ai:hover {
+.btn-CodeHub-ai:hover {
   transform: translateY(-2px); /* Subtle lift effect on hover */
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
@@ -708,7 +707,7 @@ function Dashboard() {
   width: 60px;
   height: 60px;
 
-  /* Custom "Randoman AI" Theme */
+  /* Custom "CodeHub AI" Theme */
   background: linear-gradient(45deg, #6e48aa, #9448a0) !important; /* Gradient background */
   border: none !important; /* Override Bootstrap's default border */
 
@@ -941,9 +940,9 @@ function Dashboard() {
                             <div className="modal-header border-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center">
                                     <i className="bi bi-robot me-2"></i>
-                                    {/* FIX: Removed the trailing space from "Randoman AI " and added more context */}
+                                    {/* FIX: Removed the trailing space from "CodeHub AI " and added more context */}
                                     <span>
-                                        {viewingHistory ? "Latest Review History" : "Randoman AI Resume Reviewer"}
+                                        {viewingHistory ? "Latest Review History" : "CodeHub AI Resume Reviewer"}
                                     </span>
                                 </h5>
                                 <button type="button" className={`btn-close ${theme === 'dark' ? 'btn-close-white' : ''}`} onClick={resetAndCloseResumeModal}></button>
@@ -995,8 +994,8 @@ function Dashboard() {
                                             value={resumeText}
                                             onChange={(e) => setResumeText(e.target.value)}
                                         ></textarea>
-                                        <button className="btn btn-randoman-ai w-100 mt-3" onClick={handleResumeReview}>
-                                            <i className="bi bi-magic me-2"></i>Review with Randoman AI
+                                        <button className="btn btn-CodeHub-ai w-100 mt-3" onClick={handleResumeReview}>
+                                            <i className="bi bi-magic me-2"></i>Review with CodeHub AI
                                         </button>
                                     </>
                                 )}
