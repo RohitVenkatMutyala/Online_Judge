@@ -263,7 +263,7 @@ function Call() {
         setStream(null);
         Object.values(peersRef.current).forEach(peer => peer.destroy());
         peersRef.current = {};
-        navigate('/'); // Routes to your Home component
+        navigate('/new-call'); // Routes to your Home component
     };
 
     const handleToggleMute = async (targetUserId) => {
