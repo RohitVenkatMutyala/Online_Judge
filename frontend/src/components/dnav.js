@@ -152,14 +152,14 @@ function Dnav() {
 
             <nav className={`navbar navbar-expand-lg sticky-top shadow-sm navbar-custom theme-${theme}`}>
                 <div className="container-fluid px-4">
-                    {/*<img
-                        src={logo} 
+                    <img
+                        src={logo} // Assuming you import it like: import logo from './path/to/your/logo.png';
                         alt="CodeHub Logo"
                         width="41"
                         height="41"
                         className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
-                        style={{ transform: 'rotate(104deg)' }}
-                    />*/}
+                       style={{ transform: 'rotate(104deg)' }}
+                    />
                     <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
                         CodeHub
                     </Link>
