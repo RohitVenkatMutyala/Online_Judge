@@ -26,15 +26,9 @@ function Call() {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     
-    // -- Call State --
-    // 'loading': Checking Firebase doc
-    // 'joining': Show the incoming call screen (from your image)
-    // 'active': User clicked 'Accept', show video/chat
-    // 'denied': Access denied
     const [callState, setCallState] = useState('loading');
     const [callData, setCallData] = useState(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
-
     const [activeUsers, setActiveUsers] = useState([]);
     const [callOwnerId, setCallOwnerId] = useState(null);
     
@@ -61,16 +55,15 @@ function Call() {
 
         const callDocRef = doc(db, 'calls', callId);
 
-        // Setup the heartbeat to run every 30 seconds
         const updatePresence = () => {
             updateDoc(callDocRef, {
-                [`activeParticipants.${user._id}`]: { // Use a map with user ID as key
+                [`activeParticipants.${user._id}`]: {
                     name: `${user.firstname} ${user.lastname}`,
                     lastSeen: serverTimestamp()
                 }
             }).catch(console.error);
         };
-        updatePresence(); // Call it once immediately
+        updatePresence(); 
         heartbeatIntervalRef.current = setInterval(updatePresence, 30000);
 
         const unsubscribeCall = onSnapshot(callDocRef, (docSnap) => {
@@ -80,7 +73,7 @@ function Call() {
             }
 
             const data = docSnap.data();
-            setCallData(data); // Store call data
+            setCallData(data); 
             setCallOwnerId(data.ownerId);
 
             const isOwner = user && data.ownerId === user._id;
@@ -91,9 +84,8 @@ function Call() {
                 return;
             }
 
-            // Filter the participants map to show only those seen in the last minute
             const participantsMap = data.activeParticipants || {};
-            const oneMinuteAgo = Date.now() - 60000; // 1 minute in milliseconds
+            const oneMinuteAgo = Date.now() - 60000;
 
             const currentUsers = Object.entries(participantsMap)
                 .filter(([_, userData]) => userData.lastSeen && userData.lastSeen.toDate().getTime() > oneMinuteAgo)
@@ -105,8 +97,6 @@ function Call() {
             setActiveUsers(currentUsers);
             setMuteStatus(data.muteStatus || {});
 
-            // IMPORTANT: Don't set to 'active' immediately.
-            // Set to 'joining' to show the accept/decline screen.
             if (callState === 'loading') {
                 setCallState('joining');
             }
@@ -118,11 +108,9 @@ function Call() {
         const messagesQuery = query(collection(db, 'calls', callId, 'messages'), orderBy('timestamp'));
         const unsubscribeMessages = onSnapshot(messagesQuery, qSnap => setMessages(qSnap.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-        // This is the cleanup function that runs when the user leaves
         return () => {
-            clearInterval(heartbeatIntervalRef.current); // Stop the heartbeat
+            clearInterval(heartbeatIntervalRef.current); 
             if (user) {
-                // Remove the user's entry from the map using deleteField
                 updateDoc(doc(db, 'calls', callId), {
                     [`activeParticipants.${user._id}`]: deleteField()
                 }).catch(console.error);
@@ -132,12 +120,10 @@ function Call() {
             unsubscribeCall();
             unsubscribeMessages();
         };
-        // We only want this to run once, but callState is needed to transition from 'loading'
     }, [callId, user, callState === 'loading']); // eslint-disable-line react-hooks/exhaustive-deps
 
     // useEffect for WebRTC connections
     useEffect(() => {
-        // Only run if the call is 'active' (user clicked accept) and we have a stream
         if (!stream || callState !== 'active' || !user) return;
 
         const signalingColRef = collection(db, 'calls', callId, 'signaling');
@@ -149,7 +135,6 @@ function Call() {
                 if (remoteVideoRef.current) {
                     remoteVideoRef.current.srcObject = remoteStream;
                 }
-                // Also add audio
                 if (audioContainerRef.current) {
                     let audio = document.getElementById(`audio-${recipientId}`);
                     if (!audio) {
@@ -174,7 +159,6 @@ function Call() {
                  if (remoteVideoRef.current) {
                     remoteVideoRef.current.srcObject = remoteStream;
                 }
-                 // Also add audio
                 if (audioContainerRef.current) {
                     let audio = document.getElementById(`audio-${incoming.senderId}`);
                     if (!audio) {
@@ -213,10 +197,15 @@ function Call() {
 
     // useEffect for attaching local stream to video element
     useEffect(() => {
-        if (stream && localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
+        const videoElem = localVideoRef.current;
+        if (stream && videoElem) {
+            videoElem.srcObject = stream;
+            videoElem.muted = true;
+            videoElem.play().catch(error => {
+                console.error("Error attempting to autoplay local video:", error);
+            });
         }
-    }, [stream]);
+    }, [stream]); 
 
     // useEffect for applying mute status to local microphone
     useEffect(() => {
@@ -234,14 +223,10 @@ function Call() {
 
     const handleAcceptCall = async () => {
         try {
-            // Request video and audio
             const userStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             setStream(userStream);
-            
-            // Set user's initial mute state to 'unmuted' (false)
             await updateDoc(doc(db, 'calls', callId), { [`muteStatus.${user._id}`]: false });
-            
-            setCallState('active'); // Transition to the active call UI
+            setCallState('active'); 
         } catch (err) {
             toast.error("Could not access camera/microphone. Please check permissions.");
             console.error(err);
@@ -249,7 +234,7 @@ function Call() {
     };
 
     const handleDeclineCall = () => {
-        navigate(-1); // Go back
+        navigate(-1); 
     };
     
     const handleHangUp = () => {
@@ -259,7 +244,7 @@ function Call() {
         setStream(null);
         Object.values(peersRef.current).forEach(peer => peer.destroy());
         peersRef.current = {};
-        navigate('/'); // Go to dashboard
+        navigate('/'); 
     };
 
     const handleToggleMute = async (targetUserId) => {
@@ -320,7 +305,6 @@ function Call() {
         );
     }
     
-    // RENDER: Incoming Call Screen (from your image)
     if (callState === 'joining') {
         const callerName = callData?.ownerName || 'Unknown Caller';
         return (
@@ -361,25 +345,30 @@ function Call() {
         <>
             <Navbar />
             <div className="chat-page-container">
+                {/* =================================
+                === RESPONSIVE STYLES ARE HERE ===
+                =================================
+                */}
                 <style jsx>{`
                     /* --- 1. General Page & Layout Styles --- */
                     :root {
-                      --dark-bg-primary: #12121c;   /* Main page background */
-                      --dark-bg-secondary: #1e1e2f; /* Card and container background */
-                      --border-color: #3a3a5a;      /* Borders and dividers */
-                      --text-primary: #e0e0e0;       /* Main text color */
-                      --text-secondary: #a9a9b3;    /* Muted text for timestamps/subtitles */
-                      --accent-blue: #4a69bd;       /* Accent for user's own message bubble & active elements */
+                      --dark-bg-primary: #12121c;
+                      --dark-bg-secondary: #1e1e2f;
+                      --border-color: #3a3a5a;
+                      --text-primary: #e0e0e0;
+                      --text-secondary: #a9a9b3;
+                      --accent-blue: #4a69bd;
                     }
                     body {
-                      background-color: var(--dark-bg-primary); /* Ensure body background is dark */
+                      background-color: var(--dark-bg-primary);
                     }
                     .chat-page-container {
                       background-color: var(--dark-bg-primary);
                       color: var(--text-primary);
                       min-height: calc(100vh - 56px);
-                      padding: 1.5rem 0;
+                      padding: 1rem 0; /* Use 1rem padding for mobile */
                     }
+                    
                     /* --- 2. Card Component Overrides --- */
                     .card {
                       background-color: var(--dark-bg-secondary);
@@ -402,15 +391,18 @@ function Call() {
                     }
                     .list-group-item:last-child { border-bottom: none; }
 
-                    /* --- 3. VIDEO PANEL STYLES (NEW) --- */
+                    /* --- 3. VIDEO PANEL STYLES (NOW RESPONSIVE) --- */
                     .video-panel {
                         position: relative;
                         width: 100%;
                         background-color: #000;
                         border-radius: 8px;
                         overflow: hidden;
-                        height: 75vh;
                         border: 1px solid var(--border-color);
+
+                        /* --- MOBILE FIRST STYLES --- */
+                        aspect-ratio: 16 / 9; /* Force 16:9 aspect ratio on mobile */
+                        height: auto;          /* Let aspect-ratio control height */
                     }
                     .remote-video {
                         width: 100%;
@@ -421,8 +413,9 @@ function Call() {
                         position: absolute;
                         bottom: 1rem;
                         right: 1rem;
-                        width: 25%;
-                        max-width: 200px;
+                        /* On mobile, make it a bit larger and clearer */
+                        width: 30%; 
+                        max-width: 120px; /* But not too big */
                         border: 2px solid var(--border-color);
                         border-radius: 8px;
                         background-color: #111;
@@ -434,14 +427,14 @@ function Call() {
                         transform: translateX(-50%);
                         background-color: rgba(0, 0, 0, 0.5);
                         border-radius: 50px;
-                        padding: 0.5rem 1rem;
+                        padding: 0.5rem; /* Tighter padding for mobile */
                         display: flex;
-                        gap: 1rem;
+                        gap: 0.75rem; /* Tighter gap for mobile */
                     }
                     .call-controls .btn {
-                        width: 50px;
-                        height: 50px;
-                        font-size: 1.2rem;
+                        width: 45px; /* Smaller buttons for mobile */
+                        height: 45px;
+                        font-size: 1.1rem;
                     }
 
                     /* --- 4. Chat-Specific Styles --- */
@@ -449,7 +442,8 @@ function Call() {
                     .chat-messages-container {
                       flex-grow: 1;
                       overflow-y: auto;
-                      max-height: 40vh;
+                      /* On mobile, this will be in a stacked column */
+                      max-height: 50vh; 
                       display: flex;
                       flex-direction: column;
                       padding: 0.5rem 0;
@@ -465,7 +459,7 @@ function Call() {
                     .other-message { align-items: flex-start; }
                     .other-message .message-bubble { background-color: #313147; color: var(--text-primary); border-top-left-radius: 4px; }
                     
-                    /* --- 5. Form & Input Styles (Updated) --- */
+                    /* --- 5. Form & Input Styles --- */
                     .form-control {
                       background-color: var(--dark-bg-primary) !important;
                       border: 1px solid var(--border-color) !important;
@@ -492,6 +486,38 @@ function Call() {
                     }
                     .send-button:hover { background-color: #5a7ccb; }
                     .send-button:disabled { background-color: #313147; cursor: not-allowed; }
+
+                    /* --- 6. MEDIA QUERY FOR DESKTOP (PC) --- */
+                    @media (min-width: 992px) { /* Bootstrap's 'lg' breakpoint */
+                        .chat-page-container {
+                            padding: 1.5rem 0; /* Restore original padding */
+                        }
+
+                        .video-panel {
+                            height: 75vh; /* Restore the 75vh height for desktop */
+                            aspect-ratio: auto; /* Unset the aspect ratio */
+                        }
+
+                        .local-video {
+                            width: 25%; /* Restore desktop size */
+                            max-width: 200px;
+                        }
+
+                        .call-controls .btn {
+                            width: 50px; /* Restore desktop button size */
+                            height: 50px;
+                            font-size: 1.2rem;
+                        }
+
+                        .call-controls {
+                            padding: 0.5rem 1rem; /* Restore desktop padding */
+                            gap: 1rem; /* Restore desktop gap */
+                        }
+
+                        .chat-messages-container {
+                            max-height: 40vh; /* Restore desktop chat height */
+                        }
+                    }
                 `}</style>
                 <div className="row g-3 h-100">
 
@@ -508,9 +534,7 @@ function Call() {
                             <video 
                                 ref={localVideoRef} 
                                 className="local-video" 
-                                autoPlay 
-                                playsInline 
-                                muted // Mute self-view to prevent feedback
+                                playsInline
                             />
                             
                             <div className="call-controls">
@@ -590,7 +614,7 @@ function Call() {
                                         <div ref={chatMessagesEndRef} />
                                     </div>
                                     <form onSubmit={handleSendMessage} className="chat-input-group">
-                                        <div className="d-flex align-items-center">
+                                        <div className="d-flex align-items:center">
                                             <input
                                                 type="text"
                                                 className="form-control chat-input"
@@ -607,7 +631,6 @@ function Call() {
                             </div>
                         )}
                     </div>
-
                 </div>
             </div>
         </>
