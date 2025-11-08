@@ -362,7 +362,7 @@ function Call() {
     // RENDER: Active Call UI
     return (
         <>
-            <Navbar />
+          
             <div className="chat-page-container">
                 {/* =================================
                 === FIX 3: RESPONSIVE CSS STYLES ===
