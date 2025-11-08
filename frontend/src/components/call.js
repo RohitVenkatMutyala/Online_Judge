@@ -196,29 +196,41 @@ function Call() {
         return () => unsubscribeSignaling();
     }, [stream, activeUsers, callState, callId, user]);
 
+    
     // =================================================================
     // === FIX 1: ROBUST LOCAL VIDEO (SELF-VIEW) UseEffect ===
     // =================================================================
+    // This effect runs when the 'stream' state is set.
+    // It will find the local video element and force the stream to play.
     useEffect(() => {
         const videoElem = localVideoRef.current;
-        if (stream && videoElem) {
-            // 1. Assign the stream to the video element
-            videoElem.srcObject = stream;
 
-            // 2. Set 'muted' property - this is CRITICAL for autoplay
-            videoElem.muted = true;
+        if (stream && videoElem) {
+            console.log("LocalVideo Effect: Attaching stream...");
+            
+            // 1. Assign the stream
+            videoElem.srcObject = stream;
+            
+            // 2. Explicitly set muted - This is required by all
+            //    browsers for autoplaying video with sound.
+            videoElem.muted = true; 
             
             // 3. Manually call play()
             const playPromise = videoElem.play();
+            
             if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    // Autoplay was prevented
-                    console.error("Error attempting to autoplay local video:", error);
+                playPromise.then(() => {
+                    console.log("LocalVideo Effect: Autoplay successful.");
+                }).catch(error => {
+                    // This error is common if the user didn't "click"
+                    // but our "Accept" button should cover this.
+                    console.error("LocalVideo Effect: Autoplay failed.", error);
                     toast.error("Could not autoplay self-view.");
                 });
             }
         }
-    }, [stream]); // This effect runs only when the stream is ready
+    }, [stream]); // This dependency is correct. It runs when 'stream' is ready.
+
 
     // useEffect for applying mute status to local microphone
     useEffect(() => {
@@ -237,7 +249,7 @@ function Call() {
     const handleAcceptCall = async () => {
         try {
             const userStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            setStream(userStream);
+            setStream(userStream); // This will trigger the 'useEffect' above
             await updateDoc(doc(db, 'calls', callId), { [`muteStatus.${user._id}`]: false });
             setCallState('active'); 
         } catch (err) {
@@ -250,12 +262,9 @@ function Call() {
         navigate(-1); 
     };
     
-    // =================================================================
-    // === FIX 2: HANGUP "BLANK SCREEN" CHECK ===
-    // =================================================================
-    // Your navigation logic is correct. `Maps('/')` sends the user
-    // to your Home component. If you see a blank screen, please
-    // check your `Home` component. This function is working as intended.
+    // This function is correct. navigate('/') will send you to your
+    // "Home" component. If you see a blank screen, it's an issue
+    // with your Home component, not this function.
     const handleHangUp = () => {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -365,7 +374,7 @@ function Call() {
           
             <div className="chat-page-container">
                 {/* =================================
-                === FIX 3: RESPONSIVE CSS STYLES ===
+                === FIX 2: RESPONSIVE CSS STYLES ===
                 =================================
                 */}
                 <style jsx>{`
@@ -385,7 +394,7 @@ function Call() {
                       background-color: var(--dark-bg-primary);
                       color: var(--text-primary);
                       min-height: calc(100vh - 56px);
-                      padding: 1rem 0; /* Use 1rem padding for mobile */
+                      padding: 1rem 0; /* Mobile-first padding */
                     }
                     
                     /* --- 2. Card Component Overrides --- */
@@ -418,15 +427,14 @@ function Call() {
                         border-radius: 8px;
                         overflow: hidden;
                         border: 1px solid var(--border-color);
-
-                        /* --- MOBILE FIRST (TALLER VIDEO) --- */
+                        /* MOBILE FIRST (TALLER VIDEO) */
                         height: 50vh; /* <-- INCREASED VIDEO HEIGHT */
                         width: 100%;
                     }
                     .remote-video {
                         width: 100%;
                         height: 100%;
-                        object-fit: cover; /* Fill the space, may crop */
+                        object-fit: cover;
                     }
                     .local-video {
                         position: absolute;
@@ -436,23 +444,29 @@ function Call() {
                         width: 100px;
                         height: auto;
                         aspect-ratio: 4 / 3;
-                        object-fit: cover; /* Match the remote video style */
+                        object-fit: cover;
                         border: 2px solid var(--border-color);
                         border-radius: 8px;
-                        background-color: #111;
+                        background-color: #111; /* Shows if video fails */
                         z-index: 5; /* Below controls */
                     }
+                    
+                    /* --- FIX 2B: ROBUST CALL CONTROLS --- */
                     .call-controls {
                         position: absolute;
                         bottom: 1rem;
                         left: 50%;
                         transform: translateX(-50%);
-                        background-color: rgba(0, 0, 0, 0.6);
+                        background-color: rgba(0, 0, 0, 0.7); /* Darker BG */
                         border-radius: 50px;
-                        padding: 0.5rem 0.75rem;
+                        padding: 0.5rem; /* Padding inside the bar */
                         display: flex;
-                        gap: 0.75rem; /* <-- PROPERLY SPACED BUTTONS */
-                        z-index: 10; /* <-- ON TOP OF EVERYTHING */
+                        flex-direction: row;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 0.5rem; /* Gap between buttons */
+                        z-index: 10;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
                     }
                     .call-controls .btn {
                         width: 45px;
@@ -461,14 +475,19 @@ function Call() {
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        /* Explicit margins to prevent merging */
+                        margin-left: 0.25rem; 
+                        margin-right: 0.25rem;
                     }
+                    /* --- END FIX 2B --- */
+
 
                     /* --- 4. Chat-Specific Styles --- */
                     .chat-card .card-body { padding: 0.5rem 1rem; }
                     .chat-messages-container {
                       flex-grow: 1;
                       overflow-y: auto;
-                      max-height: 40vh; /* Good height for mobile chat */
+                      max-height: 40vh;
                       display: flex;
                       flex-direction: column;
                       padding: 0.5rem 0;
@@ -519,7 +538,7 @@ function Call() {
                         }
 
                         .video-panel {
-                            height: 75vh; /* Restore 75vh height for desktop */
+                            height: 75vh; /* Restore 75vh height */
                         }
 
                         .local-video {
@@ -539,6 +558,10 @@ function Call() {
                             padding: 0.5rem 1rem;
                             gap: 1rem;
                         }
+                        .call-controls .btn {
+                            margin-left: 0.5rem;
+                            margin-right: 0.5rem;
+                        }
 
                         .chat-messages-container {
                             max-height: 40vh;
@@ -557,15 +580,20 @@ function Call() {
                                 playsInline 
                                 controls={false}
                             />
+                            
                             {/* This is the self-view video.
-                              The 'playsInline' is for iOS.
-                              'autoPlay' is removed because our useEffect handles it.
-                              'muted' is removed because our useEffect handles it.
+                              We add all props to be safe:
+                              - ref: For our code to find it
+                              - autoPlay: Hint for the browser
+                              - playsInline: Critical for iOS
+                              - muted: Critical for autoplay
                             */}
                             <video 
                                 ref={localVideoRef} 
                                 className="local-video" 
+                                autoPlay
                                 playsInline
+                                muted
                             />
                             
                             <div className="call-controls">
@@ -595,7 +623,6 @@ function Call() {
                     </div>
 
                     {/* Right Column: Users, Share, Chat */}
-                    {/* This column will stack below the video on mobile */}
                     <div className="col-lg-4 d-flex flex-column h-100">
                         <div className="card shadow-sm mb-3">
                             <div className="card-header d-flex justify-content-between">
@@ -613,7 +640,7 @@ function Call() {
                                         {stream && (
                                             <button
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
-                                                onClick={() => handleToggleMute(p.id)}
+                                                onClick={() => handleToggleMMute(p.id)}
                                                 disabled={user?._id !== callOwnerId && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
                                                 style={{ fontSize: '1.2rem' }}
                                             >
