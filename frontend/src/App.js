@@ -27,6 +27,8 @@ import CreateSession from './components/CreateSession';
 import PublicProfile from './components/PublicProfile';
 import { ToastContainer } from 'react-toastify';
 import FolderDetailPage from './components/FolderDetailPage';
+import CreateCall from './components/CreateCall';
+import Call from './components/call.js';
 import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
@@ -167,6 +169,11 @@ function App() {
                 </>
               }
             />
+            {/* Add this new route for creating a call */}
+          <Route path="/new-call" element={<CreateCall />} />
+
+          {/* This is the new route for joining a call */}
+          <Route path="/call/:callId" element={<Call />} />
             <Route
               path="/admindashboard"
               element={
