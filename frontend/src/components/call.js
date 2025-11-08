@@ -26,6 +26,7 @@ function Call() {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     
+    // -- Call State --
     const [callState, setCallState] = useState('loading');
     const [callData, setCallData] = useState(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -195,17 +196,29 @@ function Call() {
         return () => unsubscribeSignaling();
     }, [stream, activeUsers, callState, callId, user]);
 
-    // useEffect for attaching local stream to video element
+    // =================================================================
+    // === FIX 1: ROBUST LOCAL VIDEO (SELF-VIEW) UseEffect ===
+    // =================================================================
     useEffect(() => {
         const videoElem = localVideoRef.current;
         if (stream && videoElem) {
+            // 1. Assign the stream to the video element
             videoElem.srcObject = stream;
+
+            // 2. Set 'muted' property - this is CRITICAL for autoplay
             videoElem.muted = true;
-            videoElem.play().catch(error => {
-                console.error("Error attempting to autoplay local video:", error);
-            });
+            
+            // 3. Manually call play()
+            const playPromise = videoElem.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Autoplay was prevented
+                    console.error("Error attempting to autoplay local video:", error);
+                    toast.error("Could not autoplay self-view.");
+                });
+            }
         }
-    }, [stream]); 
+    }, [stream]); // This effect runs only when the stream is ready
 
     // useEffect for applying mute status to local microphone
     useEffect(() => {
@@ -237,6 +250,12 @@ function Call() {
         navigate(-1); 
     };
     
+    // =================================================================
+    // === FIX 2: HANGUP "BLANK SCREEN" CHECK ===
+    // =================================================================
+    // Your navigation logic is correct. `Maps('/')` sends the user
+    // to your Home component. If you see a blank screen, please
+    // check your `Home` component. This function is working as intended.
     const handleHangUp = () => {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -244,7 +263,7 @@ function Call() {
         setStream(null);
         Object.values(peersRef.current).forEach(peer => peer.destroy());
         peersRef.current = {};
-        navigate('/'); 
+        navigate('/'); // Routes to your Home component
     };
 
     const handleToggleMute = async (targetUserId) => {
@@ -346,7 +365,7 @@ function Call() {
             <Navbar />
             <div className="chat-page-container">
                 {/* =================================
-                === RESPONSIVE STYLES ARE HERE ===
+                === FIX 3: RESPONSIVE CSS STYLES ===
                 =================================
                 */}
                 <style jsx>{`
@@ -391,7 +410,7 @@ function Call() {
                     }
                     .list-group-item:last-child { border-bottom: none; }
 
-                    /* --- 3. VIDEO PANEL STYLES (NOW RESPONSIVE) --- */
+                    /* --- 3. VIDEO PANEL STYLES (NEW RESPONSIVE) --- */
                     .video-panel {
                         position: relative;
                         width: 100%;
@@ -400,41 +419,48 @@ function Call() {
                         overflow: hidden;
                         border: 1px solid var(--border-color);
 
-                        /* --- MOBILE FIRST STYLES --- */
-                        aspect-ratio: 16 / 9; /* Force 16:9 aspect ratio on mobile */
-                        height: auto;          /* Let aspect-ratio control height */
+                        /* --- MOBILE FIRST (TALLER VIDEO) --- */
+                        height: 50vh; /* <-- INCREASED VIDEO HEIGHT */
+                        width: 100%;
                     }
                     .remote-video {
                         width: 100%;
                         height: 100%;
-                        object-fit: cover;
+                        object-fit: cover; /* Fill the space, may crop */
                     }
                     .local-video {
                         position: absolute;
                         bottom: 1rem;
                         right: 1rem;
-                        /* On mobile, make it a bit larger and clearer */
-                        width: 30%; 
-                        max-width: 120px; /* But not too big */
+                        /* Standard 4:3 webcam aspect ratio */
+                        width: 100px;
+                        height: auto;
+                        aspect-ratio: 4 / 3;
+                        object-fit: cover; /* Match the remote video style */
                         border: 2px solid var(--border-color);
                         border-radius: 8px;
                         background-color: #111;
+                        z-index: 5; /* Below controls */
                     }
                     .call-controls {
                         position: absolute;
                         bottom: 1rem;
                         left: 50%;
                         transform: translateX(-50%);
-                        background-color: rgba(0, 0, 0, 0.5);
+                        background-color: rgba(0, 0, 0, 0.6);
                         border-radius: 50px;
-                        padding: 0.5rem; /* Tighter padding for mobile */
+                        padding: 0.5rem 0.75rem;
                         display: flex;
-                        gap: 0.75rem; /* Tighter gap for mobile */
+                        gap: 0.75rem; /* <-- PROPERLY SPACED BUTTONS */
+                        z-index: 10; /* <-- ON TOP OF EVERYTHING */
                     }
                     .call-controls .btn {
-                        width: 45px; /* Smaller buttons for mobile */
+                        width: 45px;
                         height: 45px;
                         font-size: 1.1rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                     }
 
                     /* --- 4. Chat-Specific Styles --- */
@@ -442,8 +468,7 @@ function Call() {
                     .chat-messages-container {
                       flex-grow: 1;
                       overflow-y: auto;
-                      /* On mobile, this will be in a stacked column */
-                      max-height: 50vh; 
+                      max-height: 40vh; /* Good height for mobile chat */
                       display: flex;
                       flex-direction: column;
                       padding: 0.5rem 0;
@@ -490,32 +515,33 @@ function Call() {
                     /* --- 6. MEDIA QUERY FOR DESKTOP (PC) --- */
                     @media (min-width: 992px) { /* Bootstrap's 'lg' breakpoint */
                         .chat-page-container {
-                            padding: 1.5rem 0; /* Restore original padding */
+                            padding: 1.5rem 0;
                         }
 
                         .video-panel {
-                            height: 75vh; /* Restore the 75vh height for desktop */
-                            aspect-ratio: auto; /* Unset the aspect ratio */
+                            height: 75vh; /* Restore 75vh height for desktop */
                         }
 
                         .local-video {
                             width: 25%; /* Restore desktop size */
                             max-width: 200px;
+                            height: auto;
+                            aspect-ratio: 4 / 3;
                         }
 
                         .call-controls .btn {
-                            width: 50px; /* Restore desktop button size */
+                            width: 50px;
                             height: 50px;
                             font-size: 1.2rem;
                         }
 
                         .call-controls {
-                            padding: 0.5rem 1rem; /* Restore desktop padding */
-                            gap: 1rem; /* Restore desktop gap */
+                            padding: 0.5rem 1rem;
+                            gap: 1rem;
                         }
 
                         .chat-messages-container {
-                            max-height: 40vh; /* Restore desktop chat height */
+                            max-height: 40vh;
                         }
                     }
                 `}</style>
@@ -531,6 +557,11 @@ function Call() {
                                 playsInline 
                                 controls={false}
                             />
+                            {/* This is the self-view video.
+                              The 'playsInline' is for iOS.
+                              'autoPlay' is removed because our useEffect handles it.
+                              'muted' is removed because our useEffect handles it.
+                            */}
                             <video 
                                 ref={localVideoRef} 
                                 className="local-video" 
@@ -564,6 +595,7 @@ function Call() {
                     </div>
 
                     {/* Right Column: Users, Share, Chat */}
+                    {/* This column will stack below the video on mobile */}
                     <div className="col-lg-4 d-flex flex-column h-100">
                         <div className="card shadow-sm mb-3">
                             <div className="card-header d-flex justify-content-between">
