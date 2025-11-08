@@ -33,7 +33,6 @@ function Call() {
     const [callOwnerId, setCallOwnerId] = useState(null);
     
     // --- UI State (NEW) ---
-    // These control the mobile overlay panels
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
@@ -43,7 +42,7 @@ function Call() {
     const [muteStatus, setMuteStatus] = useState({});
     const peersRef = useRef({});
     const audioContainerRef = useRef(null);
-    const localVideoRef = useRef(null);
+    // const localVideoRef = useRef(null); // <-- REMOVED
     const remoteVideoRef = useRef(null);
     const chatMessagesEndRef = useRef(null);
 
@@ -201,29 +200,13 @@ function Call() {
         return () => unsubscribeSignaling();
     }, [stream, activeUsers, callState, callId, user]);
 
+    
     // =================================================================
-    // === FIX 1: ROBUST LOCAL VIDEO (SELF-VIEW) UseEffect ===
+    // === LOCAL VIDEO (SELF-VIEW) UseEffect HAS BEEN REMOVED ===
     // =================================================================
-    useEffect(() => {
-        const videoElem = localVideoRef.current;
-        if (stream && videoElem) {
-            // 1. Assign the stream
-            videoElem.srcObject = stream;
 
-            // 2. Set 'muted' property - this is CRITICAL for autoplay
-            videoElem.muted = true;
-            
-            // 3. Manually call play()
-            const playPromise = videoElem.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.error("Error attempting to autoplay local video:", error);
-                });
-            }
-        }
-    }, [stream]);
 
-    // useEffect for applying mute status to local microphone
+    // Mute Status UseEffect
     useEffect(() => {
         if (!stream || !user || stream.getAudioTracks().length === 0) { return; }
         const isMuted = muteStatus[user._id] ?? true;
@@ -253,10 +236,7 @@ function Call() {
         navigate(-1); 
     };
     
-    // =================================================================
-    // === FIX 2: HANGUP "BLANK SCREEN" FIX ===
-    // =================================================================
-    // Navigating to /dashboard (your main app page) instead of /new-call
+    // Hangup: Navigate to dashboard
     const handleHangUp = () => {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -264,7 +244,7 @@ function Call() {
         setStream(null);
         Object.values(peersRef.current).forEach(peer => peer.destroy());
         peersRef.current = {};
-        navigate('/new-call'); // <-- CHANGED FROM /new-call
+        navigate('/new-call'); // Go to dashboard
     };
 
     const handleToggleMute = async (targetUserId) => {
@@ -366,10 +346,6 @@ function Call() {
           
             
             <div className="chat-page-container">
-                {/* =================================
-                === FIX 3: WHATSAPP-LIKE MOBILE UI ===
-                =================================
-                */}
                 <style jsx>{`
                     /* --- 1. General Page & Layout Styles --- */
                     :root {
@@ -384,7 +360,6 @@ function Call() {
                       background-color: var(--dark-bg-primary);
                       color: var(--text-primary);
                       min-height: calc(100vh - 56px); /* 56px is navbar height */
-                      /* Mobile: Fullscreen video, no padding */
                       padding: 0;
                     }
                     
@@ -398,10 +373,6 @@ function Call() {
                       border-bottom: 1px solid var(--border-color);
                       font-weight: 600;
                       color: var(--text-primary);
-                    }
-                    .card-footer {
-                      border-top: 1px solid var(--border-color);
-                      border-bottom: none;
                     }
                     .list-group-item {
                       background-color: transparent;
@@ -422,19 +393,9 @@ function Call() {
                         height: 100%;
                         object-fit: cover;
                     }
-                    .local-video {
-                        position: absolute;
-                        top: 1rem;
-                        right: 1rem;
-                        width: 100px;
-                        height: auto;
-                        aspect-ratio: 4 / 3;
-                        object-fit: cover;
-                        border: 2px solid var(--border-color);
-                        border-radius: 8px;
-                        background-color: #111;
-                        z-index: 10;
-                    }
+                    
+                    /* LOCAL VIDEO (SELF-VIEW) IS REMOVED */
+
                     .call-controls {
                         position: absolute;
                         bottom: 2rem;
@@ -454,7 +415,7 @@ function Call() {
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        margin: 0 0.25rem; /* Prevents merging */
+                        margin: 0 0.25rem;
                     }
                     
                     /* --- 4. MOBILE OVERLAY PANELS (WhatsApp-like) --- */
@@ -478,18 +439,13 @@ function Call() {
                         border-bottom: 1px solid var(--border-color);
                         background-color: var(--dark-bg-secondary);
                     }
-                    .mobile-panel-header h5 {
-                        margin: 0;
-                    }
+                    .mobile-panel-header h5 { margin: 0; }
                     .mobile-panel-body {
                         flex-grow: 1;
                         overflow-y: auto;
                         padding: 1rem;
                     }
-                    /* Special override for chat panel to fill height */
-                    .mobile-chat-panel {
-                        padding: 0;
-                    }
+                    .mobile-chat-panel { padding: 0; }
                     .mobile-chat-body {
                         display: flex;
                         flex-direction: column;
@@ -509,34 +465,46 @@ function Call() {
 
 
                     /* --- 5. DESKTOP VIEW (PC) --- */
-                    @media (min-width: 992px) { /* Bootstrap 'lg' breakpoint */
+                    @media (min-width: 992px) { 
                         .chat-page-container {
-                            padding: 1.5rem 0; /* Restore padding */
+                            padding: 1.5rem 0;
                         }
                         .video-panel-container {
-                            height: 75vh; /* Restore original height */
+                            height: 75vh;
                             border-radius: 8px;
                             border: 1px solid var(--border-color);
                         }
-                        .local-video {
-                            top: auto;
-                            bottom: 1rem;
-                            width: 25%;
-                            max-width: 200px;
-                        }
-                        .call-controls {
-                            padding: 0.5rem 1rem;
-                            gap: 1rem;
-                        }
+                        
+                        /* LOCAL VIDEO (SELF-VIEW) IS REMOVED FOR DESKTOP TOO */
+
                         .call-controls .btn {
                             width: 50px;
                             height: 50px;
                             font-size: 1.2rem;
                             margin: 0 0.5rem;
                         }
+                        .call-controls {
+                            padding: 0.5rem 1rem;
+                            gap: 1rem;
+                        }
                     }
 
-                    /* --- Chat-Specific Styles (Used by both) --- */
+                    /* --- 6. CHAT STYLES (Used by both) --- */
+                    
+                    .chat-card .card-body {
+                        padding: 0.5rem 1rem;
+                        overflow: hidden;
+                    }
+                    
+                    .chat-messages-container {
+                        flex-grow: 1;
+                        overflow-y: auto;
+                        min-height: 0;
+                        display: flex;
+                        flex-direction: column;
+                        padding: 0.5rem 0;
+                    }
+
                     .chat-message { margin-bottom: 1rem; display: flex; flex-direction: column; }
                     .message-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.3rem; }
                     .message-sender { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
@@ -575,14 +543,7 @@ function Call() {
                                 controls={false}
                             />
                             
-                            {/* FIX 1: Self-view video with all props */}
-                            <video 
-                                ref={localVideoRef} 
-                                className="local-video" 
-                                autoPlay
-                                playsInline
-                                muted
-                            />
+                            {/* --- LOCAL VIDEO (SELF-VIEW) TAG IS REMOVED --- */}
                             
                             {/* --- Call Controls (Bottom Center) --- */}
                             <div className="call-controls">
@@ -644,7 +605,7 @@ function Call() {
                             </div>
                             <ul className="list-group list-group-flush">
                                 {activeUsers.map(p => (
-                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items: center">
                                         <div>
                                             <span className="fw-bold">{p.name}</span>
                                             {p.id === user?._id && <span className="ms-2 text-muted small">(You)</span>}
@@ -672,7 +633,7 @@ function Call() {
                         <div className="card shadow-sm flex-grow-1 chat-card">
                             <div className="card-header">Live Chat</div>
                             <div className="card-body d-flex flex-column">
-                                <div className="chat-messages-container" style={{maxHeight: '40vh'}}>
+                                <div className="chat-messages-container">
                                     {messages.map(msg => (
                                         <div key={msg.id} className={`chat-message ${msg.senderId === user?._id ? 'own-message' : 'other-message'}`}>
                                             <div className="message-header">
@@ -684,7 +645,7 @@ function Call() {
                                     ))}
                                     <div ref={chatMessagesEndRef} />
                                 </div>
-                                <form onSubmit={handleSendMessage} className="mt-3">
+                                <form onSubmit={handleSendMessage} className="mt-3" style={{flexShrink: 0}}>
                                     <div className="d-flex align-items:center">
                                         <input
                                             type="text"
@@ -715,7 +676,7 @@ function Call() {
                         <div className="mobile-panel-body">
                             <ul className="list-group list-group-flush">
                                 {activeUsers.map(p => (
-                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items: center">
                                         <div>
                                             <span className="fw-bold">{p.name}</span>
                                             {p.id === user?._id && <span className="ms-2 text-muted small">(You)</span>}
