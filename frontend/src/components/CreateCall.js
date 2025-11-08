@@ -20,7 +20,6 @@ function CreateCall() {
     const [recipientEmail, setRecipientEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     
-    // --- NEW: State for the search bar ---
     const [searchTerm, setSearchTerm] = useState('');
 
     const sendInvitationEmails = async (callId, callDescription, invitedEmails) => {
@@ -120,7 +119,7 @@ function CreateCall() {
                             value={description} onChange={(e) => setDescription(e.target.value)}
                         />
                         <div className="d-flex justify-content-between mt-4">
-                            <button className="btn btn-outline-secondary" onClick={() => setStep(0)}>Back</button>
+                            <button className="btn btn-outline-secondary" onClick={() => setStep(0)}>Back to List</button>
                             <button className="btn create-btn" onClick={() => description ? setStep(2) : toast.warn('Description cannot be empty.')}>Next</button>
                         </div>
                     </div>
@@ -128,7 +127,7 @@ function CreateCall() {
             case 2: // Invite Step
                 return (
                      <div className="card-body p-4 p-md-5">
-                        <h2 className="gradient-title">Invite Person</h2>
+                        <h2 className="gradient-title">Add New Contact</h2>
                         <p className="text-muted mb-4">Enter the details of the person you want to call.</p>
                         
                         <div className="form-floating mb-3">
@@ -164,22 +163,32 @@ function CreateCall() {
                 return (
                     <div className="card-body p-0 p-md-2">
                         <div className="p-3 p-md-4">
-                            <div className="d-flex flex-column flex-md-row gap-2">
-                                <div className="input-group flex-grow-1">
-                                    <span className="input-group-text"><i className="bi bi-search"></i></span>
+                            {/* --- UPDATED UI --- */}
+                            <div className="d-flex gap-2 align-items-center">
+                                {/* Small search bar */}
+                                <div className="input-group input-group-sm flex-grow-1">
+                                    <span className="input-group-text" id="search-icon"><i className="bi bi-search"></i></span>
                                     <input
                                         type="search"
-                                        className="form-control"
-                                        placeholder="Search recent calls by name or email..."
+                                        className="form-control" // form-control-sm is automatic in input-group-sm
+                                        placeholder="Search recent calls..."
+                                        aria-label="Search recent calls"
+                                        aria-describedby="search-icon"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
                                 </div>
-                                <button className="btn create-btn d-flex align-items-center justify-content-center" onClick={() => setStep(1)}>
-                                    <i className="bi bi-person-plus-fill me-2"></i>
-                                    Add New Call
+                                {/* Small icon button */}
+                                <button 
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => setStep(1)}
+                                    title="Add New Call"
+                                    style={{lineHeight: 1}} // Fix for icon alignment
+                                > 
+                                    <i className="bi bi-person-plus-fill fs-6"></i>
                                 </button>
                             </div>
+                            {/* --- END UPDATED UI --- */}
                         </div>
                         {/* The RecentCalls component is now part of the default view */}
                         <RecentCalls searchTerm={searchTerm} />
@@ -200,7 +209,6 @@ function CreateCall() {
         <>
             <Navbar />
             <div className="container mt-5">
-                {/* --- Renamed class for clarity --- */}
                 <style jsx>{`
                     .calls-page-card { 
                         backdrop-filter: blur(15px); 
@@ -218,6 +226,7 @@ function CreateCall() {
                         font-size: 2rem; 
                         margin-bottom: 1.5rem; 
                     }
+                    /* This is for the form steps, not the icon button */
                     .create-btn { 
                         background: linear-gradient(135deg, #f12711, #f5af19); 
                         border: none; 
@@ -225,7 +234,7 @@ function CreateCall() {
                         font-weight: 600; 
                         transition: all 0.3s ease; 
                         box-shadow: 0 4px 15px rgba(241, 39, 17, 0.3);
-                        padding: 0.5rem 1rem; /* Smaller padding */
+                        padding: 0.75rem 1.5rem;
                     }
                     .create-btn:hover { 
                         transform: translateY(-2px); 
@@ -237,7 +246,6 @@ function CreateCall() {
                     {renderStep()}
                 </div>
             </div>
-            {/* RecentCalls is now rendered inside renderStep() */}
         </>
     );
 }
