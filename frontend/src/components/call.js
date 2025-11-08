@@ -42,7 +42,7 @@ function Call() {
     const [muteStatus, setMuteStatus] = useState({});
     const peersRef = useRef({});
     const audioContainerRef = useRef(null);
-    // const localVideoRef = useRef(null); // <-- REMOVED
+    const localVideoRef = useRef(null); // Ref for self-view video
     const remoteVideoRef = useRef(null);
     const chatMessagesEndRef = useRef(null);
 
@@ -201,9 +201,20 @@ function Call() {
     }, [stream, activeUsers, callState, callId, user]);
 
     
-    // =================================================================
-    // === LOCAL VIDEO (SELF-VIEW) UseEffect HAS BEEN REMOVED ===
-    // =================================================================
+    // Robust Local Video (Self-View) UseEffect
+    useEffect(() => {
+        const videoElem = localVideoRef.current;
+        if (stream && videoElem) {
+            videoElem.srcObject = stream;
+            videoElem.muted = true;
+            const playPromise = videoElem.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error("Error attempting to autoplay local video:", error);
+                });
+            }
+        }
+    }, [stream]);
 
 
     // Mute Status UseEffect
@@ -308,42 +319,68 @@ function Call() {
     if (callState === 'joining') {
         const callerName = callData?.ownerName || 'Unknown Caller';
         return (
-            <div className="d-flex flex-column justify-content-between align-items-center vh-100" style={{ backgroundColor: '#2b2b2b', color: 'white', padding: '10vh 0' }}>
-                <div className="text-center">
-                    <h1 className="display-4">{callerName}</h1>
-                    <h3 className="text-muted">{callData?.description || 'Incoming Call...'}</h3>
-                </div>
+            <>
+                {/* --- FIX 2: Pulsing Animation --- */}
+                <style jsx>{`
+                    .pulse-button {
+                        animation: pulse 1.5s infinite;
+                        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+                    }
+                    .pulse-button.decline {
+                        animation-delay: 0.5s;
+                    }
+                    @keyframes pulse {
+                        0% {
+                            transform: scale(0.95);
+                            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+                        }
+                        70% {
+                            transform: scale(1);
+                            box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+                        }
+                        100% {
+                            transform: scale(0.95);
+                            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+                        }
+                    }
+                `}</style>
+                <div className="d-flex flex-column justify-content-between align-items-center vh-100" style={{ backgroundColor: '#2b2b2b', color: 'white', padding: '10vh 0' }}>
+                    <div className="text-center">
+                        <h1 className="display-4">{callerName}</h1>
+                        <h3 className="text-muted">{callData?.description || 'Incoming Call...'}</h3>
+                    </div>
 
-                <div className="d-flex justify-content-around w-100" style={{ maxWidth: '400px' }}>
-                    <div className="text-center">
-                        <button 
-                            className="btn btn-danger btn-lg rounded-circle" 
-                            style={{ width: '70px', height: '70px', fontSize: '1.8rem' }}
-                            onClick={handleDeclineCall}
-                        >
-                            <i className="bi bi-telephone-fill" style={{ transform: 'rotate(135deg)' }}></i>
-                        </button>
-                        <div className="mt-2">Decline</div>
-                    </div>
-                    <div className="text-center">
-                        <button 
-                            className="btn btn-success btn-lg rounded-circle" 
-                            style={{ width: '70px', height: '70px', fontSize: '1.8rem' }}
-                            onClick={handleAcceptCall}
-                        >
-                            <i className="bi bi-telephone-fill"></i>
-                        </button>
-                        <div className="mt-2">Accept</div>
+                    <div className="d-flex justify-content-around w-100" style={{ maxWidth: '400px' }}>
+                        <div className="text-center">
+                            <button 
+                                className="btn btn-danger btn-lg rounded-circle pulse-button decline" 
+                                style={{ width: '70px', height: '70px', fontSize: '1.8rem' }}
+                                onClick={handleDeclineCall}
+                            >
+                                <i className="bi bi-telephone-fill" style={{ transform: 'rotate(135deg)' }}></i>
+                            </button>
+                            <div className="mt-2">Decline</div>
+                        </div>
+                        <div className="text-center">
+                            <button 
+                                className="btn btn-success btn-lg rounded-circle pulse-button" 
+                                style={{ width: '70px', height: '70px', fontSize: '1.8rem' }}
+                                onClick={handleAcceptCall}
+                            >
+                                <i className="bi bi-telephone-fill"></i>
+                            </button>
+                            <div className="mt-2">Accept</div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </>
         );
     }
 
     // RENDER: Active Call UI
     return (
         <>
-          
+           
             
             <div className="chat-page-container">
                 <style jsx>{`
@@ -393,9 +430,19 @@ function Call() {
                         height: 100%;
                         object-fit: cover;
                     }
-                    
-                    /* LOCAL VIDEO (SELF-VIEW) IS REMOVED */
-
+                    .local-video {
+                        position: absolute;
+                        top: 1rem;
+                        right: 1rem;
+                        width: 100px;
+                        height: auto;
+                        aspect-ratio: 4 / 3;
+                        object-fit: cover;
+                        border: 2px solid var(--border-color);
+                        border-radius: 8px;
+                        background-color: #111;
+                        z-index: 10;
+                    }
                     .call-controls {
                         position: absolute;
                         bottom: 2rem;
@@ -474,9 +521,12 @@ function Call() {
                             border-radius: 8px;
                             border: 1px solid var(--border-color);
                         }
-                        
-                        /* LOCAL VIDEO (SELF-VIEW) IS REMOVED FOR DESKTOP TOO */
-
+                        .local-video {
+                            top: auto;
+                            bottom: 1rem;
+                            width: 25%;
+                            max-width: 200px;
+                        }
                         .call-controls .btn {
                             width: 50px;
                             height: 50px;
@@ -491,19 +541,35 @@ function Call() {
 
                     /* --- 6. CHAT STYLES (Used by both) --- */
                     
+                    /* --- FIX 1: DESKTOP CHAT SCROLLING --- */
+                    .chat-card {
+                        /* This ensures the card itself doesn't shrink/grow weirdly */
+                        flex-grow: 1;
+                        display: flex;
+                        flex-direction: column;
+                        min-height: 0; /* Flexbox trick */
+                    }
                     .chat-card .card-body {
                         padding: 0.5rem 1rem;
-                        overflow: hidden;
+                        overflow: hidden; /* CRITICAL */
+                        display: flex;
+                        flex-direction: column;
+                        flex-grow: 1; /* Make body fill the card */
                     }
-                    
                     .chat-messages-container {
-                        flex-grow: 1;
-                        overflow-y: auto;
-                        min-height: 0;
+                        flex-grow: 1; /* Make message list fill the body */
+                        overflow-y: auto; /* CRITICAL: Add scrollbar */
+                        min-height: 0; /* Flexbox trick */
                         display: flex;
                         flex-direction: column;
                         padding: 0.5rem 0;
                     }
+                    .chat-form {
+                        flex-shrink: 0; /* Prevent form from shrinking */
+                        margin-top: 0.75rem;
+                    }
+                    /* --- END FIX 1 --- */
+
 
                     .chat-message { margin-bottom: 1rem; display: flex; flex-direction: column; }
                     .message-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.3rem; }
@@ -543,7 +609,13 @@ function Call() {
                                 controls={false}
                             />
                             
-                            {/* --- LOCAL VIDEO (SELF-VIEW) TAG IS REMOVED --- */}
+                            <video 
+                                ref={localVideoRef} 
+                                className="local-video" 
+                                autoPlay
+                                playsInline
+                                muted
+                            />
                             
                             {/* --- Call Controls (Bottom Center) --- */}
                             <div className="call-controls">
@@ -605,7 +677,7 @@ function Call() {
                             </div>
                             <ul className="list-group list-group-flush">
                                 {activeUsers.map(p => (
-                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items: center">
+                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <span className="fw-bold">{p.name}</span>
                                             {p.id === user?._id && <span className="ms-2 text-muted small">(You)</span>}
@@ -632,7 +704,7 @@ function Call() {
                         {/* Chat Card (Desktop) */}
                         <div className="card shadow-sm flex-grow-1 chat-card">
                             <div className="card-header">Live Chat</div>
-                            <div className="card-body d-flex flex-column">
+                            <div className="card-body">
                                 <div className="chat-messages-container">
                                     {messages.map(msg => (
                                         <div key={msg.id} className={`chat-message ${msg.senderId === user?._id ? 'own-message' : 'other-message'}`}>
@@ -645,7 +717,7 @@ function Call() {
                                     ))}
                                     <div ref={chatMessagesEndRef} />
                                 </div>
-                                <form onSubmit={handleSendMessage} className="mt-3" style={{flexShrink: 0}}>
+                                <form onSubmit={handleSendMessage} className="chat-form">
                                     <div className="d-flex align-items:center">
                                         <input
                                             type="text"
@@ -676,7 +748,7 @@ function Call() {
                         <div className="mobile-panel-body">
                             <ul className="list-group list-group-flush">
                                 {activeUsers.map(p => (
-                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items: center">
+                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <span className="fw-bold">{p.name}</span>
                                             {p.id === user?._id && <span className="ms-2 text-muted small">(You)</span>}
