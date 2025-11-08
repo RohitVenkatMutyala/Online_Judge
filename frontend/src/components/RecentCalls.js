@@ -8,7 +8,6 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import emailjs from '@emailjs/browser';
 
-// --- UPDATED: Now accepts searchTerm ---
 function RecentCalls({ searchTerm }) {
     const { user } = useAuth();
     const [allCalls, setAllCalls] = useState([]); // Stores all calls from Firebase
@@ -88,8 +87,31 @@ function RecentCalls({ searchTerm }) {
         );
         const unsubscribe = onSnapshot(callsQuery, (snapshot) => {
             const callsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setAllCalls(callsData);
-            setFilteredCalls(callsData); // Initially, filtered list is all calls
+
+            // =================================================================
+            // === NEW DE-DUPLICATION LOGIC ===
+            // =================================================================
+            // This creates a list with only the most recent call for each unique person.
+            const uniqueCalls = [];
+            const seenEmails = new Set();
+            
+            for (const call of callsData) {
+                // Determine the *other* person's email
+                const isOwner = call.ownerId === user._id;
+                const otherPersonEmail = isOwner ? call.recipientEmail : call.ownerEmail;
+
+                // If we haven't seen this email yet, and it's valid, add it.
+                if (otherPersonEmail && !seenEmails.has(otherPersonEmail)) {
+                    seenEmails.add(otherPersonEmail);
+                    uniqueCalls.push(call);
+                }
+                // If we have seen this email, it's an older call with the same person,
+                // so we skip it.
+            }
+            // =================================================================
+
+            setAllCalls(uniqueCalls); // Store the unique list
+            setFilteredCalls(uniqueCalls); // Set the initial filtered list
             setLoading(false);
         }, (error) => {
             console.error("Error fetching recent calls:", error);
@@ -98,7 +120,7 @@ function RecentCalls({ searchTerm }) {
         return () => unsubscribe();
     }, [user]);
 
-    // --- NEW: Effect 2: Filter calls when searchTerm changes ---
+    // Effect 2: Filter calls when searchTerm changes
     useEffect(() => {
         if (!searchTerm) {
             setFilteredCalls(allCalls); // If search is empty, show all calls
@@ -117,8 +139,7 @@ function RecentCalls({ searchTerm }) {
             );
         });
         setFilteredCalls(filtered);
-    }, [searchTerm, allCalls, user._id]); // Re-run this filter when search or data changes
-    // --- END NEW ---
+    }, [searchTerm, allCalls, user]); // Re-run this filter when search or data changes
 
 
     const formatTimestamp = (timestamp) => {
@@ -148,14 +169,11 @@ function RecentCalls({ searchTerm }) {
     }
 
     return (
-        // --- This component no longer has its own container or title ---
         <>
             <style jsx>{`
                 .recent-calls-list {
-                    /* Removed background-color and border, as the card provides it */
                     border-radius: 0.5rem;
                     overflow: hidden;
-                    /* --- NEW: Make list scrollable if it gets too long --- */
                     max-height: 60vh;
                     overflow-y: auto;
                 }
@@ -235,7 +253,6 @@ function RecentCalls({ searchTerm }) {
             `}</style>
             
             <div className="recent-calls-list">
-                {/* --- UPDATED: Use filteredCalls --- */}
                 {filteredCalls.length === 0 ? (
                     <div className="empty-state">
                         {searchTerm ? "No calls match your search." : "You have no recent calls."}
@@ -246,7 +263,7 @@ function RecentCalls({ searchTerm }) {
                         const displayName = isCurrentUserOwner ? call.recipientName : call.ownerName;
                         const displayEmail = isCurrentUserOwner ? call.recipientEmail : call.ownerEmail;
                         
-                        if (!displayName) return null;
+                        if (!displayName) return null; // Don't render calls with missing data
 
                         return (
                             <div key={call.id} className="call-item">
