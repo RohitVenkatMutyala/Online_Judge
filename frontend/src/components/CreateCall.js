@@ -14,13 +14,14 @@ function CreateCall() {
     const navigate = useNavigate();
     const { user } = useAuth();
 
-    const [step, setStep] = useState(0);
+    const [step, setStep] = useState(0); // 0 = Main list, 1 = Description, 2 = Invite
     const [description, setDescription] = useState('');
-    
-    // --- UPDATED: Added recipientName ---
     const [recipientName, setRecipientName] = useState('');
     const [recipientEmail, setRecipientEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    
+    // --- NEW: State for the search bar ---
+    const [searchTerm, setSearchTerm] = useState('');
 
     const sendInvitationEmails = async (callId, callDescription, invitedEmails) => {
         if (!invitedEmails || invitedEmails.length === 0) return;
@@ -40,7 +41,6 @@ function CreateCall() {
             };
             try {
                 await emailjs.send(serviceID, templateID, templateParams, emailjsPublicKey);
-                console.log(`Invitation sent successfully to ${email}`);
             } catch (error) {
                 console.error(`Failed to send invitation to ${email}:`, error);
                 toast.error(`Could not send invite to ${email}.`);
@@ -58,7 +58,6 @@ function CreateCall() {
             return;
         }
         
-        // --- UPDATED: Check for name and email ---
         const recipientEmailClean = recipientEmail.trim();
         const recipientNameClean = recipientName.trim();
 
@@ -70,7 +69,6 @@ function CreateCall() {
             toast.warn("Recipient's email is required.");
             return;
         }
-        // --- END UPDATE ---
 
         setIsLoading(true);
 
@@ -81,24 +79,20 @@ function CreateCall() {
         const callDocRef = doc(db, 'calls', newCallId); 
 
         try {
-            // --- UPDATED: Save owner and recipient details ---
             await setDoc(callDocRef, {
                 description,
                 createdAt: serverTimestamp(),
                 ownerId: user._id,
                 ownerName: `${user.firstname} ${user.lastname}`,
-                ownerEmail: user.email, // <-- Added this
-                
-                recipientName: recipientNameClean, // <-- Added this
-                recipientEmail: recipientEmailClean, // <-- Added this
-                
+                ownerEmail: user.email, 
+                recipientName: recipientNameClean,
+                recipientEmail: recipientEmailClean, 
                 access: 'private',
                 defaultRole: 'editor',
                 allowedEmails,
                 permissions: { [user._id]: 'editor' },
                 muteStatus: { [user._id]: false },
             });
-            // --- END UPDATE ---
 
             await sendInvitationEmails(newCallId, description, invitedEmails);
             toast.success("Call created and invitation sent!");
@@ -117,7 +111,7 @@ function CreateCall() {
         switch (step) {
             case 1: // Description Step
                 return (
-                    <div className="card-body p-5 position-relative">
+                    <div className="card-body p-4 p-md-5">
                         <h2 className="gradient-title">Call Description</h2>
                         <p className="text-muted mb-4">Give your call a clear and concise description.</p>
                         <textarea
@@ -133,11 +127,10 @@ function CreateCall() {
                 );
             case 2: // Invite Step
                 return (
-                     <div className="card-body p-5 position-relative">
+                     <div className="card-body p-4 p-md-5">
                         <h2 className="gradient-title">Invite Person</h2>
                         <p className="text-muted mb-4">Enter the details of the person you want to call.</p>
                         
-                        {/* --- UPDATED: Added Name field --- */}
                         <div className="form-floating mb-3">
                             <input
                                 type="text"
@@ -160,7 +153,6 @@ function CreateCall() {
                             />
                             <label htmlFor="recipientEmail">Recipient's Email</label>
                         </div>
-                        {/* --- END UPDATE --- */}
 
                         <div className="d-flex justify-content-between mt-4">
                             <button className="btn btn-outline-secondary" onClick={() => setStep(1)}>Back</button>
@@ -168,24 +160,29 @@ function CreateCall() {
                         </div>
                     </div>
                 );
-            default: // Initial Screen
+            default: // --- NEW: Main screen with Search and Add ---
                 return (
-                    <div className="card-body p-5 position-relative">
-                        <div className="icon-wrapper mx-auto">
-                            <i className="bi bi-person-plus-fill main-icon"></i>
+                    <div className="card-body p-0 p-md-2">
+                        <div className="p-3 p-md-4">
+                            <div className="d-flex flex-column flex-md-row gap-2">
+                                <div className="input-group flex-grow-1">
+                                    <span className="input-group-text"><i className="bi bi-search"></i></span>
+                                    <input
+                                        type="search"
+                                        className="form-control"
+                                        placeholder="Search recent calls by name or email..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <button className="btn create-btn d-flex align-items-center justify-content-center" onClick={() => setStep(1)}>
+                                    <i className="bi bi-person-plus-fill me-2"></i>
+                                    Add New Call
+                                </button>
+                            </div>
                         </div>
-                        <h1 className="gradient-title">Start a 1-on-1 Call</h1>
-                        <p className="description-text lead mx-auto" style={{ maxWidth: '600px' }}>
-                            Start a real-time private conversation. Enter a description and invite the person you want to talk to.
-                        </p>
-                        <button className="btn create-btn position-relative" onClick={() => setStep(1)}>
-                            <i className="bi bi-rocket-takeoff me-2"></i>
-                            Create New Call
-                            <i className="bi bi-arrow-right ms-2"></i>
-                        </button>
-                        <div className="mt-4">
-                            <small className="text-muted"><i className="bi bi-info-circle me-1"></i>Calls are private and invite-only</small>
-                        </div>
+                        {/* The RecentCalls component is now part of the default view */}
+                        <RecentCalls searchTerm={searchTerm} />
                     </div>
                 );
         }
@@ -203,26 +200,44 @@ function CreateCall() {
         <>
             <Navbar />
             <div className="container mt-5">
+                {/* --- Renamed class for clarity --- */}
                 <style jsx>{`
-                    .create-call-card { backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; position: relative; background: rgba(255, 255, 255, 0.95); }
-                    .create-call-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); opacity: 0; transition: opacity 0.3s ease; }
-                    .create-call-card:hover::before { opacity: 1; }
-                    .create-call-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); border-color: rgba(123, 97, 255, 0.3); }
-                    .gradient-title { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; font-size: 2rem; margin-bottom: 1.5rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-                    .create-btn { background: linear-gradient(135deg, #f12711, #f5af19); border: none; color: white; font-weight: 600; font-size: 1.1rem; padding: 1rem 3rem; border-radius: 50px; transition: all 0.3s ease; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(241, 39, 17, 0.3); }
-                    .create-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(241, 39, 17, 0.4); color: white; }
-                    .description-text { color: var(--bs-secondary); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem; opacity: 0.8; }
-                    .icon-wrapper { display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: linear-gradient(135deg, #f12711, #f5af19); border-radius: 50%; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(241, 39, 17, 0.2); }
-                    .main-icon { font-size: 1.5rem; color: white; }
-                    [data-bs-theme="dark"] .create-call-card { background: rgba(33, 37, 41, 0.95); border-color: rgba(255, 255, 255, 0.15); }
-                    [data-bs-theme="dark"] .create-call-card:hover { background: rgba(33, 37, 41, 0.98); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
-                    [data-bs-theme="dark"] .description-text { color: var(--bs-light); opacity: 0.9; }
+                    .calls-page-card { 
+                        backdrop-filter: blur(15px); 
+                        border: 1px solid var(--bs-border-color); 
+                        transition: all 0.4s; 
+                        overflow: hidden; 
+                        background: var(--bs-body-bg);
+                    }
+                    .gradient-title { 
+                        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); 
+                        -webkit-background-clip: text; 
+                        -webkit-text-fill-color: transparent; 
+                        background-clip: text; 
+                        font-weight: 700; 
+                        font-size: 2rem; 
+                        margin-bottom: 1.5rem; 
+                    }
+                    .create-btn { 
+                        background: linear-gradient(135deg, #f12711, #f5af19); 
+                        border: none; 
+                        color: white; 
+                        font-weight: 600; 
+                        transition: all 0.3s ease; 
+                        box-shadow: 0 4px 15px rgba(241, 39, 17, 0.3);
+                        padding: 0.5rem 1rem; /* Smaller padding */
+                    }
+                    .create-btn:hover { 
+                        transform: translateY(-2px); 
+                        box-shadow: 0 8px 25px rgba(241, 39, 17, 0.4); 
+                        color: white; 
+                    }
                 `}</style>
-                <div className="card create-call-card text-center shadow-lg border-0 position-relative">
+                <div className="card calls-page-card shadow-lg border-0 position-relative">
                     {renderStep()}
                 </div>
             </div>
-            <RecentCalls /> 
+            {/* RecentCalls is now rendered inside renderStep() */}
         </>
     );
 }

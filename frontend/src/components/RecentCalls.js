@@ -6,24 +6,23 @@ import { db } from '../firebaseConfig';
 import { collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import emailjs from '@emailjs/browser'; // Import emailjs
+import emailjs from '@emailjs/browser';
 
-function RecentCalls() {
+// --- UPDATED: Now accepts searchTerm ---
+function RecentCalls({ searchTerm }) {
     const { user } = useAuth();
-    const [calls, setCalls] = useState([]);
+    const [allCalls, setAllCalls] = useState([]); // Stores all calls from Firebase
+    const [filteredCalls, setFilteredCalls] = useState([]); // Stores calls to display
     const [loading, setLoading] = useState(true);
-    const [isCalling, setIsCalling] = useState(null); // Tracks which call is being initiated
+    const [isCalling, setIsCalling] = useState(null);
     const navigate = useNavigate();
 
-    // --- COPIED FROM CreateCall.js ---
-    // This function is needed to send the email when re-calling
+    // Function to send email when re-calling
     const sendInvitationEmails = async (callId, callDescription, invitedEmail) => {
         if (!invitedEmail) return;
-        
         const emailjsPublicKey = '3WEPhBvkjCwXVYBJ-';
         const serviceID = 'service_6ar5bgj';
         const templateID = 'template_w4ydq8a';
-        
         const callLink = `${window.location.origin}/call/${callId}`; 
         
         const templateParams = {
@@ -34,87 +33,93 @@ function RecentCalls() {
         };
         try {
             await emailjs.send(serviceID, templateID, templateParams, emailjsPublicKey);
-            console.log(`Invitation sent successfully to ${invitedEmail}`);
         } catch (error) {
             console.error(`Failed to send invitation to ${invitedEmail}:`, error);
             toast.error(`Could not send invite to ${invitedEmail}.`);
         }
     };
-    // --- END COPY ---
 
-    // --- NEW "SPEED DIAL" FUNCTION ---
-    // This creates a NEW call with a past participant
+    // "Speed dial" function
     const handleReCall = async (callId, recipientName, recipientEmail, description) => {
         if (!user) {
             toast.error("You must be logged in to make a call.");
             return;
         }
-        
-        setIsCalling(callId); // Show loading spinner on the specific call button
-        
+        setIsCalling(callId);
         const newCallId = Math.random().toString(36).substring(2, 9);
         const callDocRef = doc(db, 'calls', newCallId);
 
         try {
-            // Create a new call document, with the current user as owner
             await setDoc(callDocRef, {
                 description,
                 createdAt: serverTimestamp(),
                 ownerId: user._id,
                 ownerName: `${user.firstname} ${user.lastname}`,
                 ownerEmail: user.email,
-                
                 recipientName: recipientName,
                 recipientEmail: recipientEmail,
-                
                 access: 'private',
                 defaultRole: 'editor',
                 allowedEmails: [user.email, recipientEmail],
                 permissions: { [user._id]: 'editor' },
                 muteStatus: { [user._id]: false },
             });
-
-            // Send email to the recipient
             await sendInvitationEmails(newCallId, description, recipientEmail);
             toast.success(`Calling ${recipientName}...`);
-            
-            // Navigate the CALLER (you) to the new call page
             navigate(`/call/${newCallId}`);
-
         } catch (error) {
             console.error("Failed to create call:", error);
             toast.error("Could not create the call.");
             setIsCalling(null);
         }
-        // No finally block, because we navigate away on success
     };
 
-
+    // Effect 1: Fetch all calls from Firebase
     useEffect(() => {
         if (!user) {
             setLoading(false);
             return;
         }
-
-        // Query for calls where the user is EITHER the owner OR the recipient
         const callsQuery = query(
             collection(db, 'calls'),
-            where('allowedEmails', 'array-contains', user.email), // User is part of the call
+            where('allowedEmails', 'array-contains', user.email),
             orderBy('createdAt', 'desc'),
-            limit(10) 
+            limit(20) // Get more calls to make search useful
         );
-
         const unsubscribe = onSnapshot(callsQuery, (snapshot) => {
             const callsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setCalls(callsData);
+            setAllCalls(callsData);
+            setFilteredCalls(callsData); // Initially, filtered list is all calls
             setLoading(false);
         }, (error) => {
             console.error("Error fetching recent calls:", error);
             setLoading(false);
         });
-
         return () => unsubscribe();
-    }, [user]); // Re-run when user logs in
+    }, [user]);
+
+    // --- NEW: Effect 2: Filter calls when searchTerm changes ---
+    useEffect(() => {
+        if (!searchTerm) {
+            setFilteredCalls(allCalls); // If search is empty, show all calls
+            return;
+        }
+
+        const lowerCaseSearch = searchTerm.toLowerCase();
+        const filtered = allCalls.filter(call => {
+            const isOwner = call.ownerId === user._id;
+            const displayName = isOwner ? call.recipientName : call.ownerName;
+            const displayEmail = isOwner ? call.recipientEmail : call.ownerEmail;
+
+            return (
+                displayName?.toLowerCase().includes(lowerCaseSearch) ||
+                displayEmail?.toLowerCase().includes(lowerCaseSearch)
+            );
+        });
+        setFilteredCalls(filtered);
+    }, [searchTerm, allCalls, user._id]); // Re-run this filter when search or data changes
+    // --- END NEW ---
+
 
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return 'No date';
@@ -125,9 +130,9 @@ function RecentCalls() {
         });
     };
 
-    // Helper to get a color for the avatar
     const getAvatarColor = (name) => {
-        const colors = ['#fd7e14', '#6f42c1', '#d63384', '#198754', '#0d6efd'];
+        const colors = ['#fd7e14', '#6f42c1', '#d63384', '#198754', '#0d6efd', '#dc3545', '#ffc107'];
+        if (!name) return colors[0];
         const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         return colors[charCodeSum % colors.length];
     };
@@ -143,13 +148,16 @@ function RecentCalls() {
     }
 
     return (
-        <div className="container mt-5">
+        // --- This component no longer has its own container or title ---
+        <>
             <style jsx>{`
                 .recent-calls-list {
-                    background-color: var(--bs-body-bg);
+                    /* Removed background-color and border, as the card provides it */
                     border-radius: 0.5rem;
                     overflow: hidden;
-                    border: 1px solid var(--bs-border-color);
+                    /* --- NEW: Make list scrollable if it gets too long --- */
+                    max-height: 60vh;
+                    overflow-y: auto;
                 }
                 .call-item {
                     display: flex;
@@ -179,7 +187,7 @@ function RecentCalls() {
                 .call-info {
                     margin-left: 1rem;
                     flex-grow: 1;
-                    min-width: 0; /* Prevents text overflow issues */
+                    min-width: 0;
                 }
                 .call-name {
                     font-weight: 600;
@@ -219,61 +227,64 @@ function RecentCalls() {
                     color: var(--bs-secondary-color);
                     cursor: not-allowed;
                 }
+                .empty-state {
+                    padding: 2rem;
+                    text-align: center;
+                    color: var(--bs-secondary-color);
+                }
             `}</style>
             
-            <h2 className="mb-4">Recent Calls</h2>
-
-            <div className="recent-calls-list shadow-sm">
-                {calls.length === 0 && !loading && (
-                    <div className="call-item">
-                        <p className="text-muted mb-0">You have no recent calls.</p>
+            <div className="recent-calls-list">
+                {/* --- UPDATED: Use filteredCalls --- */}
+                {filteredCalls.length === 0 ? (
+                    <div className="empty-state">
+                        {searchTerm ? "No calls match your search." : "You have no recent calls."}
                     </div>
-                )}
+                ) : (
+                    filteredCalls.map(call => {
+                        const isCurrentUserOwner = call.ownerId === user._id;
+                        const displayName = isCurrentUserOwner ? call.recipientName : call.ownerName;
+                        const displayEmail = isCurrentUserOwner ? call.recipientEmail : call.ownerEmail;
+                        
+                        if (!displayName) return null;
 
-                {calls.map(call => {
-                    // Determine who the *other* person in the call was
-                    const isCurrentUserOwner = call.ownerId === user._id;
-                    const displayName = isCurrentUserOwner ? call.recipientName : call.ownerName;
-                    const displayEmail = isCurrentUserOwner ? call.recipientEmail : call.ownerEmail;
-                    
-                    if (!displayName) return null; // Don't render if name is missing
-
-                    return (
-                        <div key={call.id} className="call-item">
-                            <div 
-                                className="call-avatar" 
-                                style={{ backgroundColor: getAvatarColor(displayName) }}
-                            >
-                                {displayName.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="call-info">
-                                <div className="call-name">{displayName}</div>
-                                <div className="call-details">
-                                    <i className="bi bi-envelope-fill me-2"></i>
-                                    {displayEmail} • {formatTimestamp(call.createdAt)}
+                        return (
+                            <div key={call.id} className="call-item">
+                                <div 
+                                    className="call-avatar" 
+                                    style={{ backgroundColor: getAvatarColor(displayName) }}
+                                >
+                                    {displayName.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="call-info">
+                                    <div className="call-name">{displayName}</div>
+                                    <div className="call-details">
+                                        <i className="bi bi-envelope-fill me-2"></i>
+                                        {displayEmail} • {formatTimestamp(call.createdAt)}
+                                    </div>
+                                </div>
+                                <div className="call-action">
+                                    <button 
+                                        className="call-button" 
+                                        title={`Call ${displayName}`}
+                                        onClick={() => handleReCall(call.id, displayName, displayEmail, call.description)}
+                                        disabled={isCalling === call.id}
+                                    >
+                                        {isCalling === call.id ? (
+                                            <div className="spinner-border spinner-border-sm" role="status">
+                                                <span className="visually-hidden">Calling...</span>
+                                            </div>
+                                        ) : (
+                                            <i className="bi bi-telephone-fill"></i>
+                                        )}
+                                    </button>
                                 </div>
                             </div>
-                            <div className="call-action">
-                                <button 
-                                    className="call-button" 
-                                    title={`Call ${displayName}`}
-                                    onClick={() => handleReCall(call.id, displayName, displayEmail, call.description)}
-                                    disabled={isCalling === call.id}
-                                >
-                                    {isCalling === call.id ? (
-                                        <div className="spinner-border spinner-border-sm" role="status">
-                                            <span className="visually-hidden">Calling...</span>
-                                        </div>
-                                    ) : (
-                                        <i className="bi bi-telephone-fill"></i>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })
+                )}
             </div>
-        </div>
+        </>
     );
 }
 
