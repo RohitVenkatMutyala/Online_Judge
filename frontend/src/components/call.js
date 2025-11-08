@@ -33,6 +33,7 @@ function Call() {
     const [callOwnerId, setCallOwnerId] = useState(null);
     
     // --- UI State (NEW) ---
+    // These control the mobile overlay panels
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
@@ -42,7 +43,7 @@ function Call() {
     const [muteStatus, setMuteStatus] = useState({});
     const peersRef = useRef({});
     const audioContainerRef = useRef(null);
-    const localVideoRef = useRef(null); // Ref for self-view video
+    // localVideoRef (for self-view) has been removed
     const remoteVideoRef = useRef(null);
     const chatMessagesEndRef = useRef(null);
 
@@ -199,23 +200,8 @@ function Call() {
         });
         return () => unsubscribeSignaling();
     }, [stream, activeUsers, callState, callId, user]);
-
     
-    // Robust Local Video (Self-View) UseEffect
-    useEffect(() => {
-        const videoElem = localVideoRef.current;
-        if (stream && videoElem) {
-            videoElem.srcObject = stream;
-            videoElem.muted = true;
-            const playPromise = videoElem.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.error("Error attempting to autoplay local video:", error);
-                });
-            }
-        }
-    }, [stream]);
-
+    // Self-view useEffect has been removed
 
     // Mute Status UseEffect
     useEffect(() => {
@@ -320,7 +306,7 @@ function Call() {
         const callerName = callData?.ownerName || 'Unknown Caller';
         return (
             <>
-                {/* --- FIX 2: Pulsing Animation --- */}
+                {/* --- Pulsing Animation --- */}
                 <style jsx>{`
                     .pulse-button {
                         animation: pulse 1.5s infinite;
@@ -380,7 +366,7 @@ function Call() {
     // RENDER: Active Call UI
     return (
         <>
-           
+            
             
             <div className="chat-page-container">
                 <style jsx>{`
@@ -430,19 +416,9 @@ function Call() {
                         height: 100%;
                         object-fit: cover;
                     }
-                    .local-video {
-                        position: absolute;
-                        top: 1rem;
-                        right: 1rem;
-                        width: 100px;
-                        height: auto;
-                        aspect-ratio: 4 / 3;
-                        object-fit: cover;
-                        border: 2px solid var(--border-color);
-                        border-radius: 8px;
-                        background-color: #111;
-                        z-index: 10;
-                    }
+                    
+                    /* LOCAL VIDEO (SELF-VIEW) IS REMOVED */
+
                     .call-controls {
                         position: absolute;
                         bottom: 2rem;
@@ -498,16 +474,18 @@ function Call() {
                         flex-direction: column;
                         height: calc(100vh - 56px - 61px); /* Full - nav - header */
                         padding: 0;
+                        overflow: hidden;
                     }
                     .mobile-messages-container {
                         flex-grow: 1;
-                        overflow-y: auto;
+                        overflow-y: auto; /* SCROLLBAR */
                         padding: 1rem;
                     }
                     .mobile-chat-form {
                         padding: 1rem;
                         border-top: 1px solid var(--border-color);
                         background-color: var(--dark-bg-secondary);
+                        flex-shrink: 0;
                     }
 
 
@@ -517,16 +495,13 @@ function Call() {
                             padding: 1.5rem 0;
                         }
                         .video-panel-container {
-                            height: 75vh;
+                            height: 80vh; /* <-- INCREASED HEIGHT */
                             border-radius: 8px;
                             border: 1px solid var(--border-color);
                         }
-                        .local-video {
-                            top: auto;
-                            bottom: 1rem;
-                            width: 25%;
-                            max-width: 200px;
-                        }
+                        
+                        /* LOCAL VIDEO (SELF-VIEW) IS REMOVED FOR DESKTOP */
+
                         .call-controls .btn {
                             width: 50px;
                             height: 50px;
@@ -543,7 +518,6 @@ function Call() {
                     
                     /* --- FIX 1: DESKTOP CHAT SCROLLING --- */
                     .chat-card {
-                        /* This ensures the card itself doesn't shrink/grow weirdly */
                         flex-grow: 1;
                         display: flex;
                         flex-direction: column;
@@ -554,7 +528,7 @@ function Call() {
                         overflow: hidden; /* CRITICAL */
                         display: flex;
                         flex-direction: column;
-                        flex-grow: 1; /* Make body fill the card */
+                        flex-grow: 1;
                     }
                     .chat-messages-container {
                         flex-grow: 1; /* Make message list fill the body */
@@ -562,13 +536,30 @@ function Call() {
                         min-height: 0; /* Flexbox trick */
                         display: flex;
                         flex-direction: column;
-                        padding: 0.5rem 0;
+                        padding: 0.5rem 0.5rem 0.5rem 0; /* Add padding for scrollbar */
                     }
                     .chat-form {
-                        flex-shrink: 0; /* Prevent form from shrinking */
+                        flex-shrink: 0;
                         margin-top: 0.75rem;
                     }
                     /* --- END FIX 1 --- */
+
+                    /* --- CUSTOM SCROLLBAR (as requested) --- */
+                    .chat-messages-container::-webkit-scrollbar {
+                        width: 8px;
+                    }
+                    .chat-messages-container::-webkit-scrollbar-track {
+                        background: var(--dark-bg-secondary);
+                    }
+                    .chat-messages-container::-webkit-scrollbar-thumb {
+                        background-color: #555;
+                        border-radius: 4px;
+                        border: 2px solid var(--dark-bg-secondary);
+                    }
+                    .chat-messages-container::-webkit-scrollbar-thumb:hover {
+                        background-color: #777;
+                    }
+                    /* --- END CUSTOM SCROLLBAR --- */
 
 
                     .chat-message { margin-bottom: 1rem; display: flex; flex-direction: column; }
@@ -609,13 +600,7 @@ function Call() {
                                 controls={false}
                             />
                             
-                            <video 
-                                ref={localVideoRef} 
-                                className="local-video" 
-                                autoPlay
-                                playsInline
-                                muted
-                            />
+                            {/* --- LOCAL VIDEO (SELF-VIEW) TAG IS REMOVED --- */}
                             
                             {/* --- Call Controls (Bottom Center) --- */}
                             <div className="call-controls">
