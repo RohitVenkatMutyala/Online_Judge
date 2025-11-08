@@ -29,10 +29,15 @@ function Call() {
     // -- Call State --
     const [callState, setCallState] = useState('loading');
     const [callData, setCallData] = useState(null);
-    const [isChatOpen, setIsChatOpen] = useState(false);
     const [activeUsers, setActiveUsers] = useState([]);
     const [callOwnerId, setCallOwnerId] = useState(null);
     
+    // --- UI State (NEW) ---
+    // These control the mobile overlay panels
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
+
     // --- Voice/Video Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
@@ -202,7 +207,7 @@ function Call() {
     useEffect(() => {
         const videoElem = localVideoRef.current;
         if (stream && videoElem) {
-            // 1. Assign the stream to the video element
+            // 1. Assign the stream
             videoElem.srcObject = stream;
 
             // 2. Set 'muted' property - this is CRITICAL for autoplay
@@ -212,13 +217,11 @@ function Call() {
             const playPromise = videoElem.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    // Autoplay was prevented
                     console.error("Error attempting to autoplay local video:", error);
-                    toast.error("Could not autoplay self-view.");
                 });
             }
         }
-    }, [stream]); // This effect runs only when the stream is ready
+    }, [stream]);
 
     // useEffect for applying mute status to local microphone
     useEffect(() => {
@@ -251,11 +254,9 @@ function Call() {
     };
     
     // =================================================================
-    // === FIX 2: HANGUP "BLANK SCREEN" CHECK ===
+    // === FIX 2: HANGUP "BLANK SCREEN" FIX ===
     // =================================================================
-    // Your navigation logic is correct. `Maps('/')` sends the user
-    // to your Home component. If you see a blank screen, please
-    // check your `Home` component. This function is working as intended.
+    // Navigating to /dashboard (your main app page) instead of /new-call
     const handleHangUp = () => {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -263,7 +264,7 @@ function Call() {
         setStream(null);
         Object.values(peersRef.current).forEach(peer => peer.destroy());
         peersRef.current = {};
-        navigate('/new-call'); // Routes to your Home component
+        navigate('/new-call'); // <-- CHANGED FROM /new-call
     };
 
     const handleToggleMute = async (targetUserId) => {
@@ -363,9 +364,10 @@ function Call() {
     return (
         <>
           
+            
             <div className="chat-page-container">
                 {/* =================================
-                === FIX 3: RESPONSIVE CSS STYLES ===
+                === FIX 3: WHATSAPP-LIKE MOBILE UI ===
                 =================================
                 */}
                 <style jsx>{`
@@ -378,17 +380,15 @@ function Call() {
                       --text-secondary: #a9a9b3;
                       --accent-blue: #4a69bd;
                     }
-                    body {
-                      background-color: var(--dark-bg-primary);
-                    }
                     .chat-page-container {
                       background-color: var(--dark-bg-primary);
                       color: var(--text-primary);
-                      min-height: calc(100vh - 56px);
-                      padding: 1rem 0; /* Use 1rem padding for mobile */
+                      min-height: calc(100vh - 56px); /* 56px is navbar height */
+                      /* Mobile: Fullscreen video, no padding */
+                      padding: 0;
                     }
                     
-                    /* --- 2. Card Component Overrides --- */
+                    /* --- 2. Card Component Overrides (for desktop/panels) --- */
                     .card {
                       background-color: var(--dark-bg-secondary);
                       border: 1px solid var(--border-color);
@@ -408,51 +408,44 @@ function Call() {
                       border-bottom: 1px solid var(--border-color);
                       color: var(--text-primary);
                     }
-                    .list-group-item:last-child { border-bottom: none; }
 
-                    /* --- 3. VIDEO PANEL STYLES (NEW RESPONSIVE) --- */
-                    .video-panel {
+                    /* --- 3. VIDEO PANEL (MOBILE) --- */
+                    .video-panel-container {
                         position: relative;
                         width: 100%;
+                        height: calc(100vh - 56px); /* Full height minus navbar */
                         background-color: #000;
-                        border-radius: 8px;
                         overflow: hidden;
-                        border: 1px solid var(--border-color);
-
-                        /* --- MOBILE FIRST (TALLER VIDEO) --- */
-                        height: 50vh; /* <-- INCREASED VIDEO HEIGHT */
-                        width: 100%;
                     }
                     .remote-video {
                         width: 100%;
                         height: 100%;
-                        object-fit: cover; /* Fill the space, may crop */
+                        object-fit: cover;
                     }
                     .local-video {
                         position: absolute;
-                        bottom: 1rem;
+                        top: 1rem;
                         right: 1rem;
-                        /* Standard 4:3 webcam aspect ratio */
                         width: 100px;
                         height: auto;
                         aspect-ratio: 4 / 3;
-                        object-fit: cover; /* Match the remote video style */
+                        object-fit: cover;
                         border: 2px solid var(--border-color);
                         border-radius: 8px;
                         background-color: #111;
-                        z-index: 5; /* Below controls */
+                        z-index: 10;
                     }
                     .call-controls {
                         position: absolute;
-                        bottom: 1rem;
+                        bottom: 2rem;
                         left: 50%;
                         transform: translateX(-50%);
-                        background-color: rgba(0, 0, 0, 0.6);
+                        background-color: rgba(0, 0, 0, 0.7);
                         border-radius: 50px;
-                        padding: 0.5rem 0.75rem;
+                        padding: 0.5rem;
                         display: flex;
-                        gap: 0.75rem; /* <-- PROPERLY SPACED BUTTONS */
-                        z-index: 10; /* <-- ON TOP OF EVERYTHING */
+                        gap: 0.5rem;
+                        z-index: 20;
                     }
                     .call-controls .btn {
                         width: 45px;
@@ -461,18 +454,89 @@ function Call() {
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        margin: 0 0.25rem; /* Prevents merging */
+                    }
+                    
+                    /* --- 4. MOBILE OVERLAY PANELS (WhatsApp-like) --- */
+                    .mobile-panel {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: var(--dark-bg-primary);
+                        z-index: 100;
+                        display: flex;
+                        flex-direction: column;
+                        padding-top: 56px; /* Space for navbar */
+                    }
+                    .mobile-panel-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem;
+                        border-bottom: 1px solid var(--border-color);
+                        background-color: var(--dark-bg-secondary);
+                    }
+                    .mobile-panel-header h5 {
+                        margin: 0;
+                    }
+                    .mobile-panel-body {
+                        flex-grow: 1;
+                        overflow-y: auto;
+                        padding: 1rem;
+                    }
+                    /* Special override for chat panel to fill height */
+                    .mobile-chat-panel {
+                        padding: 0;
+                    }
+                    .mobile-chat-body {
+                        display: flex;
+                        flex-direction: column;
+                        height: calc(100vh - 56px - 61px); /* Full - nav - header */
+                        padding: 0;
+                    }
+                    .mobile-messages-container {
+                        flex-grow: 1;
+                        overflow-y: auto;
+                        padding: 1rem;
+                    }
+                    .mobile-chat-form {
+                        padding: 1rem;
+                        border-top: 1px solid var(--border-color);
+                        background-color: var(--dark-bg-secondary);
                     }
 
-                    /* --- 4. Chat-Specific Styles --- */
-                    .chat-card .card-body { padding: 0.5rem 1rem; }
-                    .chat-messages-container {
-                      flex-grow: 1;
-                      overflow-y: auto;
-                      max-height: 40vh; /* Good height for mobile chat */
-                      display: flex;
-                      flex-direction: column;
-                      padding: 0.5rem 0;
+
+                    /* --- 5. DESKTOP VIEW (PC) --- */
+                    @media (min-width: 992px) { /* Bootstrap 'lg' breakpoint */
+                        .chat-page-container {
+                            padding: 1.5rem 0; /* Restore padding */
+                        }
+                        .video-panel-container {
+                            height: 75vh; /* Restore original height */
+                            border-radius: 8px;
+                            border: 1px solid var(--border-color);
+                        }
+                        .local-video {
+                            top: auto;
+                            bottom: 1rem;
+                            width: 25%;
+                            max-width: 200px;
+                        }
+                        .call-controls {
+                            padding: 0.5rem 1rem;
+                            gap: 1rem;
+                        }
+                        .call-controls .btn {
+                            width: 50px;
+                            height: 50px;
+                            font-size: 1.2rem;
+                            margin: 0 0.5rem;
+                        }
                     }
+
+                    /* --- Chat-Specific Styles (Used by both) --- */
                     .chat-message { margin-bottom: 1rem; display: flex; flex-direction: column; }
                     .message-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.3rem; }
                     .message-sender { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
@@ -483,73 +547,26 @@ function Call() {
                     .own-message .message-header { justify-content: flex-end; }
                     .other-message { align-items: flex-start; }
                     .other-message .message-bubble { background-color: #313147; color: var(--text-primary); border-top-left-radius: 4px; }
-                    
-                    /* --- 5. Form & Input Styles --- */
                     .form-control {
                       background-color: var(--dark-bg-primary) !important;
                       border: 1px solid var(--border-color) !important;
                       color: var(--text-primary) !important;
                     }
-                    .form-control:focus {
-                      border-color: var(--accent-blue) !important;
-                      box-shadow: 0 0 0 0.2rem rgba(74, 105, 189, 0.25) !important;
-                    }
                     .form-control::placeholder { color: var(--text-secondary) !important; }
                     .chat-input { border-radius: 20px; padding: 0.5rem 1rem; }
                     .send-button {
-                      background: var(--accent-blue);
-                      border: none;
-                      color: white;
-                      border-radius: 50%;
-                      width: 40px;
-                      height: 40px;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      margin-left: 0.5rem;
-                      transition: background-color 0.2s ease;
-                    }
-                    .send-button:hover { background-color: #5a7ccb; }
-                    .send-button:disabled { background-color: #313147; cursor: not-allowed; }
-
-                    /* --- 6. MEDIA QUERY FOR DESKTOP (PC) --- */
-                    @media (min-width: 992px) { /* Bootstrap's 'lg' breakpoint */
-                        .chat-page-container {
-                            padding: 1.5rem 0;
-                        }
-
-                        .video-panel {
-                            height: 75vh; /* Restore 75vh height for desktop */
-                        }
-
-                        .local-video {
-                            width: 25%; /* Restore desktop size */
-                            max-width: 200px;
-                            height: auto;
-                            aspect-ratio: 4 / 3;
-                        }
-
-                        .call-controls .btn {
-                            width: 50px;
-                            height: 50px;
-                            font-size: 1.2rem;
-                        }
-
-                        .call-controls {
-                            padding: 0.5rem 1rem;
-                            gap: 1rem;
-                        }
-
-                        .chat-messages-container {
-                            max-height: 40vh;
-                        }
+                      background: var(--accent-blue); border: none; color: white;
+                      border-radius: 50%; width: 40px; height: 40px;
+                      display: flex; align-items: center; justify-content: center;
+                      margin-left: 0.5rem; transition: background-color 0.2s ease;
                     }
                 `}</style>
+
                 <div className="row g-3 h-100">
 
-                    {/* Left Column: Video Panel */}
-                    <div className="col-lg-8 d-flex flex-column">
-                        <div className="video-panel shadow-sm">
+                    {/* --- Video Column (Fullscreen Mobile, col-lg-8 Desktop) --- */}
+                    <div className="col-12 col-lg-8 d-flex flex-column">
+                        <div className="video-panel-container shadow-sm">
                             <video 
                                 ref={remoteVideoRef} 
                                 className="remote-video" 
@@ -557,18 +574,19 @@ function Call() {
                                 playsInline 
                                 controls={false}
                             />
-                            {/* This is the self-view video.
-                              The 'playsInline' is for iOS.
-                              'autoPlay' is removed because our useEffect handles it.
-                              'muted' is removed because our useEffect handles it.
-                            */}
+                            
+                            {/* FIX 1: Self-view video with all props */}
                             <video 
                                 ref={localVideoRef} 
                                 className="local-video" 
+                                autoPlay
                                 playsInline
+                                muted
                             />
                             
+                            {/* --- Call Controls (Bottom Center) --- */}
                             <div className="call-controls">
+                                {/* Mute Button */}
                                 <button
                                     className={`btn rounded-circle ${muteStatus[user._id] ? 'btn-secondary' : 'btn-light'}`}
                                     onClick={() => handleToggleMute(user._id)}
@@ -576,13 +594,35 @@ function Call() {
                                 >
                                     <i className={`bi ${muteStatus[user._id] ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
                                 </button>
+                                
+                                {/* Chat (MOBILE ONLY) */}
                                 <button
-                                    className="btn btn-primary rounded-circle"
-                                    onClick={() => setIsChatOpen(!isChatOpen)}
-                                    title={isChatOpen ? "Hide Chat" : "Show Chat"}
+                                    className="btn btn-primary rounded-circle d-lg-none"
+                                    onClick={() => setIsChatOpen(true)}
+                                    title="Show Chat"
                                 >
                                     <i className="bi bi-chat-dots-fill"></i>
                                 </button>
+                                
+                                {/* Participants (MOBILE ONLY) */}
+                                <button
+                                    className="btn btn-primary rounded-circle d-lg-none"
+                                    onClick={() => setIsParticipantsOpen(true)}
+                                    title="Show Participants"
+                                >
+                                    <i className="bi bi-people-fill"></i>
+                                </button>
+
+                                {/* Share (MOBILE ONLY) */}
+                                <button
+                                    className="btn btn-primary rounded-circle d-lg-none"
+                                    onClick={() => setIsShareOpen(true)}
+                                    title="Share Link"
+                                >
+                                    <i className="bi bi-share-fill"></i>
+                                </button>
+
+                                {/* Hangup Button */}
                                 <button 
                                     className="btn btn-danger rounded-circle"
                                     onClick={handleHangUp}
@@ -594,15 +634,14 @@ function Call() {
                         </div>
                     </div>
 
-                    {/* Right Column: Users, Share, Chat */}
-                    {/* This column will stack below the video on mobile */}
-                    <div className="col-lg-4 d-flex flex-column h-100">
+                    {/* --- Desktop-Only Sidebar (d-none d-lg-flex) --- */}
+                    <div className="col-lg-4 d-none d-lg-flex flex-column h-100">
+                        {/* Participants Card (Desktop) */}
                         <div className="card shadow-sm mb-3">
                             <div className="card-header d-flex justify-content-between">
                                 <span>Participants ({activeUsers.length})</span>
                                 <i className="bi bi-broadcast text-success"></i>
                             </div>
-
                             <ul className="list-group list-group-flush">
                                 {activeUsers.map(p => (
                                     <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
@@ -626,44 +665,128 @@ function Call() {
                             <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                         </div>
 
+                        {/* Share Card (Desktop) */}
                         <div className="mb-3"><SharingComponent sessionId={callId} /></div>
 
-                        {/* CONDITIONAL CHAT BOX */}
-                        {isChatOpen && (
-                            <div className="card shadow-sm flex-grow-1 chat-card">
-                                <div className="card-header">Live Chat</div>
-                                <div className="card-body d-flex flex-column">
-                                    <div className="chat-messages-container">
-                                        {messages.map(msg => (
-                                            <div key={msg.id} className={`chat-message ${msg.senderId === user?._id ? 'own-message' : 'other-message'}`}>
-                                                <div className="message-header">
-                                                    <span className="message-sender">{msg.senderName}</span>
-                                                    <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
-                                                </div>
-                                                <div className="message-bubble">{msg.text}</div>
+                        {/* Chat Card (Desktop) */}
+                        <div className="card shadow-sm flex-grow-1 chat-card">
+                            <div className="card-header">Live Chat</div>
+                            <div className="card-body d-flex flex-column">
+                                <div className="chat-messages-container" style={{maxHeight: '40vh'}}>
+                                    {messages.map(msg => (
+                                        <div key={msg.id} className={`chat-message ${msg.senderId === user?._id ? 'own-message' : 'other-message'}`}>
+                                            <div className="message-header">
+                                                <span className="message-sender">{msg.senderName}</span>
+                                                <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
                                             </div>
-                                        ))}
-                                        <div ref={chatMessagesEndRef} />
-                                    </div>
-                                    <form onSubmit={handleSendMessage} className="chat-input-group">
-                                        <div className="d-flex align-items:center">
-                                            <input
-                                                type="text"
-                                                className="form-control chat-input"
-                                                placeholder="Type a message..."
-                                                value={newMessage}
-                                                onChange={(e) => setNewMessage(e.target.value)}
-                                            />
-                                            <button className="send-button flex-shrink-0" type="submit" disabled={!newMessage.trim()}>
-                                                <i className="bi bi-send-fill"></i>
-                                            </button>
+                                            <div className="message-bubble">{msg.text}</div>
                                         </div>
-                                    </form>
+                                    ))}
+                                    <div ref={chatMessagesEndRef} />
                                 </div>
+                                <form onSubmit={handleSendMessage} className="mt-3">
+                                    <div className="d-flex align-items:center">
+                                        <input
+                                            type="text"
+                                            className="form-control chat-input"
+                                            placeholder="Type a message..."
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                        />
+                                        <button className="send-button flex-shrink-0" type="submit" disabled={!newMessage.trim()}>
+                                            <i className="bi bi-send-fill"></i>
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
+
+                {/* --- Mobile-Only Panels (Overlays) --- */}
+
+                {/* Participants Panel (Mobile) */}
+                {isParticipantsOpen && (
+                    <div className="mobile-panel d-lg-none">
+                        <div className="mobile-panel-header">
+                            <h5>Participants ({activeUsers.length})</h5>
+                            <button className="btn-close btn-close-white" onClick={() => setIsParticipantsOpen(false)}></button>
+                        </div>
+                        <div className="mobile-panel-body">
+                            <ul className="list-group list-group-flush">
+                                {activeUsers.map(p => (
+                                    <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span className="fw-bold">{p.name}</span>
+                                            {p.id === user?._id && <span className="ms-2 text-muted small">(You)</span>}
+                                        </div>
+                                        {stream && (
+                                            <button
+                                                className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
+                                                onClick={() => handleToggleMute(p.id)}
+                                                disabled={user?._id !== callOwnerId && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
+                                                style={{ fontSize: '1.2rem' }}
+                                            >
+                                                <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
+                                            </button>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
+                {/* Share Panel (Mobile) */}
+                {isShareOpen && (
+                    <div className="mobile-panel d-lg-none">
+                        <div className="mobile-panel-header">
+                            <h5>Share Call Link</h5>
+                            <button className="btn-close btn-close-white" onClick={() => setIsShareOpen(false)}></button>
+                        </div>
+                        <div className="mobile-panel-body">
+                            <SharingComponent sessionId={callId} />
+                        </div>
+                    </div>
+                )}
+
+                {/* Chat Panel (Mobile) */}
+                {isChatOpen && (
+                    <div className="mobile-panel mobile-chat-panel d-lg-none">
+                        <div className="mobile-panel-header">
+                            <h5>Live Chat</h5>
+                            <button className="btn-close btn-close-white" onClick={() => setIsChatOpen(false)}></button>
+                        </div>
+                        <div className="mobile-chat-body">
+                            <div className="mobile-messages-container">
+                                {messages.map(msg => (
+                                    <div key={msg.id} className={`chat-message ${msg.senderId === user?._id ? 'own-message' : 'other-message'}`}>
+                                        <div className="message-header">
+                                            <span className="message-sender">{msg.senderName}</span>
+                                            <span className="message-timestamp">{formatTimestamp(msg.timestamp)}</span>
+                                        </div>
+                                        <div className="message-bubble">{msg.text}</div>
+                                    </div>
+                                ))}
+                                <div ref={chatMessagesEndRef} />
+                            </div>
+                            <form onSubmit={handleSendMessage} className="mobile-chat-form">
+                                <div className="d-flex align-items:center">
+                                    <input
+                                        type="text"
+                                        className="form-control chat-input"
+                                        placeholder="Type a message..."
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                    />
+                                    <button className="send-button flex-shrink-0" type="submit" disabled={!newMessage.trim()}>
+                                        <i className="bi bi-send-fill"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
