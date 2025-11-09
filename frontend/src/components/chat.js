@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import Editor from '@monaco-editor/react';
 import Peer from 'simple-peer';
 import axios from 'axios';
+import emailjs from '@emailjs/browser'; // --- NEW: Added emailjs import ---
 
 import Navbar from './navbar';
 import SharingComponent from './SharingComponent';
@@ -42,6 +43,13 @@ function Chat() {
     const [TotalTime, setTime] = useState(null);
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [sessionOwnerId, setSessionOwnerId] = useState(null);
+    
+    // --- NEW: State for session data and invite modal ---
+    const [sessionData, setSessionData] = useState(null);
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [inviteEmails, setInviteEmails] = useState('');
+    const [isInviting, setIsInviting] = useState(false);
+
     // --- Voice Chat State ---
     const [stream, setStream] = useState(null);
     const [muteStatus, setMuteStatus] = useState({});
@@ -54,7 +62,6 @@ function Chat() {
     }, [messages]);
 
     // Main useEffect to handle session data and user presence
-    // Main useEffect to handle session data and user presence
     useEffect(() => {
         if (!sessionId || !user) {
             setLoading(!sessionId);
@@ -63,7 +70,6 @@ function Chat() {
 
         const sessionDocRef = doc(db, 'sessions', sessionId);
 
-        // --- CHANGE 1: START ---
         // Setup the heartbeat to run every 30 seconds
         const updatePresence = () => {
             updateDoc(sessionDocRef, {
@@ -75,7 +81,6 @@ function Chat() {
         };
         updatePresence(); // Call it once immediately
         heartbeatIntervalRef.current = setInterval(updatePresence, 30000);
-        // --- CHANGE 1: END ---
 
         const unsubscribeSession = onSnapshot(sessionDocRef, (docSnap) => {
             if (!docSnap.exists()) {
@@ -85,6 +90,7 @@ function Chat() {
             }
 
             const data = docSnap.data();
+            setSessionData(data); // --- NEW: Store all session data ---
             setSessionOwnerId(data.ownerId);
 
             const isOwner = user && data.ownerId === user._id;
@@ -96,8 +102,9 @@ function Chat() {
                 return;
             }
 
-            // --- CHANGE 2: START ---
-            // Filter the participants map to show only those seen in the last minute
+            // --- 
+            // --- FIX 1: PREVENT USER LIST FLICKER ---
+            // ---
             const participantsMap = data.activeParticipants || {};
             const oneMinuteAgo = Date.now() - 60000; // 1 minute in milliseconds
 
@@ -107,9 +114,17 @@ function Chat() {
                     id: userId,
                     name: userData.name,
                 }));
+            
+            // --- Create sorted ID strings to compare ---
+            const newUsersID = JSON.stringify(currentUsers.map(u => u.id).sort());
+            const oldUsersID = JSON.stringify(activeUsers.map(u => u.id).sort());
 
-            setActiveUsers(currentUsers);
-            // --- CHANGE 2: END ---
+            // --- Only update state if the user list has *actually* changed ---
+            if (newUsersID !== oldUsersID) {
+                setActiveUsers(currentUsers);
+            }
+            // --- END FIX 1 ---
+            
 
             const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
             setUserRole(role);
@@ -122,8 +137,11 @@ function Chat() {
             setOutput(data.lastRunOutput || '');
             setTime(data.lastRunTime || null);
 
+            // --- UPDATED: Request AUDIO ONLY ---
             if (data.access === 'private' && !stream) {
-                navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(setStream).catch(err => toast.error("Could not access microphone."));
+                navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+                    .then(setStream)
+                    .catch(err => toast.error("Could not access microphone."));
             }
 
             setLoading(false);
@@ -136,7 +154,6 @@ function Chat() {
         const messagesQuery = query(collection(db, 'sessions', sessionId, 'messages'), orderBy('timestamp'));
         const unsubscribeMessages = onSnapshot(messagesQuery, qSnap => setMessages(qSnap.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-        // --- CHANGE 3: START ---
         // This is the cleanup function that runs when the user leaves
         return () => {
             clearInterval(heartbeatIntervalRef.current); // Stop the heartbeat
@@ -151,81 +168,168 @@ function Chat() {
             unsubscribeSession();
             unsubscribeMessages();
         };
-        // --- CHANGE 3: END ---
-    }, [sessionId, user, stream]);
+    }, [sessionId, user]); // --- REMOVED 'stream' from dependency array to prevent re-runs ---
 
-    // useEffect for WebRTC connections
+    // ---
+    // --- FIX 2: ROBUST WEBRTC MESH & SIGNALING ---
+    // ---
+    const activeUserIDs = JSON.stringify(activeUsers.map(p => p.id).sort()); // Stable dependency
+
     useEffect(() => {
         if (!stream || sessionAccess !== 'private' || !user) return;
 
         const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
 
+        // --- Helper to add audio element ---
+        const addAudioElement = (userId, stream) => {
+            if (audioContainerRef.current) {
+                let audio = document.getElementById(`audio-${userId}`);
+                if (!audio) {
+                    audio = document.createElement('audio');
+                    audio.id = `audio-${userId}`;
+                    audio.autoplay = true;
+                    audioContainerRef.current.appendChild(audio);
+                }
+                audio.srcObject = stream;
+            }
+        };
+
+        // --- Helper to remove audio element ---
+        const removeAudioElement = (userId) => {
+            const audioElem = document.getElementById(`audio-${userId}`);
+            if (audioElem) {
+                audioElem.remove();
+            }
+        };
+
         const createPeer = (recipientId, senderId, stream) => {
+            console.log(`Creating peer for ${recipientId}`);
             const peer = new Peer({ initiator: true, trickle: false, stream });
+
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId, senderId, signal }));
             peer.on('stream', remoteStream => {
-                if (audioContainerRef.current) {
-                    let audio = document.getElementById(`audio-${recipientId}`);
-                    if (!audio) {
-                        audio = document.createElement('audio'); audio.id = `audio-${recipientId}`;
-                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
-                    }
-                    audio.srcObject = remoteStream;
-                }
+                console.log(`Received stream from ${recipientId}`);
+                addAudioElement(recipientId, remoteStream);
             });
-            peer.on('close', () => { const audioElem = document.getElementById(`audio-${recipientId}`); if (audioElem) audioElem.remove(); });
-            return peer;
+            peer.on('close', () => { 
+                console.log(`Connection closed with ${recipientId}`);
+                removeAudioElement(recipientId);
+                delete peersRef.current[recipientId];
+            });
+            peer.on('error', (err) => {
+                console.error(`Peer error (to ${recipientId}):`, err);
+                removeAudioElement(recipientId);
+                delete peersRef.current[recipientId];
+            });
+            
+            peersRef.current[recipientId] = peer;
         };
 
         const addPeer = (incoming, recipientId, stream) => {
+            console.log(`Accepting peer from ${incoming.senderId}`);
             const peer = new Peer({ initiator: false, trickle: false, stream });
+
             peer.on('signal', signal => addDoc(signalingColRef, { recipientId: incoming.senderId, senderId: recipientId, signal }));
             peer.on('stream', remoteStream => {
-                if (audioContainerRef.current) {
-                    let audio = document.getElementById(`audio-${incoming.senderId}`);
-                    if (!audio) {
-                        audio = document.createElement('audio'); audio.id = `audio-${incoming.senderId}`;
-                        audio.autoplay = true; audioContainerRef.current.appendChild(audio);
-                    }
-                    audio.srcObject = remoteStream;
-                }
+                console.log(`Received stream from ${incoming.senderId}`);
+                addAudioElement(incoming.senderId, remoteStream);
             });
-            peer.on('close', () => { const audioElem = document.getElementById(`audio-${incoming.senderId}`); if (audioElem) audioElem.remove(); });
+            peer.on('close', () => { 
+                console.log(`Connection closed with ${incoming.senderId}`);
+                removeAudioElement(incoming.senderId);
+                delete peersRef.current[incoming.senderId];
+            });
+            peer.on('error', (err) => {
+                console.error(`Peer error (from ${incoming.senderId}):`, err);
+                removeAudioElement(incoming.senderId);
+                delete peersRef.current[incoming.senderId];
+            });
+
             peer.signal(incoming.signal);
-            return peer;
+            peersRef.current[incoming.senderId] = peer;
         };
 
-        activeUsers.forEach(p => { if (p.id !== user._id && !peersRef.current[p.id]) { peersRef.current[p.id] = createPeer(p.id, user._id, stream); } });
-        Object.keys(peersRef.current).forEach(peerId => { if (!activeUsers.find(p => p.id === peerId)) { peersRef.current[peerId].destroy(); delete peersRef.current[peerId]; } });
+        // Create peers for new users
+        activeUsers.forEach(p => { 
+            if (p.id !== user._id && !peersRef.current[p.id]) { 
+                createPeer(p.id, user._id, stream); 
+            } 
+        });
 
+        // Destroy peers for users who left
+        Object.keys(peersRef.current).forEach(peerId => { 
+            if (!activeUsers.find(p => p.id === peerId)) { 
+                console.log(`Destroying peer for ${peerId}`);
+                if(peersRef.current[peerId]) {
+                    peersRef.current[peerId].destroy(); 
+                }
+                delete peersRef.current[peerId]; 
+                removeAudioElement(peerId); // Clean up audio element
+            } 
+        });
+
+        // --- Signaling listener with REFRESH FIX ---
         const unsubscribeSignaling = onSnapshot(query(signalingColRef), snapshot => {
             snapshot.docChanges().forEach(change => {
-                if (change.type === "added") {
-                    const data = change.doc.data();
-                    if (data.recipientId === user._id) {
-                        const peer = peersRef.current[data.senderId];
-                        if (peer) { peer.signal(data.signal); } else { peersRef.current[data.senderId] = addPeer(data, user._id, stream); }
-                        deleteDoc(change.doc.ref);
+                const data = change.doc.data();
+                if (change.type === "added" && data.recipientId === user._id) {
+                    const existingPeer = peersRef.current[data.senderId];
+
+                    if (data.signal.type === 'offer') {
+                        // New offer from a refresh
+                        if (existingPeer) {
+                            console.log(`(RECONNECT) Destroying stale peer for ${data.senderId}`);
+                            existingPeer.removeAllListeners(); // Prevent stale 'close'
+                            existingPeer.destroy();
+                            delete peersRef.current[data.senderId];
+                            removeAudioElement(data.senderId);
+                        }
+
+                        // Only add peer if they are in the official activeUsers list
+                        if (activeUsers.find(p => p.id === data.senderId)) {
+                            console.log(`(RECONNECT) Accepting new offer from ${data.senderId}`);
+                            addPeer(data, user._id, stream);
+                        }
+                    
+                    } else if (existingPeer && data.signal.type === 'answer') {
+                        // This is an answer to our offer
+                        console.log(`Got signal answer from ${data.senderId}`);
+                        existingPeer.signal(data.signal);
+                    
+                    } else if (existingPeer) {
+                        // Other signal (like ICE candidate, though trickle=false)
+                        existingPeer.signal(data.signal);
                     }
+                    
+                    deleteDoc(change.doc.ref); // Signal consumed
                 }
             });
         });
-        return () => unsubscribeSignaling();
-    }, [stream, activeUsers, sessionId, user]);
 
-    // useEffect for applying mute status to local microphone
+        return () => {
+             unsubscribeSignaling();
+        };
+    }, [stream, activeUserIDs, sessionId, user, sessionAccess]); // Use stable activeUserIDs
+    // --- END FIX 2 ---
+
+
+    // ---
+    // --- FIX 3: SIMPLIFIED MUTE EFFECT ---
+    // ---
     useEffect(() => {
         if (!stream || !user || stream.getAudioTracks().length === 0) { return; }
-        const isMuted = muteStatus[user._id] ?? true;
+        const isMuted = muteStatus[user._id] ?? true; // Default to muted if not specified
         const audioTrack = stream.getAudioTracks()[0];
+        
+        // This is all that's needed to mute/unmute your outgoing audio
         audioTrack.enabled = !isMuted;
-        Object.values(peersRef.current).forEach(peer => {
-            const sender = peer._pc.getSenders().find(s => s.track?.kind === 'audio');
-            if (sender) { sender.replaceTrack(audioTrack); }
-        });
-    }, [muteStatus, stream, user]);
 
-    // --- Handler Functions ---
+    }, [muteStatus, stream, user]);
+    // --- END FIX 3 ---
+
+    // ---
+    // --- MUTE LOGIC (Already Correct) ---
+    // ---
     const handleToggleMute = async (targetUserId) => {
         // Check against the true owner's ID, not the user's role
         const isTrueOwner = user && user._id === sessionOwnerId;
@@ -243,7 +347,7 @@ function Chat() {
         if (isSelf) {
             const isCurrentlyMuted = muteStatus[targetUserId] ?? true;
 
-            // If they are already muted, they cannot unmute. Block the action.
+            // If they are already muted (by owner), they cannot unmute.
             if (isCurrentlyMuted) {
                 toast.error("Only the session owner can unmute you.");
                 return;
@@ -256,6 +360,71 @@ function Chat() {
             toast.error("You do not have permission to mute other participants.");
         }
     };
+    // --- END MUTE LOGIC ---
+
+
+    // ---
+    // --- NEW: INVITE PEOPLE LOGIC ---
+    // ---
+    const handleSendInvites = async (e) => {
+        e.preventDefault();
+        if (!inviteEmails) {
+            toast.warn("Please enter at least one email.");
+            return;
+        }
+        setIsInviting(true);
+        
+        const emails = inviteEmails.split(/[,\s\n]+/).map(email => email.trim()).filter(Boolean);
+        if (emails.length === 0) {
+            toast.warn("No valid emails found.");
+            setIsInviting(false);
+            return;
+        }
+        
+        // Credentials from CreateSession.js
+        const emailjsPublicKey = '3WEPhBvkjCwXVYBJ-';
+        const serviceID = 'service_6ar5bgj';
+        const templateID = 'template_w4ydq8a';
+        const sessionLink = `${window.location.origin}/chat/${sessionId}`;
+
+        try {
+            // 1. Update permissions in Firestore
+            const sessionDocRef = doc(db, 'sessions', sessionId);
+            await updateDoc(sessionDocRef, {
+                allowedEmails: arrayUnion(...emails)
+            });
+
+            // 2. Send email to each new user
+            let successCount = 0;
+            for (const email of emails) {
+                const templateParams = {
+                    from_name: `${user.firstname} ${user.lastname}`,
+                    to_email: email,
+                    session_description: sessionData?.description || "a coding session", // Use session data
+                    session_link: sessionLink,
+                };
+                try {
+                    await emailjs.send(serviceID, templateID, templateParams, emailjsPublicKey);
+                    successCount++;
+                } catch (err) {
+                    console.error(`Failed to send invite to ${email}:`, err);
+                }
+            }
+            
+            toast.success(`Sent ${successCount} invite(s)!`);
+            setIsInviteModalOpen(false);
+            setInviteEmails('');
+
+        } catch (error) {
+            console.error("Error sending invites:", error);
+            toast.error("Could not update session permissions.");
+        } finally {
+            setIsInviting(false);
+        }
+    };
+    // --- END INVITE LOGIC ---
+
+
     const handleCodeChange = (newCode) => { if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { code: newCode }); };
     const handleInputChange = (e) => { const newInput = e.target.value; setInput(newInput); if (userRole === 'editor') updateDoc(doc(db, 'sessions', sessionId), { codeInput: newInput }); };
     const formatTimestamp = (timestamp) => !timestamp ? '' : timestamp.toDate().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -296,14 +465,14 @@ function Chat() {
             <Navbar />
             <div className="chat-page-container">
                 <style jsx>{`
-                  /* --- 1. General Page & Layout Styles --- */
+                    /* --- 1. General Page & Layout Styles --- */
 
 :root {
   --dark-bg-primary: #12121c;   /* Main page background */
   --dark-bg-secondary: #1e1e2f; /* Card and container background */
-  --border-color: #3a3a5a;      /* Borders and dividers */
-  --text-primary: #e0e0e0;      /* Main text color */
-  --text-secondary: #a9a9b3;    /* Muted text for timestamps/subtitles */
+  --border-color: #3a3a5a;       /* Borders and dividers */
+  --text-primary: #e0e0e0;       /* Main text color */
+  --text-secondary: #a9a9b3;     /* Muted text for timestamps/subtitles */
   --accent-blue: #4a69bd;       /* Accent for user's own message bubble & active elements */
 }
 
@@ -647,6 +816,9 @@ body {
                                             <button
                                                 className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
+                                                // Mute logic:
+                                                // 1. You are NOT the owner AND
+                                                // 2. It is NOT you OR you are already muted (can't unmute self)
                                                 disabled={user?._id !== sessionOwnerId && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
                                                 style={{ fontSize: '1.2rem' }}
                                             >
@@ -672,10 +844,29 @@ body {
                             <div ref={audioContainerRef} style={{ display: 'none' }}></div>
                         </div>
 
-                        {userRole === 'editor' && <div className="mb-3"><SharingComponent sessionId={sessionId} /></div>}
+                        {userRole === 'editor' && (
+                            <>
+                                <div className="mb-3"><SharingComponent sessionId={sessionId} /></div>
+                                {/* --- NEW: Invite People Button --- */}
+                                <div className="d-grid mb-3">
+                                    <button className="btn" style={{backgroundColor: 'var(--accent-blue)', color: 'white'}} onClick={() => setIsInviteModalOpen(true)}>
+                                        <i className="bi bi-person-plus-fill me-2"></i>Invite People
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
 
                         <div className="card shadow-sm flex-grow-1 chat-card">
-                            <div className="card-header">Live Chat</div>
+                            <div className="card-header d-flex align-items-center">
+                                <span 
+                                    className="spinner-grow spinner-grow-sm text-success me-2" 
+                                    role="status" 
+                                    aria-hidden="true"
+                                    style={{ width: '0.8rem', height: '0.8rem' }}
+                                ></span>
+                                Live Chat
+                            </div>
                             <div className="card-body d-flex flex-column">
                                 <div className="chat-messages-container">
                                     {messages.map(msg => (
@@ -709,6 +900,7 @@ body {
 
                 </div>
             </div>
+
             {/* --- User List Modal --- */}
             {isUserModalOpen && (
                 <div className="modal-overlay" onClick={() => setIsUserModalOpen(false)}>
@@ -743,6 +935,53 @@ body {
                                 ))}
                             </ul>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- NEW: Invite People Modal --- */}
+            {isInviteModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsInviteModalOpen(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h5 className="modal-title fw-bold">Invite People</h5>
+                            <button
+                                type="button"
+                                className="btn-close btn-close-white"
+                                onClick={() => setIsInviteModalOpen(false)}
+                            ></button>
+                        </div>
+                        <form className="modal-body" onSubmit={handleSendInvites}>
+                            <p className="text-secondary mb-3">
+                                Add more people to this call. Enter emails separated by commas or new lines.
+                            </p>
+                            <div className="form-floating mb-3">
+                                <textarea
+                                    className="form-control"
+                                    id="inviteEmails"
+                                    placeholder="Enter emails"
+                                    style={{ height: '150px' }}
+                                    value={inviteEmails}
+                                    onChange={(e) => setInviteEmails(e.target.value)}
+                                />
+                                <label htmlFor="inviteEmails" style={{color: 'var(--text-secondary)'}}>Emails (comma-separated)</label>
+                            </div>
+                            <button 
+                                type="submit" 
+                                className="btn w-100"
+                                style={{backgroundColor: 'var(--accent-blue)', color: 'white', fontWeight: 600, padding: '0.6rem'}}
+                                disabled={isInviting}
+                            >
+                                {isInviting ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Sending Invites...
+                                    </>
+                                ) : (
+                                    'Send Invites'
+                                )}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}
