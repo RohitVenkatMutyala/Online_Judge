@@ -1,4 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+// ---
+// --- CRITICAL FIX FOR: "process.nextTick is not a function" ---
+// ---
+// This is a polyfill for 'process.nextTick' which simple-peer's dependencies
+// (like readable-stream) require, but which Create React App 5+ no longer provides.
+// This will fix the peer.destroy() error during reconnect.
+if (typeof window.process === 'undefined') {
+  window.process = {};
+}
+if (typeof window.process.nextTick === 'undefined') {
+  window.process.nextTick = function (callback) {
+    setTimeout(callback, 0);
+  };
+}
+// --- END CRITICAL FIX ---
+
+
 import { useAuth } from '../context/AuthContext';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
@@ -10,7 +28,7 @@ import { toast } from 'react-toastify';
 import Editor from '@monaco-editor/react';
 import Peer from 'simple-peer';
 import axios from 'axios';
-import emailjs from '@emailjs/browser'; // --- NEW: Added emailjs import ---
+import emailjs from '@emailjs/browser'; 
 
 import Navbar from './navbar';
 import SharingComponent from './SharingComponent';
