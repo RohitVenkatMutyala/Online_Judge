@@ -57,6 +57,15 @@ function Chat() {
     const audioContainerRef = useRef(null);
     const chatMessagesEndRef = useRef(null);
 
+    // ---
+    // --- FIX 1 (Part 1): Ref to hold current users for comparison ---
+    // ---
+    const activeUsersRef = useRef(activeUsers);
+    useEffect(() => {
+        activeUsersRef.current = activeUsers;
+    }, [activeUsers]);
+    // --- END FIX 1 (Part 1) ---
+
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -103,7 +112,7 @@ function Chat() {
             }
 
             // --- 
-            // --- FIX 1: PREVENT USER LIST FLICKER ---
+            // --- FIX 1 (Part 2): PREVENT USER LIST FLICKER ---
             // ---
             const participantsMap = data.activeParticipants || {};
             const oneMinuteAgo = Date.now() - 60000; // 1 minute in milliseconds
@@ -117,13 +126,14 @@ function Chat() {
             
             // --- Create sorted ID strings to compare ---
             const newUsersID = JSON.stringify(currentUsers.map(u => u.id).sort());
-            const oldUsersID = JSON.stringify(activeUsers.map(u => u.id).sort());
+            // --- Use the REF for the "old" list to prevent stale state ---
+            const oldUsersID = JSON.stringify(activeUsersRef.current.map(u => u.id).sort());
 
             // --- Only update state if the user list has *actually* changed ---
             if (newUsersID !== oldUsersID) {
                 setActiveUsers(currentUsers);
             }
-            // --- END FIX 1 ---
+            // --- END FIX 1 (Part 2) ---
             
 
             const role = isOwner ? 'editor' : (data.defaultRole || 'viewer');
@@ -140,8 +150,15 @@ function Chat() {
             // --- UPDATED: Request AUDIO ONLY ---
             if (data.access === 'private' && !stream) {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-                    .then(setStream)
-                    .catch(err => toast.error("Could not access microphone."));
+                    .then(userStream => {
+                        setStream(userStream);
+                        // --- NEW: Inform user they are muted by default ---
+                        toast.info("You are muted by default. The owner can unmute you.");
+                    })
+                    .catch(err => {
+                        console.error("Mic access error:", err);
+                        toast.error("Could not access microphone. Voice chat disabled.");
+                    });
             }
 
             setLoading(false);
