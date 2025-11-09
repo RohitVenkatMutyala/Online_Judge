@@ -66,6 +66,9 @@ function Chat() {
     }, [activeUsers]);
     // --- END FIX 1 (Part 1) ---
 
+    // --- NEW: Ref to prevent mic request race condition ---
+    const micRequestRef = useRef(false);
+
     useEffect(() => {
         chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -147,19 +150,30 @@ function Chat() {
             setOutput(data.lastRunOutput || '');
             setTime(data.lastRunTime || null);
 
-            // --- UPDATED: Request AUDIO ONLY ---
-            if (data.access === 'private' && !stream) {
+            // --- 
+            // --- FIX 5: PREVENT MIC REQUEST RACE CONDITION ---
+            // ---
+            if (data.access === 'private' && !stream && !micRequestRef.current) {
+                // --- SET FLAG ---
+                micRequestRef.current = true; 
+                
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
                     .then(userStream => {
                         setStream(userStream);
-                        // --- NEW: Inform user they are muted by default ---
-                        toast.info("You are muted by default. The owner can unmute you.");
+                        // --- REMOVED: No longer muted by default ---
+                        // toast.info("You are muted by default. The owner can unmute you.");
+                        
+                        // --- UNSET FLAG ---
+                        micRequestRef.current = false; 
                     })
                     .catch(err => {
                         console.error("Mic access error:", err);
                         toast.error("Could not access microphone. Voice chat disabled.");
+                        // --- UNSET FLAG ---
+                        micRequestRef.current = false; 
                     });
             }
+            // --- END FIX 5 ---
 
             setLoading(false);
         }, (error) => {
@@ -197,6 +211,9 @@ function Chat() {
 
         const signalingColRef = collection(db, 'sessions', sessionId, 'signaling');
 
+        // ---
+        // --- FIX 4 (Part 1): BROWSER AUTOPLAY FIX ---
+        // ---
         // --- Helper to add audio element ---
         const addAudioElement = (userId, stream) => {
             if (audioContainerRef.current) {
@@ -204,12 +221,18 @@ function Chat() {
                 if (!audio) {
                     audio = document.createElement('audio');
                     audio.id = `audio-${userId}`;
-                    audio.autoplay = true;
+                    // audio.autoplay = true; // This is unreliable
                     audioContainerRef.current.appendChild(audio);
                 }
                 audio.srcObject = stream;
+                // Attempt to play immediately
+                audio.play().catch(e => {
+                    console.warn(`Autoplay blocked for ${userId}, user must click.`);
+                    // The document click listener (FIX 4 Part 2) will handle this
+                });
             }
         };
+        // --- END FIX 4 (Part 1) ---
 
         // --- Helper to remove audio element ---
         const removeAudioElement = (userId) => {
@@ -335,7 +358,8 @@ function Chat() {
     // ---
     useEffect(() => {
         if (!stream || !user || stream.getAudioTracks().length === 0) { return; }
-        const isMuted = muteStatus[user._id] ?? true; // Default to muted if not specified
+        // --- FIXED: Default to FALSE (unmuted) ---
+        const isMuted = muteStatus[user._id] ?? false; 
         const audioTrack = stream.getAudioTracks()[0];
         
         // This is all that's needed to mute/unmute your outgoing audio
@@ -345,36 +369,64 @@ function Chat() {
     // --- END FIX 3 ---
 
     // ---
-    // --- MUTE LOGIC (Already Correct) ---
+    // --- FIX 4 (Part 2): BROWSER AUTOPLAY FIX (Robust) ---
+    // ---
+    useEffect(() => {
+        // This effect runs once to add a global click listener
+        const unlockAudio = () => {
+            let unlocked = false;
+            if (audioContainerRef.current) {
+                const audioElements = audioContainerRef.current.querySelectorAll('audio');
+                audioElements.forEach(audio => {
+                    // Try to play each audio element that is currently paused
+                    if (audio.paused) {
+                        audio.play().then(() => {
+                            unlocked = true; // Mark that we successfully unlocked at least one
+                            console.log(`Successfully played audio for ${audio.id}`);
+                        }).catch(e => {
+                            // This is expected if it's still blocked
+                        });
+                    }
+                });
+            }
+            // --- Only remove the listener if we successfully unlocked audio ---
+            if (unlocked) {
+                console.log("Audio context unlocked. Removing click listener.");
+                document.removeEventListener('click', unlockAudio);
+            }
+        };
+
+        document.addEventListener('click', unlockAudio);
+
+        return () => {
+            document.removeEventListener('click', unlockAudio);
+        };
+    }, []); // Empty dependency array, run only once on mount
+    // --- END FIX 4 (Part 2) ---
+
+    // ---
+    // --- MUTE LOGIC (FIXED) ---
     // ---
     const handleToggleMute = async (targetUserId) => {
-        // Check against the true owner's ID, not the user's role
         const isTrueOwner = user && user._id === sessionOwnerId;
         const isSelf = targetUserId === user._id;
+        
+        // --- Default to FALSE (unmuted) ---
+        const currentMuteState = muteStatus[targetUserId] ?? false;
+        const newMuteState = !currentMuteState;
 
-        // Rule 1: The true owner can mute or unmute anyone.
+        // Rule 1: The true owner can mute/unmute anyone.
         if (isTrueOwner) {
-            const currentMuteState = muteStatus[targetUserId] ?? true;
-            const newMuteState = !currentMuteState;
             await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
             return;
         }
 
-        // Rule 2: A participant (not the owner) can ONLY mute themselves.
+        // Rule 2: A participant can ONLY mute/unmute *themselves*.
         if (isSelf) {
-            const isCurrentlyMuted = muteStatus[targetUserId] ?? true;
-
-            // If they are already muted (by owner), they cannot unmute.
-            if (isCurrentlyMuted) {
-                toast.error("Only the session owner can unmute you.");
-                return;
-            }
-
-            // If they are unmuted, allow them to mute themselves.
-            await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: true });
+            await updateDoc(doc(db, 'sessions', sessionId), { [`muteStatus.${targetUserId}`]: newMuteState });
         } else {
             // Safeguard: A participant cannot mute another participant.
-            toast.error("You do not have permission to mute other participants.");
+            toast.error("Only the session owner can mute other participants.");
         }
     };
     // --- END MUTE LOGIC ---
@@ -831,15 +883,15 @@ body {
                                         {p.id === user?._id && <span className="ms-2">(You)</span>}
                                         {sessionAccess === 'private' && stream && (
                                             <button
-                                                className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
+                                                // --- FIXED: Default to FALSE (unmuted) ---
+                                                className={`btn btn-sm ${muteStatus[p.id] ?? false ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
-                                                // Mute logic:
-                                                // 1. You are NOT the owner AND
-                                                // 2. It is NOT you OR you are already muted (can't unmute self)
-                                                disabled={user?._id !== sessionOwnerId && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
+                                                // --- FIXED: Simplified logic ---
+                                                disabled={user?._id !== sessionOwnerId && p.id !== user?._id}
                                                 style={{ fontSize: '1.2rem' }}
                                             >
-                                                <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
+                                                {/* --- FIXED: Default to FALSE (unmuted) --- */}
+                                                <i className={`bi ${muteStatus[p.id] ?? false ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
                                             </button>
                                         )}
                                     </li>
@@ -940,12 +992,15 @@ body {
                                         </div>
                                         {sessionAccess === 'private' && stream && (
                                             <button
-                                                className={`btn btn-sm ${muteStatus[p.id] ?? true ? 'text-danger' : 'text-success'}`}
+                                                // --- FIXED: Default to FALSE (unmuted) ---
+                                                className={`btn btn-sm ${muteStatus[p.id] ?? false ? 'text-danger' : 'text-success'}`}
                                                 onClick={() => handleToggleMute(p.id)}
-                                                disabled={user?._id !== sessionOwnerId && (p.id !== user?._id || (muteStatus[p.id] ?? true))}
+                                                // --- FIXED: Simplified logic ---
+                                                disabled={user?._id !== sessionOwnerId && p.id !== user?._id}
                                                 style={{ fontSize: '1.2rem' }}
                                             >
-                                                <i className={`bi ${muteStatus[p.id] ?? true ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
+                                                {/* --- FIXED: Default to FALSE (unmuted) --- */}
+                                                <i className={`bi ${muteStatus[p.id] ?? false ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
                                             </button>
                                         )}
                                     </li>
