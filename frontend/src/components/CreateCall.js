@@ -1,17 +1,15 @@
-// src/components/CreateCall.js
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import emailjs from '@emailjs/browser';
+// import emailjs from '@emailjs/browser'; // --- NO LONGER NEEDED HERE ---
 import RecentCalls from './RecentCalls';
 import Navbar from './navbar';
 
 function CreateCall() {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Still needed if you have other navigation
     const { user } = useAuth();
 
     const [step, setStep] = useState(0); // 0 = Main list, 1 = Description, 2 = Invite
@@ -22,31 +20,15 @@ function CreateCall() {
     
     const [searchTerm, setSearchTerm] = useState('');
 
+    /* // --- REMOVED ---
+    // This function is no longer called from this component.
+    // It is now only called by handleReCall in RecentCalls.js
     const sendInvitationEmails = async (callId, callDescription, invitedEmails) => {
-        if (!invitedEmails || invitedEmails.length === 0) return;
-        
-        const emailjsPublicKey = '3WEPhBvkjCwXVYBJ-';
-        const serviceID = 'service_6ar5bgj';
-        const templateID = 'template_w4ydq8a';
-        
-        const callLink = `${window.location.origin}/call/${callId}`; 
-        
-        for (const email of invitedEmails) {
-            const templateParams = {
-                from_name: `${user.firstname} ${user.lastname}`,
-                to_email: email,
-                session_description: callDescription,
-                session_link: callLink,
-            };
-            try {
-                await emailjs.send(serviceID, templateID, templateParams, emailjsPublicKey);
-            } catch (error) {
-                console.error(`Failed to send invitation to ${email}:`, error);
-                toast.error(`Could not send invite to ${email}.`);
-            }
-        }
+    // ...
     };
+    */
 
+    // --- MODIFIED FUNCTION ---
     const handleCreateCall = async () => {
         if (!user) {
             toast.error("You must be logged in.");
@@ -71,13 +53,15 @@ function CreateCall() {
 
         setIsLoading(true);
 
-        const invitedEmails = [recipientEmailClean];
+        // const invitedEmails = [recipientEmailClean]; // --- NO LONGER NEEDED ---
         const allowedEmails = [user.email, recipientEmailClean];
         
         const newCallId = Math.random().toString(36).substring(2, 9);
         const callDocRef = doc(db, 'calls', newCallId); 
 
         try {
+            // This part is still needed! It creates the call document
+            // so that RecentCalls can find it.
             await setDoc(callDocRef, {
                 description,
                 createdAt: serverTimestamp(),
@@ -93,14 +77,24 @@ function CreateCall() {
                 muteStatus: { [user._id]: false },
             });
 
-            await sendInvitationEmails(newCallId, description, invitedEmails);
-            toast.success("Call created and invitation sent!");
+            // --- REMOVED ---
+            // await sendInvitationEmails(newCallId, description, invitedEmails);
             
-            navigate(`/call/${newCallId}`); 
+            // --- MODIFIED ---
+            toast.success("Contact added to recent calls!");
+            
+            // --- REMOVED ---
+            // navigate(`/call/${newCallId}`); 
+
+            // --- NEW: Reset form and go back to the list
+            setDescription('');
+            setRecipientName('');
+            setRecipientEmail('');
+            setStep(0);
 
         } catch (error) {
             console.error("Failed to create call:", error);
-            toast.error("Could not create the call.");
+            toast.error("Could not save the contact.");
         } finally {
             setIsLoading(false);
         }
@@ -155,11 +149,14 @@ function CreateCall() {
 
                         <div className="d-flex justify-content-between mt-4">
                             <button className="btn btn-outline-secondary" onClick={() => setStep(1)}>Back</button>
-                            <button className="btn create-btn" onClick={handleCreateCall} disabled={isLoading}>{isLoading ? 'Creating...' : 'Finish & Create Call'}</button>
+                            {/* --- MODIFIED BUTTON TEXT --- */}
+                            <button className="btn create-btn" onClick={handleCreateCall} disabled={isLoading}>
+                                {isLoading ? 'Saving...' : 'Save Contact'}
+                            </button>
                         </div>
                     </div>
                 );
-            default: // --- NEW: Main screen with Search and Add ---
+            default: // --- Main screen with Search and Add ---
                 return (
                     <div className="card-body p-0 p-md-2">
                         <div className="p-3 p-md-4">
@@ -170,7 +167,7 @@ function CreateCall() {
                                     <span className="input-group-text" id="search-icon"><i className="bi bi-search"></i></span>
                                     <input
                                         type="search"
-                                        className="form-control" // form-control-sm is automatic in input-group-sm
+                                        className="form-control"
                                         placeholder="Search recent calls..."
                                         aria-label="Search recent calls"
                                         aria-describedby="search-icon"
@@ -198,11 +195,11 @@ function CreateCall() {
     };
 
      if (!user) {
-        return (
-          <div className="container mt-5">
-            <div className="alert alert-danger text-center">You are not logged in.</div>
-          </div>
-        );
+         return (
+            <div className="container mt-5">
+               <div className="alert alert-danger text-center">You are not logged in.</div>
+            </div>
+         );
      }
 
     return (
@@ -217,29 +214,31 @@ function CreateCall() {
                         overflow: hidden; 
                         background: var(--bs-body-bg);
                     }
+                    
+                    /* --- MODIFIED: Removed gradient --- */
                     .gradient-title { 
-                        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444); 
-                        -webkit-background-clip: text; 
-                        -webkit-text-fill-color: transparent; 
-                        background-clip: text; 
+                        color: var(--bs-body-color); /* Use theme text color */
                         font-weight: 700; 
                         font-size: 2rem; 
                         margin-bottom: 1.5rem; 
                     }
-                    /* This is for the form steps, not the icon button */
+                    
+                    /* --- MODIFIED: Replaced gradient with solid color --- */
                     .create-btn { 
-                        background: linear-gradient(135deg, #f12711, #f5af19); 
-                        border: none; 
+                        background-color: #4A69BD; /* Professional blue */
+                        border: 1px solid #4A69BD;
                         color: white; 
                         font-weight: 600; 
-                        transition: all 0.3s ease; 
-                        box-shadow: 0 4px 15px rgba(241, 39, 17, 0.3);
+                        transition: all 0.2s ease; 
+                        box-shadow: 0 4px 12px rgba(74, 105, 189, 0.25);
                         padding: 0.75rem 1.5rem;
                     }
                     .create-btn:hover { 
-                        transform: translateY(-2px); 
-                        box-shadow: 0 8px 25px rgba(241, 39, 17, 0.4); 
+                        background-color: #3e5aa8; /* Darker blue */
+                        border-color: #3e5aa8;
+                        box-shadow: 0 6px 16px rgba(74, 105, 189, 0.3); 
                         color: white; 
+                        transform: translateY(-1px);
                     }
                 `}</style>
                 <div className="card calls-page-card shadow-lg border-0 position-relative">
