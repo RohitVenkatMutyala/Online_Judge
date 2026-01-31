@@ -160,7 +160,7 @@ function Navbar() {
                         className={`logo-image ${theme === 'dark' ? 'logo-dark-theme' : ''}`}
                         style={{ transform: 'rotate(104deg)' }}
                     />*/}
-                    <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2">
+                    <Link to={user ? "/dashboard" : "/"} className="navbar-brand-custom py-2"   style={{ textDecoration: "none" }}>
                         CodeHub
                     </Link>
 
